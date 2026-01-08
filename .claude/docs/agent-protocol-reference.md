@@ -1,0 +1,153 @@
+# Agent Protocol Reference Guide
+
+**Purpose:** Reference documentation for cognitive agent protocols in the Penny AI system
+
+---
+
+## Overview
+
+Seven universal cognitive agents adapt to ANY task domain through domain-adaptive processing. This guide provides validation checklists, success factors, and quick reference for agent operation.
+
+---
+
+## Protocol Validation Checklist
+
+Before completing work, EVERY agent verifies:
+
+### Context Loading
+- [ ] Task-ID extracted successfully
+- [ ] Task domain identified (confidence level documented)
+- [ ] Workflow context fully loaded
+- [ ] Previous agent outputs integrated (per pattern)
+- [ ] Context loading pattern followed correctly
+
+### Cognitive Processing
+- [ ] Unknown Registry checked and updates proposed
+- [ ] Cognitive function adapted to domain
+- [ ] Quality standards applied appropriately
+- [ ] Johari Summary compressed effectively (≤1200 tokens)
+
+### Output Generation
+- [ ] Context Loaded section output FIRST
+- [ ] Downstream Directives complete
+- [ ] Output formatted correctly (Markdown + JSON)
+- [ ] Gate criteria satisfied
+- [ ] Context preserved for next agent
+
+### Memory Protocol
+- [ ] Memory file written to correct location
+- [ ] Four-section structure followed
+- [ ] Token limits respected
+
+---
+
+## Critical Success Factors
+
+| Factor | Description |
+|--------|-------------|
+| **Domain Identification** | Correctly identify task domain early in processing |
+| **Cognitive Consistency** | Apply universal process regardless of domain |
+| **Context Adaptation** | Adjust WHAT not HOW based on domain |
+| **Quality Maintenance** | Apply domain-appropriate standards |
+| **Token Efficiency** | Compress intelligently while preserving critical context |
+| **Handoff Clarity** | Next agent receives sufficient context to adapt |
+
+---
+
+## Quick Reference
+
+### Agent Invocation Always Includes
+
+| Element | Example |
+|---------|---------|
+| Task-ID | `task-oauth2-implementation` |
+| Step number and name | `Step 2: Research Execution` |
+| Purpose statement | Purpose: Investigate authentication patterns |
+| Gate entry/exit criteria | Entry: Requirements clear, Exit: Patterns identified |
+| Context files to read | `${PAI_DIRECTORY}/.claude/memory/task-xxx-clarification-memory.md` |
+| Previous agent dependencies | Predecessor: clarification |
+
+### Agent Always Produces
+
+| Output | Format |
+|--------|--------|
+| Context Loaded section | JSON (Section 0 - FIRST) |
+| Step Overview | Markdown narrative |
+| Johari Summary | JSON (≤1200 tokens) |
+| Downstream Directives | JSON |
+| Unknown Registry updates | JSON |
+| Task domain classification | String with confidence |
+| Quality validation results | PASS/FAIL with details |
+
+### Memory File Locations
+
+| Type | Path Pattern |
+|------|--------------|
+| Workflow metadata | `${PAI_DIRECTORY}/.claude/memory/task-{id}-memory.md` |
+| Agent outputs | `${PAI_DIRECTORY}/.claude/memory/task-{id}-{agent}-memory.md` |
+
+---
+
+## Domain-Specific Standards
+
+### Technical Domain
+
+| Standard | Application |
+|----------|-------------|
+| TDD | Write tests before implementation |
+| SOLID | Apply design principles |
+| Security | OWASP Top 10, input validation |
+| Performance | Benchmarks, load testing |
+
+### Personal Domain
+
+| Standard | Application |
+|----------|-------------|
+| Values alignment | Decisions reflect user values |
+| Privacy | Data stays local |
+| Wellbeing | Consider emotional impact |
+
+### Creative Domain
+
+| Standard | Application |
+|----------|-------------|
+| Audience fit | Content matches target |
+| Vision clarity | Creative direction defined |
+| Quality | Meets artistic standards |
+
+### Professional Domain
+
+| Standard | Application |
+|----------|-------------|
+| Business case | ROI justified |
+| Stakeholder | Needs addressed |
+| Compliance | Regulations followed |
+
+### Recreational Domain
+
+| Standard | Application |
+|----------|-------------|
+| Fun factor | Engagement high |
+| Safety | Participants protected |
+| Accessibility | All can participate |
+
+---
+
+## Common Failure Modes
+
+| Failure | Cause | Prevention |
+|---------|-------|------------|
+| Missing Context Loaded section | Agent started work without verification | Always output Section 0 FIRST |
+| Token budget exceeded | Loaded too much context | Follow pattern limits strictly |
+| Memory file not created | Agent completed without writing output | Verify file exists post-completion |
+| Domain mismatch | Incorrect classification | Document confidence level |
+| Incomplete handoff | Missing downstream directives | Use checklist before completion |
+
+---
+
+## Related Documentation
+
+- `${PAI_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` - Execution protocols
+- `${PAI_DIRECTORY}/.claude/docs/context-loading-reference.md` - Context pattern selection
+- `${PAI_DIRECTORY}/.claude/docs/code-generation-reference.md` - Code generation standards
+- `${PAI_DIRECTORY}/.claude/docs/context-pruning-reference.md` - Compression techniques

@@ -18,7 +18,7 @@ TAXONOMY OVERVIEW
 7. METACOGNITION - Monitors progress, detects impasses (memory agent)
 
 **Special function:**
-8. COORDINATOR - Manages workflow state, tracks progress (performed by Penny)
+8. COORDINATOR - Manages workflow state, tracks progress (performed by the orchestrator)
 
 ---
 
@@ -249,7 +249,7 @@ DEFINITION
 
 Manages workflow state, tracks progress, orchestrates step transitions, and handles deliverable finalization. Does NOT perform domain work - delegates to specialized cognitive functions. Ensures workflow integrity and completion.
 
-NOTE: This function is performed by Penny herself (the master orchestrator), not a separate agent.
+NOTE: This function is performed by the master orchestrator, not a separate agent.
 
 CHARACTERISTICS
 
@@ -268,7 +268,7 @@ TYPICAL TOOLS
 
 USAGE GUIDELINES
 
-Penny performs COORDINATOR functions implicitly:
+The orchestrator performs COORDINATOR functions implicitly:
 - Determining which cognitive functions are needed
 - Sequencing agent invocations with proper context handoffs
 - Managing workflow state across phases
@@ -283,7 +283,7 @@ DEFINITION
 
 Monitors problem-solving state, detects impasses, and suggests remediation strategies. Operates as a metacognitive layer that observes workflow progress without performing task work. Automatically invoked by the orchestration layer.
 
-NOTE: This function is performed by memory agent, which is AUTOMATICALLY invoked after each agent completion and at phase transitions. It is NOT directly invoked by Penny.
+NOTE: This function is performed by memory agent, which is AUTOMATICALLY invoked after each agent completion and at phase transitions. It is NOT directly invoked by the orchestrator.
 
 CHARACTERISTICS
 
@@ -323,7 +323,7 @@ What does the agent PRIMARILY do?
 - Creates new artifacts → GENERATOR candidate
 - Verifies correctness → VALIDATOR candidate
 - Resolves ambiguities → CLARIFIER candidate
-- Manages workflow state → COORDINATOR (Penny's role, not a separate agent)
+- Manages workflow state → COORDINATOR (orchestrator's role, not a separate agent)
 - Monitors progress/detects impasses → METACOGNITION (memory agent, automatic)
 
 STEP 2: Apply Single Cognitive Responsibility Principle (SCRP)
@@ -434,5 +434,5 @@ TYPICAL WORKFLOW PATTERN 3: Generation → Validation Loop
 
 RELATED DOCUMENTS
 
-- ${PAI_DIRECTORY}/.claude/docs/agent-registry.md - Catalog of existing agents by cognitive function
-- ${PAI_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/ - Input/output contracts
+- ${CAII_DIRECTORY}/.claude/docs/agent-registry.md - Catalog of existing agents by cognitive function
+- ${CAII_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/ - Input/output contracts

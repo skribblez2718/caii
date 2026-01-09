@@ -1,10 +1,11 @@
-# Phase 0.5: Atomic Skill Provisioning (AUTO)
+# Phase 0.5: Atomic Skill Provisioning
 
-**Type:** AUTO (Python execution, no agent invocation)
+**Uses Atomic Skill:** `orchestrate-generation`
+**Phase Type:** LINEAR
 
 ## Purpose
 
-Ensure all required atomic skills exist before proceeding with skill development.
+Ensure all required atomic skills exist before proceeding with skill development. The generation agent creates any missing atomic skills.
 
 ## Trigger
 
@@ -12,10 +13,10 @@ Phase 0 identifies atomic skills needed for the new skill.
 
 ## Actions
 
-This AUTO phase performs the following checks:
+The generation agent performs the following:
 
 1. **Scan Atomic Skill Registry**
-   - Read `${PAI_DIRECTORY}/.claude/skills/*/SKILL.md` files
+   - Read `${CAII_DIRECTORY}/.claude/skills/*/SKILL.md` files
    - Filter for `type: atomic` in frontmatter
    - Build available atomic skill list
 
@@ -25,8 +26,8 @@ This AUTO phase performs the following checks:
 
 3. **Provision Missing Skills**
    - For each missing atomic skill:
-     - Use `${PAI_DIRECTORY}/.claude/skills/develop-skill/resources/create-atomic-skill.md` template
-     - Write to `${PAI_DIRECTORY}/.claude/skills/orchestrate-{function}/SKILL.md`
+     - Use `${CAII_DIRECTORY}/.claude/skills/develop-skill/resources/create-atomic-skill.md` template
+     - Write to `${CAII_DIRECTORY}/.claude/skills/orchestrate-{function}/SKILL.md`
      - Log creation for user awareness
 
 4. **Update Registry**

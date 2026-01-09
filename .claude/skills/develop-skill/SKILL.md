@@ -16,7 +16,7 @@ uses_composites: []
 
 ## Overview
 
-Guides creation and modification of workflow skills within Penny. Supports both CREATE (new skill) and UPDATE (modify existing) workflows. Generated skills include:
+Guides creation and modification of workflow skills within the system. Supports both CREATE (new skill) and UPDATE (modify existing) workflows. Generated skills include:
 
 - Complete SKILL.md definition
 - Full Python orchestration (entry.py, complete.py, __init__.py, content/*.md)
@@ -38,9 +38,9 @@ Invoke when **workflow orchestration itself** needs to be created or modified:
 
 ### CREATE Workflow (New Skills)
 
-- **New workflow pattern needed:** Penny needs new orchestration capability for a task type → "Create a skill for code review workflows"
+- **New workflow pattern needed:** The system needs new orchestration capability for a task type → "Create a skill for code review workflows"
 - **Agent sequencing design:** Need to define how cognitive agents should be coordinated for new task types → "Design a workflow for automated testing"
-- **Penny capability extension:** System needs new skill to handle previously unsupported task patterns → "Add capability to handle data pipeline workflows"
+- **System capability extension:** The system needs new skill to handle previously unsupported task patterns → "Add capability to handle data pipeline workflows"
 - **Composite skill composition:** Need to build a skill that uses existing composite skills as building blocks → "Create a skill that uses develop-learnings for multiple topics"
 
 ### UPDATE Workflow (Existing Skills)
@@ -52,7 +52,7 @@ Invoke when **workflow orchestration itself** needs to be created or modified:
 
 ### System Modifications
 
-- **Penny system modifications:** Any changes to skills, agents, protocols, or architecture → "Modify the routing system", "Update agent protocols"
+- **System modifications:** Any changes to skills, agents, protocols, or architecture → "Modify the routing system", "Update agent protocols"
 - **Meta-work on workflows:** Task is about creating or modifying workflows themselves, not executing them → "Create a new skill"
 
 ## Core Principles
@@ -62,13 +62,13 @@ Invoke when **workflow orchestration itself** needs to be created or modified:
 3. **Reference Over Duplication:** Reference existing documentation, don't duplicate
 4. **Modularity:** Skills are self-contained, composable units
 5. **Composition Hierarchy:** Skills can use both atomic and composite skills as building blocks (max depth: 1)
-6. **Philosophy First:** For Penny system modifications, always load `philosophy.md` principles first
+6. **Philosophy First:** For system modifications, always load `philosophy.md` principles first
 
-**Reference:** For efficiency principles, see `${PAI_DIRECTORY}/.claude/docs/philosophy.md`
+**Reference:** For efficiency principles, see `${CAII_DIRECTORY}/.claude/docs/philosophy.md`
 
 ## Workflow Protocol
 
-**Reference:** See `${PAI_DIRECTORY}/.claude/orchestration/protocols/execution/skill/` for full workflow lifecycle
+**Reference:** See `${CAII_DIRECTORY}/.claude/orchestration/protocols/execution/skill/` for full workflow lifecycle
 
 ### Initialization
 - Generate task-id: `task-skill-{skill-name}`
@@ -86,7 +86,7 @@ Invoke when **workflow orchestration itself** needs to be created or modified:
 **After invoking this skill, IMMEDIATELY execute:**
 
 ```bash
-python3 ${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/composite/develop_skill/entry.py "{task_id}" --domain technical
+python3 ${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/composite/develop_skill/entry.py "{task_id}" --domain technical
 ```
 
 This triggers Python-enforced phase orchestration. DO NOT manually read files or bypass this step.
@@ -94,19 +94,19 @@ This triggers Python-enforced phase orchestration. DO NOT manually read files or
 ## Workflow Phases
 
 **NOTE:** Phase details are managed by Python orchestration in:
-`${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/composite/develop_skill/`
+`${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/composite/develop_skill/`
 
 | Phase | Name | Atomic Skill | Type |
 |-------|------|--------------|------|
 | 0 | Requirements Clarification | orchestrate-clarification | LINEAR |
-| 0.5 | Atomic Skill Provisioning | - | AUTO |
-| 0.6 | Composite Skill Validation | - | AUTO |
+| 0.5 | Atomic Skill Provisioning | orchestrate-generation | LINEAR |
+| 0.6 | Composite Skill Validation | orchestrate-validation | LINEAR |
 | 1 | Complexity Analysis | orchestrate-analysis | LINEAR |
 | 1.5 | Pattern Research | orchestrate-research | LINEAR |
 | 2 | Design Synthesis | orchestrate-synthesis | LINEAR |
 | 3 | Skill Generation | orchestrate-generation | LINEAR |
 | 4 | Skill Validation | orchestrate-validation | LINEAR |
-| 5 | DA.md Registration | - | LINEAR |
+| 5 | DA.md Registration | orchestrate-generation | LINEAR |
 
 **Execution:** Phases are enforced by `protocols/skill/fsm.py` with state tracked in `protocols/skill/state/`.
 
@@ -173,7 +173,7 @@ Before considering skill complete:
 - [ ] Sub-workflow mode specified for each composite reference
 - [ ] No circular references in skill dependency graph
 
-**Reference:** See `${PAI_DIRECTORY}/.claude/skills/develop-skill/resources/validation-checklist.md` for complete checklist
+**Reference:** See `${CAII_DIRECTORY}/.claude/skills/develop-skill/resources/validation-checklist.md` for complete checklist
 
 ## Anti-Patterns
 
@@ -182,10 +182,12 @@ Before considering skill complete:
 | Parallel agent invocation | Sequential phases |
 | Implementation details in skill | Orchestration only |
 | Duplicating documentation | Reference docs |
-| Verbose context loading blocks | Use `${PAI_DIRECTORY}/.claude/docs/agent-protocol-reference.md` |
+| Verbose context loading blocks | Use `${CAII_DIRECTORY}/.claude/docs/agent-protocol-reference.md` |
 | Referencing depth-1 composites | Only reference base composites (depth 0) |
 | Mixing atomic and composite in same phase | One skill type per phase |
 | Circular skill references | Build acyclic dependency graph |
+| Using PhaseType.AUTO | All phases must use agents (AUTO is deprecated) |
+| Direct execution (uses_atomic_skill: None) | Always specify appropriate orchestrate-* agent |
 
 ## Cognitive Sequence Patterns
 
@@ -197,13 +199,13 @@ Before considering skill complete:
 
 ## References
 
-- `${PAI_DIRECTORY}/.claude/orchestration/protocols/execution/skill/` - Workflow lifecycle
-- `${PAI_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` - Agent execution
-- `${PAI_DIRECTORY}/.claude/docs/agent-protocol-reference.md` - Memory format reference
-- `${PAI_DIRECTORY}/.claude/skills/develop-skill/resources/agent-invocation-template.md` - Invocation patterns
-- `${PAI_DIRECTORY}/.claude/docs/agent-registry.md` - Agent capabilities
-- `${PAI_DIRECTORY}/.claude/docs/philosophy.md` - System principles
-- `${PAI_DIRECTORY}/.claude/skills/develop-skill/resources/composite-skill-reference.md` - Composite-to-composite composition protocol
+- `${CAII_DIRECTORY}/.claude/orchestration/protocols/execution/skill/` - Workflow lifecycle
+- `${CAII_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` - Agent execution
+- `${CAII_DIRECTORY}/.claude/docs/agent-protocol-reference.md` - Memory format reference
+- `${CAII_DIRECTORY}/.claude/skills/develop-skill/resources/agent-invocation-template.md` - Invocation patterns
+- `${CAII_DIRECTORY}/.claude/docs/agent-registry.md` - Agent capabilities
+- `${CAII_DIRECTORY}/.claude/docs/philosophy.md` - System principles
+- `${CAII_DIRECTORY}/.claude/skills/develop-skill/resources/composite-skill-reference.md` - Composite-to-composite composition protocol
 
 ## Remember
 

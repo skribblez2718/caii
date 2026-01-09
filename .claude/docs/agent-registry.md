@@ -267,5 +267,5 @@ Agents that resolve ambiguities and transform vague inputs into explicit outputs
 
 ## Related Documents
 
-- **Path:** `${PAI_DIRECTORY}/.claude/docs/cognitive-function-taxonomy.md`
+- **Path:** `${CAII_DIRECTORY}/.claude/docs/cognitive-function-taxonomy.md`
 - **Description:** Cognitive function definitions

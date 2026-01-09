@@ -326,7 +326,7 @@ def signal_phase_needs_clarification(
     Signal that phase needs user clarification.
 
     Used when the clarification-agent (or any agent) has questions
-    that require user input. The main orchestrator (Penny) will:
+    that require user input. The main orchestrator will:
     1. Detect this signal
     2. Parse the questions from the memory file
     3. Use AskUserQuestion to present them to the user

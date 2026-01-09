@@ -6,7 +6,7 @@ JSON-based state management for the Mandatory Reasoning Protocol.
 
 This module handles:
 - Creating and persisting protocol state
-- Tracking step outputs (Penny's responses)
+- Tracking step outputs (orchestrator responses)
 - Managing routing decisions
 - Routing validation loop iteration tracking
 - Session lifecycle
@@ -55,7 +55,7 @@ class ProtocolState:
     This class handles:
     - Session initialization
     - Step progression tracking
-    - Output capture (Penny's responses to each step)
+    - Output capture (orchestrator responses to each step)
     - Routing decision storage
     - State persistence to JSON
 
@@ -161,7 +161,7 @@ class ProtocolState:
 
         Args:
             step_num: The step number (1-8)
-            output: The step's output (Penny's response, extracted data, etc.)
+            output: The step's output (orchestrator response, extracted data, etc.)
 
         Returns:
             True if step was completed successfully

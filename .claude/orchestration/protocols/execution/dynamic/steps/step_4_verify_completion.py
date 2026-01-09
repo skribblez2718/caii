@@ -38,7 +38,7 @@ class Step4VerifyCompletion(BaseStep):
         """
         Process the completion verification.
 
-        The actual verification is done by Penny reviewing outputs.
+        The actual verification is done by the orchestrator reviewing outputs.
         This method provides structure for capturing the result.
         """
         return {

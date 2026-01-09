@@ -45,7 +45,11 @@ except ImportError:
 
 # Import learning trigger (optional - for develop-learnings)
 try:
-    from learning_trigger import should_trigger_learnings, format_trigger_prompt
+    from learning_trigger import (
+        should_trigger_learnings,
+        format_trigger_prompt,
+        build_learnings_directive,
+    )
     from episode_store_helper import create_episode_from_skill_state
     LEARNING_TRIGGER_AVAILABLE = True
 except ImportError:
@@ -98,32 +102,8 @@ def invoke_goal_memory(state: AgentExecutionState, agent_name: str) -> Dict[str,
         "remediation_loops": state.metadata.get("remediation_loops", 0),
     }
 
-    # Print GoalMemory assessment request (LLM will process)
-    print("\n---")
-    print("# GoalMemory Assessment Request")
-    print()
-    print("## Context")
-    print(f"- Task ID: `{task_id[:12]}...`")
-    print(f"- Current Phase: `{phase_id}`")
-    print(f"- Agent Just Completed: `{agent_name}`")
-    print(f"- Skill Context: `{skill_name}`")
-    print()
-    print("## Agent Output Summary")
-    print(f"```\n{agent_output_summary}\n```")
-    print()
-    print("## Previous Goal State")
-    print(f"{previous_goal_state}")
-    print()
-    print("## Workflow Metrics")
-    print(f"- Phases Completed: {workflow_metrics['phases_completed']}")
-    print(f"- Unknowns Resolved: {workflow_metrics['unknowns_resolved']}")
-    print(f"- Unknowns Pending: {workflow_metrics['unknowns_pending']}")
-    print(f"- Remediation Loops: {workflow_metrics['remediation_loops']}")
-    print()
-    print("## Assessment Required")
-    print("Invoke memory agent via Task tool with subagent_type: `memory`")
-    print("Provide the above context for metacognitive assessment.")
-    print("---\n")
+    # Minimal GoalMemory request
+    print(f"Invoke memory agent via Task tool with subagent_type: `memory`")
 
     return {"goal_memory_invoked": True, "invoked_at": datetime.now().isoformat()}
 
@@ -207,6 +187,7 @@ def agent_complete(agent_name: str) -> None:
     # Develop-Learnings trigger for agent completions
     # Skip for memory agent (metacognitive, not task work)
     # Skip for skills in bypass list (for performance optimization)
+    # ALWAYS ask the user (not conditional on learning trigger)
     if (normalized_agent != "memory" and
         LEARNING_TRIGGER_AVAILABLE and
         not skill_bypasses_hooks):
@@ -219,10 +200,13 @@ def agent_complete(agent_name: str) -> None:
                 agents_invoked=[agent_name],
                 outcome="success",
             )
+            # Check criteria for enhanced reason (but always ask)
             should_learn, reason = should_trigger_learnings(episode)
-            if should_learn:
-                print()
-                print(format_trigger_prompt(episode, reason))
+            reason_text = reason if should_learn else None
+
+            # Print AskUserQuestion directive - ALWAYS ask the user
+            print()
+            print(build_learnings_directive(task_id, reason_text))
         except Exception:
             # Don't fail completion due to learning trigger errors
             pass
@@ -238,25 +222,5 @@ def agent_complete(agent_name: str) -> None:
     state.metadata["status"] = "complete"
     state.save()
 
-    # Minimal output
-    print(f"## {config['cognitive_function']} Agent Complete")
-    print(f"Task: `{task_id[:8]}...`")
-    if state.skill_name:
-        print(f"Skill: `{state.skill_name}` Phase: `{phase_id}`")
-    print(f"Duration: {duration.total_seconds():.1f}s")
-    print()
+    # Minimal output - just the completion marker
     print(f"**{agent_name.upper().replace('-', '_')}_COMPLETE**")
-
-    # ENFORCEMENT: Learnings capture reminder for atomic skill executions
-    # Skip for memory agent (metacognitive, not task work)
-    # Skip for skills in bypass list (for performance optimization)
-    if normalized_agent != "memory" and not skill_bypasses_hooks:
-        print()
-        print("---")
-        print("## Learnings Capture")
-        print()
-        print("Atomic skill execution complete. Learnings should be captured")
-        print("to preserve patterns and insights for future agent improvements.")
-        print()
-        print(f"Run: `/develop-learnings --source-task {task_id} --atomic`")
-        print("---")

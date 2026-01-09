@@ -180,7 +180,7 @@ class PhaseType(Enum):
     OPTIONAL = auto()    # Conditional (may skip based on trigger)
     ITERATIVE = auto()   # Loop pattern (3A, 3B, 3C...)
     REMEDIATION = auto() # Retry after validation failure
-    AUTO = auto()        # Python execution only, no agent
+    AUTO = auto()        # DEPRECATED: Use LINEAR with appropriate agent
     PARALLEL = auto()    # Execute branches concurrently
 ```
 
@@ -192,8 +192,10 @@ class PhaseType(Enum):
 | OPTIONAL | Skip if trigger condition not met | Conditional features |
 | ITERATIVE | Execute sub-phases in sequence (3A→3B→3C) | Multi-step generation |
 | REMEDIATION | Retry on validation failure | Post-validation corrections |
-| AUTO | Python-only, no agent invocation | Automated checks/setup |
+| AUTO | **DEPRECATED** - Do not use | All phases must invoke agents |
 | PARALLEL | Execute branches concurrently, merge | Parallel research/work |
+
+**Important:** `PhaseType.AUTO` is deprecated. All cognitive work should flow through specialized agents. Use `orchestrate-generation` for phases that create/write artifacts, and `orchestrate-validation` for phases that verify/check constraints.
 
 ## Data Contracts
 

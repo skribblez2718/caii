@@ -11,7 +11,7 @@ Transform completed workflow experiences into structured, reusable learnings.
 | 2.5 | Integration Analysis | orchestrate-synthesis |
 | 3 | Consolidation | orchestrate-synthesis |
 | 4 | Validation | orchestrate-validation (REMEDIATION) |
-| 5 | Commit | Direct execution |
+| 5 | Commit | orchestrate-generation |
 | 5.5 | Post-Integration Cleanup | orchestrate-analysis |
 
 ## When Used

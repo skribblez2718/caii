@@ -1,4 +1,4 @@
-# Penny AI Assistant - Git Ignore Configuration
+# CAII - Git Ignore Configuration
 
 # Ignore settings.json (contains user-specific configurations)
 .claude/settings.json

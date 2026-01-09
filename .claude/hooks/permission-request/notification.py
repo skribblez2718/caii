@@ -105,9 +105,10 @@ def send_to_voice_server(message: str, port: str = "8001") -> bool:
     """
     try:
         url = f"http://127.0.0.1:{port}/v1/audio/speech"
+        da_name = os.environ.get("DA_NAME", "AI Assistant")
         payload = {
             "model": "tts-1",
-            "input": f"Penny Permission Request: {message}",
+            "input": f"{da_name} Permission Request: {message}",
             "voice": "alloy",
             "response_format": "mp3"
         }
@@ -130,7 +131,7 @@ def send_to_voice_server(message: str, port: str = "8001") -> bool:
 
             # Send desktop notification
             try:
-                subprocess.run(['notify-send', 'Penny Permission Request', message],
+                subprocess.run(['notify-send', f'{da_name} Permission Request', message],
                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             except:
                 pass

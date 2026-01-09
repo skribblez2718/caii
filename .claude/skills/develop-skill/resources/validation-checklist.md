@@ -51,7 +51,7 @@ Skills must coordinate agent activities without dictating their execution method
 
 ## Integration Validation
 
-- [ ] Compatible with Penny's architecture
+- [ ] Compatible with the system architecture
 - [ ] Doesn't conflict with existing skills
 - [ ] Proper agent invocation protocols
 - [ ] State passing mechanisms work
@@ -98,7 +98,7 @@ Skills must coordinate agent activities without dictating their execution method
 
 ## Atomic Skill Validation
 
-- [ ] All referenced atomic skills exist in `${PAI_DIRECTORY}/.claude/skills/` directory
+- [ ] All referenced atomic skills exist in `${CAII_DIRECTORY}/.claude/skills/` directory
 - [ ] Referenced atomic skills have `type: atomic` in YAML frontmatter
 - [ ] No duplicate atomic skill functionality (each skill maps to one agent)
 - [ ] Atomic skill references use pure 1:1 pattern (one agent per atomic)
@@ -117,7 +117,7 @@ Skills must coordinate agent activities without dictating their execution method
 
 ### Reference Validity
 
-- [ ] All referenced composite skills exist in `${PAI_DIRECTORY}/.claude/skills/` directory
+- [ ] All referenced composite skills exist in `${CAII_DIRECTORY}/.claude/skills/` directory
 - [ ] Referenced composite skills have `type: composite` in YAML frontmatter
 - [ ] Referenced composite skills have `composition_depth: 0` (base composites only)
 - [ ] Composite skill references use "Uses Composite Skill:" syntax
@@ -149,7 +149,7 @@ Skills must coordinate agent activities without dictating their execution method
 
 ## DA.md Registration Validation
 
-- [ ] Skill entry added to `${PAI_DIRECTORY}/.claude/DA.md` Available Skills section
+- [ ] Skill entry added to `${CAII_DIRECTORY}/.claude/DA.md` Available Skills section
 - [ ] Entry placed in correct subsection (Composite Skills or Atomic Skills)
 - [ ] "When to Use" section includes 5 semantic trigger examples
 - [ ] Each trigger follows pattern: `**Condition:** Description → "Example utterance"`

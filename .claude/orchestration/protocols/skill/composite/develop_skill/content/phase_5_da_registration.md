@@ -1,11 +1,11 @@
 # Phase 5: Documentation Registration (Comprehensive)
 
-**Agent:** Penny (direct execution, not cognitive agent)
+**Agent:** generation (via orchestrate-generation)
 **Phase Type:** LINEAR
 
 ## Purpose
 
-Register the new/updated skill across ALL documentation touchpoints to ensure system-wide consistency and discoverability.
+Generate documentation updates to register the new/updated skill across ALL documentation touchpoints, ensuring system-wide consistency and discoverability.
 
 ## Workflow Mode Handling
 
@@ -20,7 +20,7 @@ Check `metadata.workflow_mode` from Phase 0:
 
 ### 1. DA.md Registration (REQUIRED)
 
-**Location:** `${PAI_DIRECTORY}/.claude/DA.md`
+**Location:** `${CAII_DIRECTORY}/.claude/DA.md`
 
 **Actions:**
 1. Read DA.md and locate the "Execution Routing" section
@@ -57,7 +57,7 @@ Check `metadata.workflow_mode` from Phase 0:
 
 ### 2. skill-catalog.md Registration (REQUIRED)
 
-**Location:** `${PAI_DIRECTORY}/.claude/docs/skill-catalog.md`
+**Location:** `${CAII_DIRECTORY}/.claude/docs/skill-catalog.md`
 
 **Actions:**
 1. Read skill-catalog.md
@@ -87,7 +87,7 @@ Check `metadata.workflow_mode` from Phase 0:
 
 ### 3. composite/CLAUDE.md Update (REQUIRED for composite skills)
 
-**Location:** `${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/composite/CLAUDE.md`
+**Location:** `${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/composite/CLAUDE.md`
 
 **Actions:**
 1. Find the "Registered Composite Skills" table
@@ -108,7 +108,7 @@ Check `metadata.workflow_mode` from Phase 0:
 
 ### 4. protocols/skill/CLAUDE.md Update (CONDITIONAL)
 
-**Location:** `${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/CLAUDE.md`
+**Location:** `${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/CLAUDE.md`
 
 **Update if:**
 - New phase types introduced
@@ -127,22 +127,22 @@ Check `metadata.workflow_mode` from Phase 0:
 Check and update if relevant:
 
 #### agent-registry.md
-**Location:** `${PAI_DIRECTORY}/.claude/docs/agent-registry.md`
+**Location:** `${CAII_DIRECTORY}/.claude/docs/agent-registry.md`
 **Update if:** Skill introduces new agent interaction patterns
 
 #### execution-protocols.md
-**Location:** `${PAI_DIRECTORY}/.claude/docs/execution-protocols.md`
+**Location:** `${CAII_DIRECTORY}/.claude/docs/execution-protocols.md`
 **Update if:** Skill introduces new execution patterns
 
 #### cognitive-function-taxonomy.md
-**Location:** `${PAI_DIRECTORY}/.claude/docs/cognitive-function-taxonomy.md`
+**Location:** `${CAII_DIRECTORY}/.claude/docs/cognitive-function-taxonomy.md`
 **Update if:** Skill reveals new cognitive function patterns
 
 ---
 
 ### 6. config.py Registration (MANUAL - from Phase 3)
 
-**Location:** `${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/config/config.py`
+**Location:** `${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/config/config.py`
 
 **Actions:**
 1. Retrieve config.py registration code from Phase 3 generation output

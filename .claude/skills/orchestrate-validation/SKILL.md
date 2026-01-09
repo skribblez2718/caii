@@ -28,29 +28,6 @@ type: atomic
 | verdict | GO\|NO-GO\|CONDITIONAL | Validation verdict |
 | memory_file | string | Path to validation output (`.claude/memory/task-{id}-validation-memory.md`) |
 
-## Agent Sequence
-
-### Step 1: Validation
-
-**Agent:** validation
-**Cognitive Function:** VALIDATION
-
-**Context Loading:** MULTIPLE_PREDECESSORS
-**Predecessors:** {validation_target}, workflow-metadata
-
-**Gate Entry:**
-- Target artifact exists
-- Quality criteria defined
-
-**Gate Exit:**
-- All criteria evaluated
-- Issues documented with severity
-- GO/NO-GO verdict issued
-
-**Memory Output:** Standard format per `${PAI_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/`
-- Agent: validation
-- Task: {task_id}
-
 ## Validation Scope
 
 Quality-validator evaluates against:
@@ -76,7 +53,7 @@ Quality-validator evaluates against:
 
 ## References
 
-- `${PAI_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` - Memory output format
-- `${PAI_DIRECTORY}/.claude/docs/context-loading-reference.md` - Context loading patterns
-- `${PAI_DIRECTORY}/.claude/docs/agent-protocol-reference.md` - Quick reference checklist
-- `${PAI_DIRECTORY}/.claude/skills/develop-skill/resources/agent-invocation-template.md` - Invocation patterns
+- `${CAII_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` - Memory output format
+- `${CAII_DIRECTORY}/.claude/docs/context-loading-reference.md` - Context loading patterns
+- `${CAII_DIRECTORY}/.claude/docs/agent-protocol-reference.md` - Quick reference checklist
+- `${CAII_DIRECTORY}/.claude/skills/develop-skill/resources/agent-invocation-template.md` - Invocation patterns

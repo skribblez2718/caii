@@ -26,7 +26,7 @@ Copy and customize for each agent invocation in a skill:
 - {Success criterion}
 - {Another success criterion}
 
-**Memory Output:** Standard format per `${PAI_DIRECTORY}/.claude/docs/agent-protocol-reference.md`
+**Memory Output:** Standard format per `${CAII_DIRECTORY}/.claude/docs/agent-protocol-reference.md`
 - Agent: {agent-name}
 - Task: {task-id}
 ```
@@ -108,7 +108,7 @@ Copy and customize for each agent invocation in a skill:
 - Specifications explicit and testable
 - Success criteria defined
 
-**Memory Output:** Standard format per `${PAI_DIRECTORY}/.claude/docs/agent-protocol-reference.md`
+**Memory Output:** Standard format per `${CAII_DIRECTORY}/.claude/docs/agent-protocol-reference.md`
 - Agent: clarification
 - Task: {task-id}
 ```
@@ -135,7 +135,7 @@ Copy and customize for each agent invocation in a skill:
 - Options compared
 - Recommendations documented
 
-**Memory Output:** Standard format per `${PAI_DIRECTORY}/.claude/docs/agent-protocol-reference.md`
+**Memory Output:** Standard format per `${CAII_DIRECTORY}/.claude/docs/agent-protocol-reference.md`
 - Agent: research
 - Task: {task-id}
 ```
@@ -162,7 +162,7 @@ Copy and customize for each agent invocation in a skill:
 - Issues documented
 - GO/NO-GO verdict issued
 
-**Memory Output:** Standard format per `${PAI_DIRECTORY}/.claude/docs/agent-protocol-reference.md`
+**Memory Output:** Standard format per `${CAII_DIRECTORY}/.claude/docs/agent-protocol-reference.md`
 - Agent: validation
 - Task: {task-id}
 ```
@@ -187,7 +187,7 @@ Example for MCP server development:
 
 ## Protocol References
 
-- **Memory Output Format:** `${PAI_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/`
-- **Context Loading Details:** `${PAI_DIRECTORY}/.claude/docs/context-loading-reference.md`
-- **Johari Format:** `${PAI_DIRECTORY}/.claude/docs/johari-reference.md`
-- **Token Limits:** `${PAI_DIRECTORY}/.claude/docs/johari-reference.md` (Token Limits section)
+- **Memory Output Format:** `${CAII_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/`
+- **Context Loading Details:** `${CAII_DIRECTORY}/.claude/docs/context-loading-reference.md`
+- **Johari Format:** `${CAII_DIRECTORY}/.claude/docs/johari-reference.md`
+- **Token Limits:** `${CAII_DIRECTORY}/.claude/docs/johari-reference.md` (Token Limits section)

@@ -11,7 +11,7 @@ color: orange
 **BEFORE ANY TASK WORK**, you MUST execute the Agent Reasoning Protocol:
 
 ```bash
-python3 ${PAI_DIRECTORY}/.claude/orchestration/protocols/reasoning/entry.py "{task_context}" --agent-mode
+python3 ${CAII_DIRECTORY}/.claude/orchestration/protocols/reasoning/entry.py "{task_context}" --agent-mode
 ```
 
 **What this does:**
@@ -26,7 +26,7 @@ After Step 8 completes, you will see the Knowledge Transfer Checkpoint output. A
 
 **THEN execute your Execution Protocol:**
 ```bash
-python3 ${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/synthesis/entry.py {task_id}
+python3 ${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/synthesis/entry.py {task_id}
 ```
 
 **DO NOT** begin Step 0 (Learning Injection) until the reasoning protocol completes Step 8.
@@ -122,18 +122,18 @@ python3 ${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/synthesis/entry.p
 
 ## Protocol Steps
 
-**Location:** `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/synthesis/`
+**Location:** `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/synthesis/`
 
 The execution protocol is orchestrated via Python scripts with step-by-step content files:
 
 | Step | Name | Content File |
 |------|------|--------------|
-| 0 | Learning Injection | `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/synthesis/content/step_0.md` |
-| 1 | Context Integration | `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/synthesis/content/step_1.md` |
-| 2 | Strategy Development | `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/synthesis/content/step_2.md` |
-| 3 | Integration Process | `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/synthesis/content/step_3.md` |
-| 4 | Framework Construction | `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/synthesis/content/step_4.md` |
-| 5 | Output Generation | `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/synthesis/content/step_5.md` |
+| 0 | Learning Injection | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/synthesis/content/step_0.md` |
+| 1 | Context Integration | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/synthesis/content/step_1.md` |
+| 2 | Strategy Development | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/synthesis/content/step_2.md` |
+| 3 | Integration Process | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/synthesis/content/step_3.md` |
+| 4 | Framework Construction | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/synthesis/content/step_4.md` |
+| 5 | Output Generation | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/synthesis/content/step_5.md` |
 
 **Entry Point:** `python3 entry.py <task_id>`
 **Completion:** `python3 complete.py --state <state_file>`

@@ -9,7 +9,7 @@
 
 ## Context Sources
 
-Load from `${PAI_DIRECTORY}/.claude/memory/task-{task-id}-memory.md`:
+Load from `${CAII_DIRECTORY}/.claude/memory/task-{task-id}-memory.md`:
 - Original request/requirement
 - Previous agent outputs (clarification, research)
 - Johari summaries from predecessors

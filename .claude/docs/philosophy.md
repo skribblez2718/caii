@@ -135,25 +135,25 @@ WORKFLOW DESIGN CHECKLIST:
 
 DIRECTORY STRUCTURE AND PURPOSE
 
-Skills Directory: ${PAI_DIRECTORY}/.claude/skills/
+Skills Directory: ${CAII_DIRECTORY}/.claude/skills/
 - Contains workflow orchestration definitions
 - Defines phases, gates, and success criteria
 - NEVER includes implementation details
 - References required agents for each phase
 
-Agents Directory: ${PAI_DIRECTORY}/.claude/agents/
+Agents Directory: ${CAII_DIRECTORY}/.claude/agents/
 - Contains task execution implementations
 - Defines HOW specific work gets done
 - Inherits context from skill invocations
 - Implements ALL reasoning strategies
 
-Shared Content Directory: ${PAI_DIRECTORY}/.claude/orchestration/shared-content/
+Shared Content Directory: ${CAII_DIRECTORY}/.claude/orchestration/shared-content/
 - Operational standards and procedures (pythonized)
 - Context management specifications
 - Shared behaviors across components
 - Loaded by Python scripts and printed to agents
 
-Documentation Directory: ${PAI_DIRECTORY}/.claude/docs/
+Documentation Directory: ${CAII_DIRECTORY}/.claude/docs/
 - System design principles and patterns
 - Decision matrices and trade-offs
 - Implementation guidelines
@@ -317,7 +317,7 @@ ENFORCEMENT PROTOCOL
 
 ROUTING GATE ENFORCEMENT
 The routing_gate.py module enforces triviality validation before allowing direct execution
-Self-assessment prompt guides Penny through evaluation of 5 triviality criteria
+Self-assessment prompt guides the orchestrator through evaluation of 5 triviality criteria
 Response parsing identifies YES/NO answers to determine routing decision
 
 THREE DECISION OUTCOMES:

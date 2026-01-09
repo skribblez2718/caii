@@ -7,12 +7,12 @@ from agent memory files.
 
 IMPORTANT: Due to Claude Code limitations, subagents CANNOT use the
 AskUserQuestion tool directly. Instead, they document questions in their
-memory files, and this module helps the main Penny thread detect and
+memory files, and this module helps the main orchestrator thread detect and
 process those questions.
 
 Usage Flow:
 1. Agent completes and writes memory file with Section 4: User Questions
-2. Main Penny thread calls check_clarification_needed() to detect questions
+2. Main orchestrator thread calls check_clarification_needed() to detect questions
 3. If questions found, main thread uses AskUserQuestion to present them
 4. Answers are provided to the next phase or agent re-invocation
 
@@ -267,3 +267,82 @@ def handle_clarification_if_needed(
         return None
 
     return format_questions_for_ask_user(questions)
+
+
+def build_ask_user_invocation(questions: list[dict]) -> str:
+    """
+    Build a complete AskUserQuestion tool invocation directive.
+
+    This generates a formatted string that the main orchestrator can
+    print to instruct Claude to invoke the AskUserQuestion tool.
+
+    Args:
+        questions: Formatted questions from format_questions_for_ask_user()
+
+    Returns:
+        Formatted directive string for Claude to invoke AskUserQuestion
+
+    Example output:
+        ---
+        ## MANDATORY: Invoke AskUserQuestion Tool
+
+        Clarification is required before proceeding. You MUST invoke the
+        AskUserQuestion tool with the following parameters:
+
+        ```json
+        {
+          "questions": [...]
+        }
+        ```
+
+        DO NOT proceed until the user has answered these questions.
+        ---
+    """
+    questions_json = json.dumps({"questions": questions}, indent=2)
+
+    return f"""
+---
+
+## MANDATORY: Invoke AskUserQuestion Tool
+
+Clarification is required before proceeding. You **MUST** invoke the `AskUserQuestion` tool with the following parameters:
+
+```json
+{questions_json}
+```
+
+**DO NOT:**
+- Print these questions as markdown
+- Assume answers
+- Proceed without user response
+
+**DO:**
+- Invoke AskUserQuestion tool NOW
+- Wait for user response
+- Then continue with the workflow
+
+---
+"""
+
+
+def print_clarification_directive(memory_file_path: str | Path) -> bool:
+    """
+    Check for clarification needs and print invocation directive if needed.
+
+    This is the primary entry point for phase transitions. Call this after
+    an agent completes to check if clarification is needed and print the
+    appropriate directive.
+
+    Args:
+        memory_file_path: Path to the agent's memory file
+
+    Returns:
+        True if clarification directive was printed, False otherwise
+    """
+    questions = handle_clarification_if_needed(memory_file_path)
+
+    if questions:
+        print(build_ask_user_invocation(questions))
+        return True
+
+    return False

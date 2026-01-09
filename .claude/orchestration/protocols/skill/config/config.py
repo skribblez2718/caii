@@ -34,7 +34,7 @@ class PhaseType(Enum):
     OPTIONAL = auto()    # Conditional phase (may be skipped based on trigger)
     ITERATIVE = auto()   # Loop phase (3A, 3B, 3C, 3D pattern)
     REMEDIATION = auto() # Re-try phase after validation failure
-    AUTO = auto()        # Python execution only, prints context, no agent
+    AUTO = auto()        # DEPRECATED: Use LINEAR with appropriate agent instead
     PARALLEL = auto()    # Execute multiple branches concurrently, merge results
 
 
@@ -104,6 +104,11 @@ COMPOSITE_SKILLS: Dict[str, Dict[str, Any]] = {
         "composition_depth": 0,
         "phases": "DEVELOP_LEARNINGS_PHASES",
     },
+    "develop-command": {
+        "description": "Create and manage Claude Code slash commands",
+        "composition_depth": 0,
+        "phases": "DEVELOP_COMMAND_PHASES",
+    },
 }
 
 
@@ -125,8 +130,8 @@ DEVELOP_SKILL_PHASES: Dict[str, Dict[str, Any]] = {
     "0.5": {
         "name": "ATOMIC_PROVISIONING",
         "title": "Atomic Skill Provisioning",
-        "type": PhaseType.AUTO,
-        "uses_atomic_skill": None,  # AUTO phases don't invoke agents
+        "type": PhaseType.LINEAR,  # Changed from AUTO - all phases use agents
+        "uses_atomic_skill": "orchestrate-generation",  # Creates missing atomic skills
         "script": "phase_0_5_atomic_provisioning.py",
         "content": "phase_0_5_atomic_provisioning.md",
         "trigger": "phase_0_identifies_missing_atomics",
@@ -136,8 +141,8 @@ DEVELOP_SKILL_PHASES: Dict[str, Dict[str, Any]] = {
     "0.6": {
         "name": "COMPOSITE_VALIDATION",
         "title": "Composite Skill Validation",
-        "type": PhaseType.AUTO,
-        "uses_atomic_skill": None,
+        "type": PhaseType.LINEAR,  # Changed from AUTO - all phases use agents
+        "uses_atomic_skill": "orchestrate-validation",  # Validates composite references
         "script": "phase_0_6_composite_validation.py",
         "content": "phase_0_6_composite_validation.md",
         "trigger": "phase_0_identifies_composite_references",
@@ -210,8 +215,7 @@ DEVELOP_SKILL_PHASES: Dict[str, Dict[str, Any]] = {
         "name": "DA_REGISTRATION",
         "title": "DA.md Registration",
         "type": PhaseType.LINEAR,
-        "uses_atomic_skill": None,  # Direct execution by Penny
-        "script": "phase_5_da_registration.py",
+        "uses_atomic_skill": "orchestrate-generation",
         "content": "phase_5_da_registration.md",
         "next": None,  # Final phase
         "description": "Register new skill in DA.md",
@@ -288,7 +292,7 @@ DEVELOP_LEARNINGS_PHASES: Dict[str, Dict[str, Any]] = {
         "name": "COMMIT",
         "title": "Commit",
         "type": PhaseType.LINEAR,
-        "uses_atomic_skill": None,  # Direct Penny execution
+        "uses_atomic_skill": "orchestrate-generation",  # Generation agent writes learnings
         "script": "phase_5_commit.py",
         "content": "phase_5_commit.md",
         "next": "5.5",
@@ -308,6 +312,44 @@ DEVELOP_LEARNINGS_PHASES: Dict[str, Dict[str, Any]] = {
 
 
 # =============================================================================
+# PHASE DEFINITIONS - develop-command
+# =============================================================================
+
+DEVELOP_COMMAND_PHASES: Dict[str, Dict[str, Any]] = {
+    "0": {
+        "name": "REQUIREMENTS_CLARIFICATION",
+        "title": "Requirements Clarification",
+        "type": PhaseType.LINEAR,
+        "uses_atomic_skill": "orchestrate-clarification",
+        "script": None,
+        "content": "phase_0_requirements_clarification.md",
+        "next": "1",
+        "description": "Clarify command requirements and category placement",
+    },
+    "1": {
+        "name": "COMMAND_GENERATION",
+        "title": "Command Generation",
+        "type": PhaseType.LINEAR,
+        "uses_atomic_skill": "orchestrate-generation",
+        "script": None,
+        "content": "phase_1_command_generation.md",
+        "next": "2",
+        "description": "Generate command file with frontmatter and bash script",
+    },
+    "2": {
+        "name": "COMMAND_VALIDATION",
+        "title": "Command Validation",
+        "type": PhaseType.LINEAR,
+        "uses_atomic_skill": "orchestrate-validation",
+        "script": None,
+        "content": "phase_2_command_validation.md",
+        "next": None,
+        "description": "Validate command and update DA.md registration",
+    },
+}
+
+
+# =============================================================================
 # SKILL PHASE REGISTRY
 # =============================================================================
 # Maps skill names to their phase configurations
@@ -315,6 +357,7 @@ DEVELOP_LEARNINGS_PHASES: Dict[str, Dict[str, Any]] = {
 SKILL_PHASES: Dict[str, Dict[str, Dict[str, Any]]] = {
     "develop-skill": DEVELOP_SKILL_PHASES,
     "develop-learnings": DEVELOP_LEARNINGS_PHASES,
+    "develop-command": DEVELOP_COMMAND_PHASES,
 }
 
 

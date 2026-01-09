@@ -33,7 +33,7 @@ Verification happens in THREE stages when orchestrator invokes agent with a spec
 ### WORKFLOW_ONLY Pattern
 
 **Requirements:**
-- Agent MUST read workflow metadata file: `${PAI_DIRECTORY}/.claude/memory/task-{id}-memory.md`
+- Agent MUST read workflow metadata file: `${CAII_DIRECTORY}/.claude/memory/task-{id}-memory.md`
 - Agent MUST NOT read any predecessor files
 
 **Expected "Context Loaded" section:**
@@ -67,7 +67,7 @@ Verification happens in THREE stages when orchestrator invokes agent with a spec
   "predecessors_loaded": [
     {
       "agent_name": "{predecessor}",
-      "file_path": "${PAI_DIRECTORY}/.claude/memory/task-{id}-{predecessor}-memory.md",
+      "file_path": "${CAII_DIRECTORY}/.claude/memory/task-{id}-{predecessor}-memory.md",
       "tokens_consumed": 1200,
       "required": true
     }

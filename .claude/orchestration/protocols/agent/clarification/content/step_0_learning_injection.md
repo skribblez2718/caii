@@ -2,8 +2,8 @@
 
 ## Actions
 
-1. Load INDEX section from `${PAI_DIRECTORY}/.claude/learnings/clarification/heuristics.md` (~100-150 tokens)
-2. Load INDEX section from `${PAI_DIRECTORY}/.claude/learnings/clarification/checklists.md` (~50-100 tokens)
+1. Load INDEX section from `${CAII_DIRECTORY}/.claude/learnings/clarification/heuristics.md` (~100-150 tokens)
+2. Load INDEX section from `${CAII_DIRECTORY}/.claude/learnings/clarification/checklists.md` (~50-100 tokens)
 3. Scan INDEX for patterns matching current task domain/context
 4. If pattern match found: Perform targeted grep for that specific section in full learnings file
 5. Apply loaded heuristics/checklists to current clarification task

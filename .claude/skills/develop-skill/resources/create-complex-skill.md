@@ -116,7 +116,7 @@ For skills that reference other composite skills:
 
 ### Phase 5: Template Population
 
-Read the complex skill template from: `${PAI_DIRECTORY}/.claude/skills/develop-skill/resources/complex-skill-template.md`
+Read the complex skill template from: `${CAII_DIRECTORY}/.claude/skills/develop-skill/resources/complex-skill-template.md`
 
 Use this template to create the skill file, populating all bracketed placeholders with specific content based on your architecture design.
 
@@ -153,7 +153,7 @@ Verify:
 
 Register the new skill in DA.md:
 
-1. Open `${PAI_DIRECTORY}/.claude/DA.md`
+1. Open `${CAII_DIRECTORY}/.claude/DA.md`
 2. Locate the `### Available Skills` section
 3. Add new entry in alphabetical order:
    ```markdown

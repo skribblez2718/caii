@@ -140,12 +140,8 @@ class BasePhase(ABC):
         print(content)
 
     def print_phase_header(self) -> None:
-        """Print minimal phase header."""
-        print(f"## Phase {self.phase_id}: {self.phase_title}")
-        if self.uses_atomic_skill:
-            agent_name = get_atomic_skill_agent(self.uses_atomic_skill)
-            print(f"Agent: {agent_name}")
-        print()
+        """Print minimal phase header (no output - content is self-explanatory)."""
+        pass
 
     def get_agent_invocation(self) -> Optional[dict[str, Any]]:
         """

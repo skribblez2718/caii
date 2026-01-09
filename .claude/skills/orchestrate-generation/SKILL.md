@@ -28,32 +28,6 @@ type: atomic
 | tests_passing | boolean | Whether all tests pass |
 | memory_file | string | Path to generation output (`.claude/memory/task-{id}-generation-memory.md`) |
 
-## Agent Sequence
-
-### Step 1: Generation
-
-**Agent:** generation
-**Cognitive Function:** GENERATION
-
-**Context Loading:** IMMEDIATE_PREDECESSORS
-**Predecessors:** synthesis (design/architecture)
-
-**Gate Entry:**
-- Design/architecture complete
-- Implementation scope defined
-- Test requirements understood
-
-**Gate Exit:**
-- Tests written first (RED)
-- Implementation passes tests (GREEN)
-- Code refactored for quality (REFACTOR)
-
-**Memory Output:** Standard format per `${PAI_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/`
-- Agent: generation
-- Task: {task_id}
-
-**Protocol Extension:** `${PAI_DIRECTORY}/.claude/orchestration/shared-content/code-generation/` (required for code generation)
-
 ## TDD Cycle Requirements
 
 ### RED Phase
@@ -103,8 +77,8 @@ Each iteration follows full RED-GREEN-REFACTOR cycle.
 
 ## References
 
-- `${PAI_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` - Memory output format
-- `${PAI_DIRECTORY}/.claude/docs/code-generation-reference.md` - Code generation requirements
-- `${PAI_DIRECTORY}/.claude/docs/context-loading-reference.md` - Context loading patterns
-- `${PAI_DIRECTORY}/.claude/docs/agent-protocol-reference.md` - Quick reference checklist
-- `${PAI_DIRECTORY}/.claude/skills/develop-skill/resources/agent-invocation-template.md` - Invocation patterns
+- `${CAII_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` - Memory output format
+- `${CAII_DIRECTORY}/.claude/docs/code-generation-reference.md` - Code generation requirements
+- `${CAII_DIRECTORY}/.claude/docs/context-loading-reference.md` - Context loading patterns
+- `${CAII_DIRECTORY}/.claude/docs/agent-protocol-reference.md` - Quick reference checklist
+- `${CAII_DIRECTORY}/.claude/skills/develop-skill/resources/agent-invocation-template.md` - Invocation patterns

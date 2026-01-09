@@ -133,14 +133,14 @@ When marking a learning for INTEGRATE, you MUST provide:
 - Core Workflow: YES - fundamental to generating functional Python code
 
 **Integration Specification:**
-- Target File: `${PAI_DIRECTORY}/.claude/skills/develop-mcp-server/SKILL.md`
+- Target File: `${CAII_DIRECTORY}/.claude/skills/develop-mcp-server/SKILL.md`
 - Target Location: Phase 4 (Core Implementation), Instructions, Step 3
 - Proposed Rule Addition:
   ```
   - **CRITICAL: Use ONLY absolute imports - NO relative imports allowed** (see G-H-001)
     - Pattern: `from src.module import Item`
     - NEVER use: `from .module` or `from ..module`
-    - See `${PAI_DIRECTORY}/.claude/learnings/generation/heuristics.md` for detailed rationale
+    - See `${CAII_DIRECTORY}/.claude/learnings/generation/heuristics.md` for detailed rationale
   ```
 - Integration Rationale: Prevents systematic import errors across all generated Python projects; blocks workflow if violated
 - Learning Reference: G-H-001 retains detailed failure modes, examples, validation commands

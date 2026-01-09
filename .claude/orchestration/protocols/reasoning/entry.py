@@ -4,9 +4,9 @@ entry.py
 
 Unified entry point for the Mandatory Reasoning Protocol.
 
-This script supports both Penny (full 8-step) and Agent (7-step, skips Step 4) modes:
+This script supports both Main (full 8-step) and Agent (7-step, skips Step 4) modes:
 
-Penny Mode (default):
+Main Mode (default):
   All 8 steps including Step 4 (Task Routing)
 
 Agent Mode (--agent-mode):
@@ -202,7 +202,7 @@ def main() -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Penny mode (full 8-step protocol)
+  # Main mode (full 8-step protocol)
   python entry.py "How do I implement authentication?"
   python entry.py --resume abc123def456
 

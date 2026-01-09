@@ -77,17 +77,17 @@ Phase N: [PHASE NAME] (if using composite skill)
 4. [Step 4 - Domain-specific guidance if needed]
 5. [Step 5 - Output requirements]
 
-**Context Loading:** WORKFLOW_ONLY (see `${PAI_DIRECTORY}/.claude/docs/context-loading-reference.md`)
+**Context Loading:** WORKFLOW_ONLY (see `${CAII_DIRECTORY}/.claude/docs/context-loading-reference.md`)
 **Predecessor:** None (first agent)
 
 **Additional Resources:**
-- `${PAI_DIRECTORY}/.claude/[path]/[resource].md` [REQUIRED | OPTIONAL]
+- `${CAII_DIRECTORY}/.claude/[path]/[resource].md` [REQUIRED | OPTIONAL]
 
 **Protocol References:**
-- `${PAI_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` [ALWAYS]
+- `${CAII_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` [ALWAYS]
 
 **Memory Output:**
-- Write to: `${PAI_DIRECTORY}/.claude/memory/task-{id}-[agent-name]-memory.md`
+- Write to: `${CAII_DIRECTORY}/.claude/memory/task-{id}-[agent-name]-memory.md`
 - Format: Johari Window (open, hidden, blind, unknown)
 - Token Limit: 1200 tokens for Johari section
 
@@ -121,18 +121,18 @@ Phase N: [PHASE NAME] (if using composite skill)
 4. [What decisions to make]
 5. [Output requirements]
 
-**Context Loading:** IMMEDIATE_PREDECESSORS (see `${PAI_DIRECTORY}/.claude/docs/context-loading-reference.md`)
+**Context Loading:** IMMEDIATE_PREDECESSORS (see `${CAII_DIRECTORY}/.claude/docs/context-loading-reference.md`)
 **Predecessor:** [previous-agent-name]
 
 **Additional Resources:**
-- `${PAI_DIRECTORY}/.claude/[path]/[resource].md` [REQUIRED | OPTIONAL]
+- `${CAII_DIRECTORY}/.claude/[path]/[resource].md` [REQUIRED | OPTIONAL]
 
 **Protocol References:**
-- `${PAI_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` [ALWAYS]
-- `${PAI_DIRECTORY}/.claude/docs/code-generation-reference.md` [IF technical code generation]
+- `${CAII_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` [ALWAYS]
+- `${CAII_DIRECTORY}/.claude/docs/code-generation-reference.md` [IF technical code generation]
 
 **Memory Output:**
-- Write to: `${PAI_DIRECTORY}/.claude/memory/task-{id}-[agent-name]-memory.md`
+- Write to: `${CAII_DIRECTORY}/.claude/memory/task-{id}-[agent-name]-memory.md`
 - Format: Johari Window (open, hidden, blind, unknown)
 - Token Limit: 1200 tokens for Johari section
 
@@ -166,18 +166,18 @@ Phase N: [PHASE NAME] (if using composite skill)
 4. [What to generate/validate]
 5. [Output requirements]
 
-**Context Loading:** MULTIPLE_PREDECESSORS (see `${PAI_DIRECTORY}/.claude/docs/context-loading-reference.md`)
+**Context Loading:** MULTIPLE_PREDECESSORS (see `${CAII_DIRECTORY}/.claude/docs/context-loading-reference.md`)
 **Predecessors:** [agent-1], [agent-2], [agent-3]
 
 **Additional Resources:**
-- `${PAI_DIRECTORY}/.claude/[path]/[resource].md` [REQUIRED | OPTIONAL]
+- `${CAII_DIRECTORY}/.claude/[path]/[resource].md` [REQUIRED | OPTIONAL]
 
 **Protocol References:**
-- `${PAI_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` [ALWAYS]
-- `${PAI_DIRECTORY}/.claude/docs/code-generation-reference.md` [IF technical code generation]
+- `${CAII_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` [ALWAYS]
+- `${CAII_DIRECTORY}/.claude/docs/code-generation-reference.md` [IF technical code generation]
 
 **Memory Output:**
-- Write to: `${PAI_DIRECTORY}/.claude/memory/task-{id}-[agent-name]-memory.md`
+- Write to: `${CAII_DIRECTORY}/.claude/memory/task-{id}-[agent-name]-memory.md`
 - Format: Johari Window (open, hidden, blind, unknown)
 - Token Limit: 1200 tokens for Johari section
 
@@ -205,7 +205,7 @@ Phase N: [PHASE NAME] (if using composite skill)
 > Include this section only if the skill invokes other composite skills (composition_depth: 1).
 > A phase uses EITHER atomic skills OR composite skills, not both.
 > All referenced composite skills MUST have composition_depth: 0.
-> Reference: `${PAI_DIRECTORY}/.claude/skills/develop-skill/resources/composite-skill-reference.md`
+> Reference: `${CAII_DIRECTORY}/.claude/skills/develop-skill/resources/composite-skill-reference.md`
 
 ### PHASE [N]: [PHASE NAME]
 
@@ -271,9 +271,9 @@ Phase N: [PHASE NAME] (if using composite skill)
 
 ## Related Documentation
 
-- `${PAI_DIRECTORY}/.claude/docs/[relevant-reference].md` - [What it provides]
-- `${PAI_DIRECTORY}/.claude/orchestration/shared-content/` - [What it defines]
-- `${PAI_DIRECTORY}/.claude/skills/[related-skill]/SKILL.md` - [How it relates]
+- `${CAII_DIRECTORY}/.claude/docs/[relevant-reference].md` - [What it provides]
+- `${CAII_DIRECTORY}/.claude/orchestration/shared-content/` - [What it defines]
+- `${CAII_DIRECTORY}/.claude/skills/[related-skill]/SKILL.md` - [How it relates]
 
 ## Notes
 

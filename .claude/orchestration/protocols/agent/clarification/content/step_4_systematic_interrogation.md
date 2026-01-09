@@ -9,7 +9,7 @@
 3. **Set `clarification_required: true`** if user input is needed
 4. **Return your output** - the main orchestrator will present questions to the user
 
-The main Penny thread will:
+The main orchestrator thread will:
 - Parse your `user_questions` JSON from the memory file
 - Use `AskUserQuestion` to present them to the user
 - Resume the workflow with answers as context

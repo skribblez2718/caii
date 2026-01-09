@@ -5,7 +5,7 @@ entry.py
 Entry point for the Dynamic Skill Sequencing Protocol.
 
 This protocol handles tasks that require multiple cognitive functions but don't
-match an existing composite skill. Penny determines and invokes a sequence of
+match an existing composite skill. The orchestrator determines and invokes a sequence of
 orchestrate-* atomic skills dynamically based on context.
 
 KEY PRINCIPLE: Agents are NEVER invoked directly. All cognitive work flows

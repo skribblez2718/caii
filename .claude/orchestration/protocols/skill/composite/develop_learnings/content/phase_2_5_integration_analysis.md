@@ -46,7 +46,7 @@ When analyzing integration:
 
 ## Resources
 
-- `${PAI_DIRECTORY}/.claude/skills/develop-learnings/resources/integration-criteria.md`
+- `${CAII_DIRECTORY}/.claude/skills/develop-learnings/resources/integration-criteria.md`
 
 ## Gate Exit Criteria
 

@@ -33,16 +33,16 @@ class Step6CompleteWorkflow(ExecutionBaseStep):
 
         # Get task-id
         step1 = self.state.get_step_output(1)
-        if step1 and "penny_response" in step1:
+        if step1 and "orchestrator_response" in step1:
             context_parts.append("TASK ID:")
-            context_parts.append(step1["penny_response"][:100])
+            context_parts.append(step1["orchestrator_response"][:100])
             context_parts.append("")
 
         # Get agent execution summary
         step5 = self.state.get_step_output(5)
-        if step5 and "penny_response" in step5:
+        if step5 and "orchestrator_response" in step5:
             context_parts.append("AGENT EXECUTION SUMMARY (from Step 5):")
-            context_parts.append(step5["penny_response"][:600])
+            context_parts.append(step5["orchestrator_response"][:600])
 
         return "\n".join(context_parts)
 

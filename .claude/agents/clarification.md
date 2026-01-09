@@ -11,7 +11,7 @@ color: cyan
 **BEFORE ANY TASK WORK**, you MUST execute the Agent Reasoning Protocol:
 
 ```bash
-python3 ${PAI_DIRECTORY}/.claude/orchestration/protocols/reasoning/entry.py "{task_context}" --agent-mode
+python3 ${CAII_DIRECTORY}/.claude/orchestration/protocols/reasoning/entry.py "{task_context}" --agent-mode
 ```
 
 **What this does:**
@@ -26,7 +26,7 @@ After Step 8 completes, you will see the Knowledge Transfer Checkpoint output. A
 
 **THEN execute your Execution Protocol:**
 ```bash
-python3 ${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/clarification/entry.py {task_id}
+python3 ${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/clarification/entry.py {task_id}
 ```
 
 **DO NOT** begin Step 0 (Learning Injection) until the reasoning protocol completes Step 8.
@@ -135,18 +135,18 @@ Before DEEP research workflows, MUST clarify: (1) scope inclusions/exclusions, (
 
 ## Execution Methodology
 
-**Location:** `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/clarification/`
+**Location:** `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/clarification/`
 
 The execution methodology is orchestrated via Python scripts with step-by-step content files:
 
 | Step | Name | Content File |
 |------|------|--------------|
-| 0 | Learning Injection | `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/clarification/content/step_0.md` |
-| 1 | Context Assessment | `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/clarification/content/step_1.md` |
-| 2 | Strategic Question Formulation | `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/clarification/content/step_2.md` |
-| 3 | Systematic Interrogation | `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/clarification/content/step_3.md` |
-| 4 | Specification Construction | `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/clarification/content/step_4.md` |
-| 5 | Knowledge Synthesis | `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/clarification/content/step_5.md` |
+| 0 | Learning Injection | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/clarification/content/step_0.md` |
+| 1 | Context Assessment | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/clarification/content/step_1.md` |
+| 2 | Strategic Question Formulation | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/clarification/content/step_2.md` |
+| 3 | Systematic Interrogation | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/clarification/content/step_3.md` |
+| 4 | Specification Construction | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/clarification/content/step_4.md` |
+| 5 | Knowledge Synthesis | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/clarification/content/step_5.md` |
 
 **Entry Point:** `python3 entry.py <task_id>`
 **Completion:** `python3 complete.py --state <state_file>`
@@ -199,7 +199,7 @@ Label all clarifications with explicit confidence levels:
 3. **Return your output** - the main orchestrator will handle user interaction
 4. **Wait for re-invocation** - you will be called again with user answers in context
 
-**The main Penny orchestrator will:**
+**The main orchestrator will:**
 - Detect `clarification_required: true` in your output
 - Present your questions to the user via `AskUserQuestion`
 - Provide answers back to the workflow

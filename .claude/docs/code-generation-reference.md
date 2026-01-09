@@ -195,7 +195,7 @@ This extended protocol applies when:
 
 ## Related Documentation
 
-- `${PAI_DIRECTORY}/.claude/orchestration/shared-content/code-generation/` - Execution step files
-- `${PAI_DIRECTORY}/.claude/orchestration/shared-content/code-generation/python-project-setup.md` - Python/uv requirements
-- `${PAI_DIRECTORY}/.claude/orchestration/shared-content/code-generation/tdd-protocol.md` - TDD cycle
-- `${PAI_DIRECTORY}/.claude/orchestration/shared-content/code-generation/security-patterns.md` - Security patterns
+- `${CAII_DIRECTORY}/.claude/orchestration/shared-content/code-generation/` - Execution step files
+- `${CAII_DIRECTORY}/.claude/orchestration/shared-content/code-generation/python-project-setup.md` - Python/uv requirements
+- `${CAII_DIRECTORY}/.claude/orchestration/shared-content/code-generation/tdd-protocol.md` - TDD cycle
+- `${CAII_DIRECTORY}/.claude/orchestration/shared-content/code-generation/security-patterns.md` - Security patterns

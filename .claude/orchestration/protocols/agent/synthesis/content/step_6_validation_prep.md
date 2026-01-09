@@ -37,7 +37,7 @@ Identify areas needing further work:
 ## Memory File Update
 
 Write synthesis results to task memory:
-- Path: `${PAI_DIRECTORY}/.claude/memory/task-{task-id}-memory.md`
+- Path: `${CAII_DIRECTORY}/.claude/memory/task-{task-id}-memory.md`
 - Append synthesis section with:
   - Integrated design
   - Component definitions

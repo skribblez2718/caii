@@ -12,7 +12,7 @@
 ```json
 {
   "workflow_metadata_loaded": true,
-  "workflow_file_path": "${PAI_DIRECTORY}/.claude/memory/task-{id}-memory.md",
+  "workflow_file_path": "${CAII_DIRECTORY}/.claude/memory/task-{id}-memory.md",
   "workflow_tokens_consumed": 500,
 
   "context_loading_pattern_used": "WORKFLOW_ONLY | IMMEDIATE_PREDECESSORS | MULTIPLE_PREDECESSORS",
@@ -20,7 +20,7 @@
   "predecessors_loaded": [
     {
       "agent_name": "clarification",
-      "file_path": "${PAI_DIRECTORY}/.claude/memory/task-{id}-clarification-memory.md",
+      "file_path": "${CAII_DIRECTORY}/.claude/memory/task-{id}-clarification-memory.md",
       "tokens_consumed": 1200,
       "required": true
     }
@@ -30,7 +30,7 @@
   "token_budget_status": "WITHIN_BUDGET (1700/3000)",
 
   "protocols_referenced": [
-    "${PAI_DIRECTORY}/.claude/orchestration/shared/protocols/agent/"
+    "${CAII_DIRECTORY}/.claude/orchestration/shared/protocols/agent/"
   ],
 
   "verification_timestamp": "YYYY-MM-DD HH:MM:SS",

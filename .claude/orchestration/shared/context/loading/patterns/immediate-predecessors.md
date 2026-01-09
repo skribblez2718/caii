@@ -10,8 +10,8 @@ Agent loads workflow metadata plus the immediately preceding agent's output. Thi
 
 ## Context References
 
-- `${PAI_DIRECTORY}/.claude/memory/task-{id}-memory.md` (workflow metadata) [ALWAYS_REQUIRED]
-- `${PAI_DIRECTORY}/.claude/memory/task-{id}-{predecessor}-memory.md` [IMMEDIATE_PREDECESSOR_REQUIRED]
+- `${CAII_DIRECTORY}/.claude/memory/task-{id}-memory.md` (workflow metadata) [ALWAYS_REQUIRED]
+- `${CAII_DIRECTORY}/.claude/memory/task-{id}-{predecessor}-memory.md` [IMMEDIATE_PREDECESSOR_REQUIRED]
 
 ## Context Scope
 
@@ -32,8 +32,8 @@ IMMEDIATE_PREDECESSORS
 
 ## Expanded File Paths
 
-- `${PAI_DIRECTORY}/.claude/memory/task-{id}-memory.md`
-- `${PAI_DIRECTORY}/.claude/memory/task-{id}-clarification-memory.md`
+- `${CAII_DIRECTORY}/.claude/memory/task-{id}-memory.md`
+- `${CAII_DIRECTORY}/.claude/memory/task-{id}-clarification-memory.md`
 
 ## Compliance Requirements
 
@@ -53,7 +53,7 @@ IMMEDIATE_PREDECESSORS
   "predecessors_loaded": [
     {
       "agent_name": "clarification",
-      "file_path": "${PAI_DIRECTORY}/.claude/memory/task-{id}-clarification-memory.md",
+      "file_path": "${CAII_DIRECTORY}/.claude/memory/task-{id}-clarification-memory.md",
       "tokens_consumed": 1200,
       "required": true
     }

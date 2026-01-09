@@ -14,7 +14,7 @@ Before proceeding, verify:
 
 ### 2. Task Matches Available Skills
 - IF task matches pattern of existing skill:
-  - **develop-skill** → Workflow/skill creation AND Penny system modifications
+  - **develop-skill** → Workflow/skill creation AND system modifications
   - **develop-learnings** → Transform experiences to structured learnings
 - THEN → Either invoke skill directly OR recommend skill to user
 
@@ -45,13 +45,13 @@ All cognitive work flows through one of two routes:
 - Task complexity benefits from structured workflow with gate checks
 - Keywords suggest multi-step cognitive work: "create", "develop", "analyze and build"
 - User explicitly mentions skill name (MANDATORY invocation)
-- **Penny system modifications** (skills, agents, protocols, architecture) → use develop-skill
+- **System modifications** (skills, agents, protocols, architecture) → use develop-skill
 
 **MANDATORY Skill Execution Sequence:**
 1. Invoke skill via `Skill` tool → Returns SKILL.md content
 2. **IMMEDIATELY execute entry.py:**
    ```bash
-   python3 ${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/composite/{skill_name}/entry.py "{task_id}" --domain {domain}
+   python3 ${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/composite/{skill_name}/entry.py "{task_id}" --domain {domain}
    ```
 3. Entry.py outputs Phase 0 directive with agent to invoke
 4. Invoke agent via `Task` tool with `subagent_type: {agent-name}`
@@ -78,7 +78,7 @@ All cognitive work flows through one of two routes:
 
 **Execution:**
 ```bash
-python3 ${PAI_DIRECTORY}/.claude/orchestration/protocols/execution/dynamic-skill-sequencing/entry.py --state {state_file}
+python3 ${CAII_DIRECTORY}/.claude/orchestration/protocols/execution/dynamic-skill-sequencing/entry.py --state {state_file}
 ```
 
 **How It Works:**

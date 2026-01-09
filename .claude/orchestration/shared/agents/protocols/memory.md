@@ -5,17 +5,17 @@
 ALL cognitive agents MUST:
 
 1. **READ workflow metadata FIRST:**
-   - Location: `${PAI_DIRECTORY}/.claude/memory/task-{id}-memory.md`
+   - Location: `${CAII_DIRECTORY}/.claude/memory/task-{id}-memory.md`
    - Contains: task domain, quality standards, artifact types, success criteria, constraints
    - Status: ALWAYS_REQUIRED before any work begins
 
 2. **READ predecessor context (scoped):**
    - Load immediate predecessor outputs only (not all previous agents)
-   - Pattern: `${PAI_DIRECTORY}/.claude/memory/task-{id}-{predecessor-name}-memory.md`
+   - Pattern: `${CAII_DIRECTORY}/.claude/memory/task-{id}-{predecessor-name}-memory.md`
    - See context-loading patterns for standard patterns
 
 3. **WRITE output AFTER completion:**
-   - Location: `${PAI_DIRECTORY}/.claude/memory/task-{id}-{agent-name}-memory.md`
+   - Location: `${CAII_DIRECTORY}/.claude/memory/task-{id}-{agent-name}-memory.md`
    - Format: Three sections (Step Overview + Johari Summary + Downstream Directives)
    - Token Limit: 1200 tokens MAXIMUM for Johari section
 
@@ -35,7 +35,7 @@ An agent has FAILED if:
 MANDATORY - Orchestrator MUST verify before invoking agent:
 
 1. **Verify workflow metadata EXISTS:**
-   - Check `${PAI_DIRECTORY}/.claude/memory/task-{id}-memory.md` file exists
+   - Check `${CAII_DIRECTORY}/.claude/memory/task-{id}-memory.md` file exists
    - FAIL IMMEDIATELY if missing
 
 2. **Verify predecessor files EXIST (if required):**
@@ -67,4 +67,4 @@ After EVERY agent completes:
 
 - **Workflow metadata:** `task-{id}-memory.md`
 - **Agent outputs:** `task-{id}-{agent}-memory.md`
-- **Directory:** `${PAI_DIRECTORY}/.claude/memory/`
+- **Directory:** `${CAII_DIRECTORY}/.claude/memory/`

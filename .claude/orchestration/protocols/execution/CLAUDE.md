@@ -153,8 +153,15 @@ step_3_invoke_skills.py (dynamic-skill-sequencing)
 
 ## Routing Gate Logic
 
-Note: Skill routing is handled semantically by the reasoning protocol (Step 3b + Step 4),
-not by the routing gate. The gate handles only triviality validation.
+**Important Clarification:** The routing gate (`routing_gate.py`) is DEFINED but NOT AUTOMATICALLY INVOKED in the current execution flow.
+
+- **Skill vs. Dynamic routing:** Handled by reasoning protocol Step 3b (skill detection) + Step 4 (task routing)
+- **Triviality validation:** The routing gate MODULE exists for evaluating trivial tasks
+- **Current status:** The gate is available for OPTIONAL invocation by the orchestrator when deciding whether a task can use direct tools vs. requiring agents
+
+**When triviality evaluation occurs:** The orchestrator (Claude) can invoke `RoutingGate.validate_triviality()` at any point after receiving the route to determine if direct tools suffice. This is a semantic decision by the orchestrator, not an automatic protocol step.
+
+The gate handles ONLY triviality validation, not skill routing.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────┐

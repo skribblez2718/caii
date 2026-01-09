@@ -10,14 +10,14 @@ start, providing PAI core context directly to Claude.
 Behavior
 --------
 * Skips execution for subagent sessions (they do not need PAI context).
-* Reads DA.md from ``${PAI_DIRECTORY}/.claude/DA.md``.
+* Reads DA.md from ``${CAII_DIRECTORY}/.claude/DA.md``.
 * Emits the contents wrapped in ``<system-reminder>`` tags to ``stdout``.
 * Logs progress to ``stderr``.
 * Exits with code ``0`` on success, ``1`` on irrecoverable error.
 
 Environment Variables
 ---------------------
-* ``PAI_DIRECTORY`` — Base directory for PAI configuration files.
+* ``CAII_DIRECTORY`` — Base directory for PAI configuration files.
 * ``CLAUDE_PROJECT_DIR`` — If it contains ``/.claude/agents/``, this is treated
   as a subagent session.
 * ``CLAUDE_AGENT_TYPE`` — If set (to any value), this is treated as a subagent
@@ -58,7 +58,7 @@ def main() -> int:
     Workflow
     --------
     1. Detect and skip subagent sessions.
-    2. Read DA.md contents from PAI_DIRECTORY.
+    2. Read DA.md contents from CAII_DIRECTORY.
     3. Emit contents wrapped in ``<system-reminder>`` tags.
 
     :returns: ``0`` on success; ``1`` on irrecoverable error.
@@ -70,13 +70,13 @@ def main() -> int:
             print("🤖 Subagent session - skipping PAI context loading", file=sys.stderr)
             return 0
 
-        # 2) Get PAI_DIRECTORY and construct DA.md path
-        pai_directory = os.environ.get("PAI_DIRECTORY")
-        if not pai_directory:
-            print("⚠️ PAI_DIRECTORY not set - skipping context injection", file=sys.stderr)
+        # 2) Get CAII_DIRECTORY and construct DA.md path
+        caii_directory = os.environ.get("CAII_DIRECTORY")
+        if not caii_directory:
+            print("⚠️ CAII_DIRECTORY not set - skipping context injection", file=sys.stderr)
             return 0
 
-        da_path = os.path.join(pai_directory, ".claude", "DA.md")
+        da_path = os.path.join(caii_directory, ".claude", "DA.md")
 
         # 3) Read DA.md contents
         if not os.path.isfile(da_path):

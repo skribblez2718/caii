@@ -5,11 +5,11 @@ step_3b_skill_detection.py
 Step 3b of the Mandatory Reasoning Protocol: Semantic Skill Detection
 
 This step runs AFTER Step 3 (Tree of Thought) and BEFORE Step 4 (Task Routing).
-It presents available skills to Penny for SEMANTIC evaluation based on the
+It presents available skills to the orchestrator for SEMANTIC evaluation based on the
 "When to Use" patterns defined in DA.md.
 
-NO KEYWORD MATCHING is used. Penny makes the skill detection decision based on
-her semantic understanding of the user's query and the skill descriptions.
+NO KEYWORD MATCHING is used. The orchestrator makes the skill detection decision based on
+semantic understanding of the user's query and the skill descriptions.
 
 Agent Mode Routing:
 - Normal sessions: Step 3b → Step 4 (Task Routing)
@@ -34,14 +34,14 @@ from reasoning.steps.base import BaseStep
 
 
 # Available skills for semantic matching
-# These descriptions are used by Penny to semantically determine skill applicability
+# These descriptions are used by the orchestrator to semantically determine skill applicability
 COMPOSITE_SKILLS = {
     "develop-skill": {
-        "description": "Meta-skill for creating/updating workflow skills and Penny system modifications",
+        "description": "Meta-skill for creating/updating workflow skills and system modifications",
         "when_to_use": [
             "New workflow pattern or orchestration capability needed",
             "Existing skill needs enhancement or modification",
-            "ANY Penny system modifications (skills, agents, protocols, architecture)",
+            "ANY system modifications (skills, agents, protocols, architecture)",
             "Meta-work on workflows themselves",
         ],
         "examples": [
@@ -99,8 +99,8 @@ class Step3bSkillDetection(BaseStep):
     """
     Step 3b: Semantic Skill Detection
 
-    Presents available skills to Penny for SEMANTIC evaluation.
-    No keyword matching - Penny decides based on understanding from DA.md.
+    Presents available skills to the orchestrator for SEMANTIC evaluation.
+    No keyword matching - the orchestrator decides based on understanding from DA.md.
 
     Also handles agent mode routing:
     - Normal sessions proceed to Step 4 (Task Routing)
@@ -124,17 +124,17 @@ class Step3bSkillDetection(BaseStep):
         """
         Process skill detection.
 
-        Returns minimal output - Penny makes the semantic decision.
+        Returns minimal output - the orchestrator makes the semantic decision.
         """
         return {
             "skill_detection_method": "semantic",
-            "note": "Penny evaluates skills semantically based on DA.md patterns",
+            "note": "Orchestrator evaluates skills semantically based on DA.md patterns",
             "completed": True,
         }
 
     def get_extra_context(self) -> str:
         """
-        Present available skills for Penny's semantic evaluation.
+        Present available skills for the orchestrator's semantic evaluation.
         """
         query = getattr(self.state, "user_query", "")
 
@@ -288,8 +288,6 @@ class Step3bSkillDetection(BaseStep):
         if not state:
             print(f"ERROR: Could not load state from {args.state}", file=sys.stderr)
             return 1
-
-        print("# Step 3b: SKILL_DETECTION (Semantic)\n")
 
         step = cls(state)
         if not step.execute():

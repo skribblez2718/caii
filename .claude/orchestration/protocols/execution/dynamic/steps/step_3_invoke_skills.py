@@ -38,7 +38,7 @@ class Step3InvokeSkills(BaseStep):
         """
         Process the skill invocation.
 
-        The actual invocation is done by Penny using the Skill tool.
+        The actual invocation is done by the orchestrator using the Skill tool.
         This method provides structure for tracking progress.
         """
         return {

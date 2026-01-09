@@ -25,30 +25,6 @@ type: atomic
 | status | PASS\|FAIL | Execution result |
 | memory_file | string | Path to synthesis output (`.claude/memory/task-{id}-synthesis-memory.md`) |
 
-## Agent Sequence
-
-### Step 1: Synthesis
-
-**Agent:** synthesis
-**Cognitive Function:** SYNTHESIS
-
-**Context Loading:** MULTIPLE_PREDECESSORS
-**Predecessors:** research, analysis (or workflow-metadata if first)
-
-**Gate Entry:**
-- Findings available for integration
-- Design scope defined
-
-**Gate Exit:**
-- Disparate findings integrated
-- Contradictions resolved
-- Coherent recommendations produced
-- Unified deliverable defined
-
-**Memory Output:** Standard format per `${PAI_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/`
-- Agent: synthesis
-- Task: {task_id}
-
 ## Exit Criteria
 
 - [ ] Multiple inputs integrated into unified output
@@ -59,7 +35,7 @@ type: atomic
 
 ## References
 
-- `${PAI_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` - Memory output format
-- `${PAI_DIRECTORY}/.claude/docs/context-loading-reference.md` - Context loading patterns
-- `${PAI_DIRECTORY}/.claude/docs/agent-protocol-reference.md` - Quick reference checklist
-- `${PAI_DIRECTORY}/.claude/skills/develop-skill/resources/agent-invocation-template.md` - Invocation patterns
+- `${CAII_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` - Memory output format
+- `${CAII_DIRECTORY}/.claude/docs/context-loading-reference.md` - Context loading patterns
+- `${CAII_DIRECTORY}/.claude/docs/agent-protocol-reference.md` - Quick reference checklist
+- `${CAII_DIRECTORY}/.claude/skills/develop-skill/resources/agent-invocation-template.md` - Invocation patterns

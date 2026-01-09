@@ -7,7 +7,7 @@ Execute the cognitive agent sequence defined in Step 3.
 For EACH agent in the sequence:
 
 ### Pre-Invocation Verification
-1. Verify workflow metadata exists at `${PAI_DIRECTORY}/.claude/memory/task-{task-id}-memory.md`
+1. Verify workflow metadata exists at `${CAII_DIRECTORY}/.claude/memory/task-{task-id}-memory.md`
 2. Verify predecessor files exist (if required by context pattern)
 3. Verify agent prompt includes all context instructions
 
@@ -27,13 +27,13 @@ CRITICAL INSTRUCTIONS:
    - context-loading-patterns.md (ALWAYS)
 
 2. LOAD context from:
-   - ${PAI_DIRECTORY}/.claude/memory/task-{task-id}-memory.md (ALWAYS)
-   - ${PAI_DIRECTORY}/.claude/memory/task-{task-id}-{predecessor}-memory.md (if applicable)
+   - ${CAII_DIRECTORY}/.claude/memory/task-{task-id}-memory.md (ALWAYS)
+   - ${CAII_DIRECTORY}/.claude/memory/task-{task-id}-{predecessor}-memory.md (if applicable)
 
 3. EXECUTE your cognitive function for this {domain} task
 
 4. WRITE output to:
-   - ${PAI_DIRECTORY}/.claude/memory/task-{task-id}-{agent-name}-memory.md
+   - ${CAII_DIRECTORY}/.claude/memory/task-{task-id}-{agent-name}-memory.md
    - Format: Section 0 (Context) + Section 1 (Overview) + Section 2 (Johari) + Section 3 (Directives)
 ```
 

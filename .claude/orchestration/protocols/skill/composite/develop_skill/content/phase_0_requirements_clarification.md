@@ -16,7 +16,7 @@ Clarify skill requirements through systematic Socratic questioning to transform 
 
 **Before any clarification work, load and internalize system principles:**
 
-**File:** `${PAI_DIRECTORY}/.claude/docs/philosophy.md`
+**File:** `${CAII_DIRECTORY}/.claude/docs/philosophy.md`
 
 Read and apply:
 - **Cognitive Domain Separation:** Agents organized by cognitive function, NOT task domains
@@ -25,7 +25,7 @@ Read and apply:
 - **Single Point of Change:** One canonical location for each concept
 - **Minimal Size Without Sacrificing Detail:** Concise but complete
 
-**This is especially critical for Penny system modifications** (skills, agents, protocols, architecture).
+**This is especially critical for system modifications** (skills, agents, protocols, architecture).
 
 ## Workflow Mode Detection (FIRST STEP)
 
@@ -34,7 +34,7 @@ Read and apply:
 ### 1. Check Skill Existence
 
 ```
-Path: ${PAI_DIRECTORY}/.claude/skills/{skill-name}/SKILL.md
+Path: ${CAII_DIRECTORY}/.claude/skills/{skill-name}/SKILL.md
 ```
 
 - **If file EXISTS** → **UPDATE workflow** (modify existing skill)

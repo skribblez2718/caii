@@ -19,9 +19,9 @@ Setup
 
 1. Set environment variables in ``settings.json``:
 
-   - ``DA_NAME``: Your AI's name (e.g., ``"Penny"``, ``"Kai"``, ``"Assistant"``)
+   - ``DA_NAME``: Your AI's name (e.g., ``"Assistant"``, ``"Kai"``, ``"Jarvis"``)
    - ``VOICE_SERVER_PORT``: Port for the voice server (defaults to ``8001``)
-   - ``PAI_DIRECTORY``: Path to your PAI directory (defaults to ``$HOME/.claude``)
+   - ``CAII_DIRECTORY``: Path to your PAI directory (defaults to ``$HOME/.claude``)
 
 2. Ensure ``load-core-context.ts`` exists in the ``hooks/`` directory.
 3. Add both hooks to ``SessionStart`` in ``settings.json``.
@@ -181,7 +181,7 @@ def test_stop_hook() -> bool:
     """
     Validate the presence and executability of the stop-hook.
 
-    The stop-hook is expected at ``<PAI_DIRECTORY>/.claude/hooks/stop/stop.py``.
+    The stop-hook is expected at ``<CAII_DIRECTORY>/.claude/hooks/stop/stop.py``.
 
     :returns: ``True`` if the stop-hook exists and is executable; ``False`` otherwise.
     :rtype: bool
@@ -192,7 +192,7 @@ def test_stop_hook() -> bool:
     * When the hook exists and is executable, sets the initial terminal tab
       title to ``"<DA_NAME> Ready"``.
     """
-    pai_dir = os.environ.get("PAI_DIRECTORY", str(Path.home() / ".claude"))
+    pai_dir = os.environ.get("CAII_DIRECTORY", str(Path.home() / ".claude"))
     stop_hook_path = Path(pai_dir) / ".claude" / "hooks" / "stop" / "stop.py"
 
     print("\n🧪 Testing stop-hook configuration...", file=sys.stderr)
@@ -279,7 +279,7 @@ def main() -> int:
 
         # Note: PAI core context loading is handled by load-core-context.py hook
         # which should run BEFORE this hook in settings.json SessionStart hooks.
-        send_notification(f"Hi, Sketch! Penny here.", message, "low")
+        send_notification(f"{da_name} Ready", message, "low")
 
         return 0
     except Exception as e:  # pragma: no cover - defensive

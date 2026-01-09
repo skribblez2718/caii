@@ -26,7 +26,7 @@ CLAUDE_ROOT = ORCHESTRATION_ROOT.parent
 """Root of .claude directory."""
 
 PROJECT_ROOT = CLAUDE_ROOT.parent
-"""Root of the project (penny-experimental)."""
+"""Root of the project."""
 
 # --- Protocol Directories (NEW UNIFIED STRUCTURE) ---
 PROTOCOLS_DIR = ORCHESTRATION_ROOT / "protocols"

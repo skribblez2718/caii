@@ -1,6 +1,6 @@
 # Orchestration System
 
-Python-based orchestration for Penny's cognitive workflows. Scripts output markdown directives that Claude must execute.
+Python-based orchestration for the system's cognitive workflows. Scripts output markdown directives that Claude must execute.
 
 ## System Flow Diagram
 
@@ -87,7 +87,7 @@ orchestration/
 └── shared/                 # Reusable markdown content snippets
 ```
 
-Note: Skill routing uses Penny's semantic understanding (DA.md "When to Use" patterns),
+Note: Skill routing uses the orchestrator's semantic understanding (DA.md "When to Use" patterns),
 not keyword-based pattern matching.
 
 ## Shared Path Management (orchestration/__init__.py)
@@ -313,7 +313,7 @@ Each base class provides:
 
 The Johari Discovery Protocol transforms unknown unknowns into known knowns. It is implemented in TWO places:
 
-### 1. Penny's Reasoning Protocol (Step 0)
+### 1. Main Reasoning Protocol (Step 0)
 
 Step 0 executes at the **START of every user interaction** before formal reasoning begins.
 

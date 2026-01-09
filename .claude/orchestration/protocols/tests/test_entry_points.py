@@ -115,7 +115,7 @@ class TestReasoningEntryStepSequence:
         assert 4 not in AGENT_STEP_SEQUENCE
         assert AGENT_STEP_SEQUENCE == [0, 1, 2, 3, 5, 6, 7, 8]
 
-    def test_get_step_sequence_returns_full_for_penny(self):
+    def test_get_step_sequence_returns_full_for_orchestrator(self):
         """get_step_sequence() returns full sequence when not agent mode."""
         from reasoning.entry import get_step_sequence, FULL_STEP_SEQUENCE
 

@@ -39,12 +39,12 @@ class Step1AnalyzeRequirements(BaseStep):
         """
         Process the requirements analysis.
 
-        The actual analysis is done by Penny when processing the step content.
+        The actual analysis is done by the orchestrator when processing the step content.
         This method provides structure for capturing the output.
         """
         return {
             "analysis_pending": True,
-            "instruction": "Capture cognitive function requirements from Penny's analysis"
+            "instruction": "Capture cognitive function requirements from the orchestrator's analysis"
         }
 
 

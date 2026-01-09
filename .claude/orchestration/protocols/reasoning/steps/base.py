@@ -303,8 +303,7 @@ document your analysis clearly.
         # Create and execute step - properties are now accessible on instance
         step = cls(state)
 
-        # Print step info after instantiation when properties are accessible
-        print(f"# Step {step.step_number}: {step.step_name}\n")
+        # No step header - content is self-explanatory
 
         if not step.execute():
             return 1

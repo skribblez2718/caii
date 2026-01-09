@@ -20,13 +20,13 @@ Embodies "reflection-driven growth" - systematically capturing what was unknown 
 
 **Core Philosophy:**
 - Agents own their learnings (SRP maintained)
-- Penny orchestrates, agents author
+- The orchestrator coordinates, agents author
 - Learnings are token-efficient, progressively disclosed
 - Focus on generalization over task-specific details
 
 ## Workflow Protocol
 
-**Reference:** See `${PAI_DIRECTORY}/.claude/orchestration/protocols/execution/skill/` for full workflow lifecycle
+**Reference:** See `${CAII_DIRECTORY}/.claude/orchestration/protocols/execution/skill/` for full workflow lifecycle
 
 ### Initialization
 - Generate task-id: `learnings-{source-task-id}`
@@ -44,7 +44,7 @@ Embodies "reflection-driven growth" - systematically capturing what was unknown 
 **After invoking this skill, IMMEDIATELY execute:**
 
 ```bash
-python3 ${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/composite/develop_learnings/entry.py "{task_id}" --domain technical
+python3 ${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/composite/develop_learnings/entry.py "{task_id}" --domain technical
 ```
 
 This triggers Python-enforced phase orchestration. DO NOT manually read files or bypass this step.
@@ -52,7 +52,7 @@ This triggers Python-enforced phase orchestration. DO NOT manually read files or
 ## Workflow Phases
 
 **NOTE:** Phase details are managed by Python orchestration in:
-`${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/composite/develop_learnings/`
+`${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/composite/develop_learnings/`
 
 | Phase | Name | Atomic Skill | Type |
 |-------|------|--------------|------|
@@ -61,7 +61,7 @@ This triggers Python-enforced phase orchestration. DO NOT manually read files or
 | 2.5 | Integration Analysis | orchestrate-synthesis | LINEAR |
 | 3 | Consolidation | orchestrate-synthesis | LINEAR |
 | 4 | Validation | orchestrate-validation | REMEDIATION |
-| 5 | Commit | (direct execution) | LINEAR |
+| 5 | Commit | orchestrate-generation | LINEAR |
 | 5.5 | Post-Integration Cleanup | orchestrate-analysis | LINEAR |
 
 **Note:** This skill starts at Phase 1 (no Phase 0) because it requires a completed source workflow.
@@ -105,16 +105,16 @@ This triggers Python-enforced phase orchestration. DO NOT manually read files or
 
 ## Required Resources
 
-- `${PAI_DIRECTORY}/.claude/skills/develop-learnings/resources/learnings-schema.md` - Learning entry template
-- `${PAI_DIRECTORY}/.claude/skills/develop-learnings/resources/learnings-update-rubric.md` - Validation criteria
-- `${PAI_DIRECTORY}/.claude/skills/develop-learnings/resources/candidate-extraction-guidelines.md` - Identification guidelines
-- `${PAI_DIRECTORY}/.claude/skills/develop-learnings/resources/integration-criteria.md` - Integration decision criteria
-- `${PAI_DIRECTORY}/.claude/skills/develop-learnings/resources/retention-criteria.md` - Retention decision criteria
+- `${CAII_DIRECTORY}/.claude/skills/develop-learnings/resources/learnings-schema.md` - Learning entry template
+- `${CAII_DIRECTORY}/.claude/skills/develop-learnings/resources/learnings-update-rubric.md` - Validation criteria
+- `${CAII_DIRECTORY}/.claude/skills/develop-learnings/resources/candidate-extraction-guidelines.md` - Identification guidelines
+- `${CAII_DIRECTORY}/.claude/skills/develop-learnings/resources/integration-criteria.md` - Integration decision criteria
+- `${CAII_DIRECTORY}/.claude/skills/develop-learnings/resources/retention-criteria.md` - Retention decision criteria
 
 ## Required Directory Structure
 
 ```
-${PAI_DIRECTORY}/.claude/learnings/{function}/
+${CAII_DIRECTORY}/.claude/learnings/{function}/
 ├── heuristics.md
 ├── anti-patterns.md
 ├── checklists.md
@@ -125,10 +125,10 @@ ${PAI_DIRECTORY}/.claude/learnings/{function}/
 
 ## References
 
-- `${PAI_DIRECTORY}/.claude/orchestration/protocols/execution/skill/` - Workflow lifecycle
-- `${PAI_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` - Agent execution
-- `${PAI_DIRECTORY}/.claude/docs/agent-protocol-reference.md` - Memory format reference
-- `${PAI_DIRECTORY}/.claude/skills/develop-skill/resources/agent-invocation-template.md` - Invocation patterns
+- `${CAII_DIRECTORY}/.claude/orchestration/protocols/execution/skill/` - Workflow lifecycle
+- `${CAII_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` - Agent execution
+- `${CAII_DIRECTORY}/.claude/docs/agent-protocol-reference.md` - Memory format reference
+- `${CAII_DIRECTORY}/.claude/skills/develop-skill/resources/agent-invocation-template.md` - Invocation patterns
 
 ## Performance
 

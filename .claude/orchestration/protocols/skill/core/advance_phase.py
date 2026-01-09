@@ -78,52 +78,14 @@ def invoke_phase_goal_memory(
     # Generate phase-specific memory file identifier
     phase_transition_id = f"phase-{completed_phase_id}-to-{next_phase_id}"
 
-    print("\n" + "=" * 70)
-    print("# MANDATORY: GoalMemory Phase Transition Assessment")
-    print("=" * 70)
-    print()
-    print("## Phase Transition")
-    print(f"- Completed Phase: `{completed_phase_id}`")
-    print(f"- Next Phase: `{next_phase_id}`")
-    print(f"- Skill: `{state.skill_name}`")
-    print(f"- Task ID: `{state.task_id[:12]}...`")
-    print(f"- Transition ID: `{phase_transition_id}`")
-    print()
-
-    # Get phase summary from state
-    phase_summary = state.metadata.get(f"phase_{completed_phase_id}_summary", "No summary available")
-    print(f"## Phase Summary")
-    print(f"{phase_summary}")
-    print()
-
-    # Get goal state
-    goal_state = state.metadata.get("goal_state", "Not yet established")
-    print(f"## Current Goal State")
-    print(f"{goal_state}")
-    print()
-
-    # Get remediation count
-    remediation_count = state.metadata.get("total_remediation_loops", 0)
-    print(f"## Workflow Health")
-    print(f"- Total Remediation Loops: {remediation_count}")
-    print(f"- Max Allowed: 3")
-    print()
-
-    print("## REQUIRED Action")
-    print("Invoke memory-agent via Task tool with subagent_type: `memory-agent`")
-    print("Provide the above context for phase transition assessment.")
-    print()
-
     # Phase-specific expected output file
     expected_file = f".claude/memory/{state.task_id}-memory-{phase_transition_id}-memory.md"
-    print("=" * 70)
-    print("**BLOCKING:** Next phase will NOT be printed until memory completes.")
+
+    # Minimal output - just the essential directive
+    print(f"\nPhase transition: {completed_phase_id} → {next_phase_id}")
+    print(f"Invoke memory-agent via Task tool with subagent_type: `memory-agent`")
     print(f"Expected output: {expected_file}")
-    print("=" * 70)
-    print()
-    print("## After Goal-Memory Completes")
-    print(f"Run: `python3 .claude/orchestration/protocols/skill/core/advance_phase.py {state.skill_name} {state.session_id}`")
-    print("to continue to the next phase.")
+    print(f"After completion: `python3 .claude/orchestration/protocols/skill/core/advance_phase.py {state.skill_name} {state.session_id}`")
     print()
 
     # Track phase-specific invocation in state
@@ -192,15 +154,16 @@ def print_agent_directive(phase_config: Dict[str, Any]) -> None:
 
     ENFORCEMENT: Uses mandatory directive language to ensure Claude
     invokes the agent via Task tool rather than performing the work directly.
+
+    NOTE: As of the AUTO deprecation, ALL phases should specify an agent.
+    Phases without agents (uses_atomic_skill: None) are deprecated.
     """
     atomic_skill = phase_config.get("uses_atomic_skill")
     if atomic_skill:
         agent_name = get_atomic_skill_agent(atomic_skill)
         phase_name = phase_config.get("title", phase_config.get("name", ""))
         print(format_mandatory_agent_directive(agent_name, phase_name))
-    else:
-        print("\n## No Agent Required")
-        print("This phase executes automatically (AUTO type).")
+    # DEPRECATED: Phases without agent invocation should be updated to use appropriate agents
 
 
 def print_parallel_directives(phase_config: Dict[str, Any]) -> None:
@@ -213,29 +176,11 @@ def print_parallel_directives(phase_config: Dict[str, Any]) -> None:
     if not branches:
         return
 
-    print("\n## MANDATORY: Parallel Branch Execution")
-    print()
-    print("**MANDATORY - EXECUTE ALL BRANCHES BEFORE ANY OTHER ACTION:**")
-    print()
-    print("⚠️ ALL parallel branches MUST be invoked via Task tool.")
-    print("DO NOT perform any branch's work directly - spawn each agent via Task tool.")
-    print("Each agent will create its own memory file upon completion.")
-    print()
-
+    print("Parallel branches - invoke all via Task tool:")
     for branch_id, branch_config in branches.items():
-        branch_name = branch_config.get("name", branch_id)
         atomic_skill = branch_config.get("uses_atomic_skill")
         agent_name = get_atomic_skill_agent(atomic_skill) if atomic_skill else "N/A"
-        content_file = branch_config.get("content", "N/A")
-        fail_on_error = branch_config.get("fail_on_error", False)
-
-        print(f"### Branch {branch_id}: {branch_name}")
-        print(f"- **INVOKE**: `Task` tool with `subagent_type`: `{agent_name}`")
-        print(f"- Content: `{content_file}`")
-        print(f"- Critical: {'Yes' if fail_on_error else 'No'}")
-        print()
-
-    print("---")
+        print(f"  - {branch_id}: subagent_type: `{agent_name}`")
     print("After ALL branches complete, run advance_phase.py to continue.")
 
 
@@ -315,7 +260,11 @@ def handle_phase_transition(
         return phase_config.get("next")
 
     # AUTO: No agent needed, just advance
+    # DEPRECATED: PhaseType.AUTO should not be used in new skills.
+    # All phases should use appropriate agents for cognitive oversight.
+    # See: protocols/skill/CLAUDE.md for guidance.
     if phase_type == PhaseType.AUTO:
+        print(f"[DEPRECATION WARNING: Phase uses PhaseType.AUTO - consider using LINEAR with appropriate agent]", file=sys.stderr)
         return phase_config.get("next")
 
     # PARALLEL: All branches must complete before advancing
@@ -494,17 +443,8 @@ def advance_phase(skill_name: str, session_id: str) -> None:
         goal_memory_file = Path(".claude/memory") / goal_memory_filename
 
         if not goal_memory_file.exists():
-            print("\n" + "=" * 70)
-            print("# BLOCKED: Goal-Memory Assessment Required")
-            print("=" * 70)
-            print()
-            print("Cannot advance until memory-agent completes.")
-            print(f"Expected memory file: {goal_memory_file}")
-            if transition_id:
-                print(f"Transition ID: {transition_id}")
-            print()
+            print(f"BLOCKED: Goal-Memory required. Expected: {goal_memory_file}")
             print("Run memory-agent assessment, then re-run this command.")
-            print("=" * 70)
             sys.exit(1)
         else:
             # Goal-memory completed for THIS phase transition, clear the pending flag
@@ -533,21 +473,10 @@ def advance_phase(skill_name: str, session_id: str) -> None:
                     state, current_phase_id_check, check_config
                 )
                 if not all_verified:
-                    print(f"\n{'='*70}")
-                    print("# BLOCKED: Parallel Branch Memory Files Missing")
-                    print(f"{'='*70}\n")
-                    print(f"Phase: {current_phase_id_check} (PARALLEL)")
-                    print(f"Failures:")
+                    print(f"BLOCKED: Parallel branch memory files missing for phase {current_phase_id_check}")
                     for failure in failures:
                         print(f"  - {failure}")
-                    print(f"\nAll parallel branches must create memory files before advancing.")
-                    print()
-                    print("## Resolution Options")
-                    print("1. Invoke the required agent(s) to create their memory files")
-                    print(f"2. Use --complete-all-branches {current_phase_id_check} to mark branches complete (if agents already ran)")
-                    print()
-                    print("NOTE: No --force or --force-advance flag exists. This is by design.")
-                    print(f"{'='*70}")
+                    print(f"Use --complete-all-branches {current_phase_id_check} if agents already ran")
                     sys.exit(1)
                 print(f"[PARALLEL phase {current_phase_id_check}: All branches verified]")
             else:
@@ -560,19 +489,8 @@ def advance_phase(skill_name: str, session_id: str) -> None:
                         try:
                             verifier.require_phase_completion(current_phase_id_check, agent_name)
                         except PhaseNotVerifiedError as e:
-                            print(f"\n{'='*70}")
-                            print("# BLOCKED: Agent Memory File Missing")
-                            print(f"{'='*70}\n")
-                            print(f"Phase: {current_phase_id_check}")
-                            print(f"Agent: {agent_name}")
-                            print(f"Error: {e}")
-                            print(f"\nThe agent must create its memory file before advancing.")
-                            print()
-                            print("## Resolution")
+                            print(f"BLOCKED: Agent memory file missing for phase {current_phase_id_check}")
                             print(f"Invoke {agent_name} via Task tool to complete the phase.")
-                            print()
-                            print("NOTE: No --force or --force-advance flag exists. This is by design.")
-                            print(f"{'='*70}")
                             sys.exit(1)
 
     # Get current phase info
@@ -600,12 +518,10 @@ def advance_phase(skill_name: str, session_id: str) -> None:
 
     # Check for workflow completion
     if state.fsm.is_completed() or state.fsm.is_halted():
-        print(f"## Workflow Status: {state.fsm.state.name}")
         if state.fsm.is_halted():
-            print(f"Halt reason: {state.halt_reason}")
+            print(f"Workflow halted: {state.halt_reason}")
         else:
-            # AUTO-CALL complete.py instead of just printing directive
-            print("\n## Running Completion Logic...")
+            # AUTO-CALL complete.py
             skill_dir = skill_name.replace("-", "_")
             complete_script = Path(f".claude/orchestration/protocols/skill/composite/{skill_dir}/complete.py")
 
@@ -625,7 +541,6 @@ def advance_phase(skill_name: str, session_id: str) -> None:
 
     if next_phase_id is None:
         # Phase requires more execution (PARALLEL branches or ITERATIVE)
-        print(f"## Phase {current_phase_id} requires additional execution")
         print_phase_content(skill_name, current_config)
 
         phase_type = current_config.get("type")
@@ -648,9 +563,7 @@ def advance_phase(skill_name: str, session_id: str) -> None:
 
     # Check if transition resulted in completion
     if actual_next == "COMPLETED":
-        print("## Workflow Completed")
-        # AUTO-CALL complete.py instead of just printing directive
-        print("\n## Running Completion Logic...")
+        # AUTO-CALL complete.py
         skill_dir = skill_name.replace("-", "_")
         complete_script = Path(f".claude/orchestration/protocols/skill/composite/{skill_dir}/complete.py")
 
@@ -675,19 +588,18 @@ def advance_phase(skill_name: str, session_id: str) -> None:
         sys.exit(1)
 
     # Handle AUTO phases - execute immediately without agent
+    # DEPRECATED: PhaseType.AUTO should not be used in new skills.
+    # All phases should invoke appropriate agents for cognitive oversight.
     phase_type = next_config.get("type")
     if phase_type == PhaseType.AUTO:
-        print(f"## Phase {actual_next}: {next_config.get('title', actual_next)} (AUTO)")
+        print(f"[DEPRECATION WARNING: Phase {actual_next} uses PhaseType.AUTO - consider using LINEAR with appropriate agent]", file=sys.stderr)
         print_phase_content(skill_name, next_config)
-        print("\n[AUTO phase - no agent invocation needed]")
-        print("\n## Next Step: Advance to following phase")
-        print(f"`python3 .claude/orchestration/protocols/skill/core/advance_phase.py {skill_name} {session_id}`")
+        print(f"AUTO phase - run: `python3 .claude/orchestration/protocols/skill/core/advance_phase.py {skill_name} {session_id}`")
         state.save()
         return
 
     # Handle PARALLEL phases - print all branch directives
     if phase_type == PhaseType.PARALLEL:
-        print(f"## Phase {actual_next}: {next_config.get('title', actual_next)} (PARALLEL)")
         print_phase_content(skill_name, next_config)
         print_parallel_directives(next_config)
 
@@ -697,13 +609,9 @@ def advance_phase(skill_name: str, session_id: str) -> None:
         return
 
     # Standard phase output
-    print(f"## Phase {actual_next}: {next_config.get('title', actual_next)}")
     print_phase_content(skill_name, next_config)
     print_agent_directive(next_config)
-
-    # Print advance directive for after agent completes
-    print(f"\n## After Agent Completes")
-    print(f"Run: `python3 .claude/orchestration/protocols/skill/core/advance_phase.py {skill_name} {session_id}`")
+    print(f"After agent completes: `python3 .claude/orchestration/protocols/skill/core/advance_phase.py {skill_name} {session_id}`")
 
     # Save state
     state.save()

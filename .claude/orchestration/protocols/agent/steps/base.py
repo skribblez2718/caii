@@ -125,7 +125,7 @@ class AgentExecutionState:
                 current_step=data.get("current_step", 0),
                 started_at=data.get("started_at", datetime.now().isoformat()),
                 completed_steps=data.get("completed_steps", []),
-                step_outputs=data.get("step_outputs", {}),
+                step_outputs={int(k): v for k, v in data.get("step_outputs", {}).items()},
                 metadata=data.get("metadata", {}),
             )
         except (json.JSONDecodeError, KeyError):

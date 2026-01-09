@@ -10,10 +10,10 @@ Agent loads workflow metadata, one required immediate predecessor, and additiona
 
 ## Context References
 
-- `${PAI_DIRECTORY}/.claude/memory/task-{id}-memory.md` (workflow metadata) [ALWAYS_REQUIRED]
-- `${PAI_DIRECTORY}/.claude/memory/task-{id}-{predecessor-1}-memory.md` [IMMEDIATE_PREDECESSOR_REQUIRED]
-- `${PAI_DIRECTORY}/.claude/memory/task-{id}-{predecessor-2}-memory.md` ({context note}) [OPTIONAL]
-- `${PAI_DIRECTORY}/.claude/memory/task-{id}-{predecessor-3}-memory.md` ({context note}) [OPTIONAL]
+- `${CAII_DIRECTORY}/.claude/memory/task-{id}-memory.md` (workflow metadata) [ALWAYS_REQUIRED]
+- `${CAII_DIRECTORY}/.claude/memory/task-{id}-{predecessor-1}-memory.md` [IMMEDIATE_PREDECESSOR_REQUIRED]
+- `${CAII_DIRECTORY}/.claude/memory/task-{id}-{predecessor-2}-memory.md` ({context note}) [OPTIONAL]
+- `${CAII_DIRECTORY}/.claude/memory/task-{id}-{predecessor-3}-memory.md` ({context note}) [OPTIONAL]
 
 ## Context Scope
 
@@ -38,10 +38,10 @@ IMMEDIATE_PREDECESSORS + OPTIONAL_REFERENCES
 
 ## Expanded File Paths
 
-- `${PAI_DIRECTORY}/.claude/memory/task-{id}-memory.md`
-- `${PAI_DIRECTORY}/.claude/memory/task-{id}-research-memory.md`
-- `${PAI_DIRECTORY}/.claude/memory/task-{id}-synthesis-memory.md` (optional)
-- `${PAI_DIRECTORY}/.claude/memory/task-{id}-analysis-memory.md` (optional)
+- `${CAII_DIRECTORY}/.claude/memory/task-{id}-memory.md`
+- `${CAII_DIRECTORY}/.claude/memory/task-{id}-research-memory.md`
+- `${CAII_DIRECTORY}/.claude/memory/task-{id}-synthesis-memory.md` (optional)
+- `${CAII_DIRECTORY}/.claude/memory/task-{id}-analysis-memory.md` (optional)
 
 ## Compliance Requirements
 
@@ -61,13 +61,13 @@ IMMEDIATE_PREDECESSORS + OPTIONAL_REFERENCES
   "predecessors_loaded": [
     {
       "agent_name": "research",
-      "file_path": "${PAI_DIRECTORY}/.claude/memory/task-{id}-research-memory.md",
+      "file_path": "${CAII_DIRECTORY}/.claude/memory/task-{id}-research-memory.md",
       "tokens_consumed": 1200,
       "required": true
     },
     {
       "agent_name": "clarification",
-      "file_path": "${PAI_DIRECTORY}/.claude/memory/task-{id}-clarification-memory.md",
+      "file_path": "${CAII_DIRECTORY}/.claude/memory/task-{id}-clarification-memory.md",
       "tokens_consumed": 800,
       "required": false
     }

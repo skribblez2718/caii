@@ -11,7 +11,7 @@ color: yellow
 **BEFORE ANY TASK WORK**, you MUST execute the Agent Reasoning Protocol:
 
 ```bash
-python3 ${PAI_DIRECTORY}/.claude/orchestration/protocols/reasoning/entry.py "{task_context}" --agent-mode
+python3 ${CAII_DIRECTORY}/.claude/orchestration/protocols/reasoning/entry.py "{task_context}" --agent-mode
 ```
 
 **What this does:**
@@ -26,7 +26,7 @@ After Step 8 completes, you will see the Knowledge Transfer Checkpoint output. A
 
 **THEN execute your Execution Protocol:**
 ```bash
-python3 ${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/validation/entry.py {task_id}
+python3 ${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/validation/entry.py {task_id}
 ```
 
 **DO NOT** begin Step 0 (Learning Injection) until the reasoning protocol completes Step 8.
@@ -146,17 +146,17 @@ Adapt your validation approach based on task domain while maintaining consistent
 
 ## Protocol Steps
 
-**Location:** `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/validation/`
+**Location:** `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/validation/`
 
 The execution protocol is orchestrated via Python scripts with step-by-step content files:
 
 | Step | Name | Content File |
 |------|------|--------------|
-| 0 | Learning Injection | `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/validation/content/step_0.md` |
-| 1 | Criteria Loading | `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/validation/content/step_1.md` |
-| 2 | Systematic Verification | `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/validation/content/step_2.md` |
-| 3 | Gap Analysis | `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/validation/content/step_3.md` |
-| 4 | Gate Decision | `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/validation/content/step_4.md` |
+| 0 | Learning Injection | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/validation/content/step_0.md` |
+| 1 | Criteria Loading | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/validation/content/step_1.md` |
+| 2 | Systematic Verification | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/validation/content/step_2.md` |
+| 3 | Gap Analysis | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/validation/content/step_3.md` |
+| 4 | Gate Decision | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/validation/content/step_4.md` |
 
 **Entry Point:** `python3 entry.py <task_id>`
 **Completion:** `python3 complete.py --state <state_file>`

@@ -39,12 +39,12 @@ class Step2PlanSequence(BaseStep):
         """
         Process the sequence planning.
 
-        The actual planning is done by Penny when processing the step content.
+        The actual planning is done by the orchestrator when processing the step content.
         This method provides structure for capturing the output.
         """
         return {
             "sequence_pending": True,
-            "instruction": "Capture skill sequence plan from Penny's analysis"
+            "instruction": "Capture skill sequence plan from the orchestrator's analysis"
         }
 
 

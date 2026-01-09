@@ -12,9 +12,9 @@ These files MUST be updated for every new skill creation:
 
 ### 1. DA.md (System Identity)
 
-**Path:** `${PAI_DIRECTORY}/.claude/DA.md`
+**Path:** `${CAII_DIRECTORY}/.claude/DA.md`
 
-**Purpose:** Primary system identity file defining Penny's execution routing
+**Purpose:** Primary system identity file defining the system's execution routing
 
 **Section to Update:** "Execution Routing" → "Composite Skills" or "Atomic Skills"
 
@@ -42,7 +42,7 @@ These files MUST be updated for every new skill creation:
 
 ### 2. skill-catalog.md (Quick Reference)
 
-**Path:** `${PAI_DIRECTORY}/.claude/docs/skill-catalog.md`
+**Path:** `${CAII_DIRECTORY}/.claude/docs/skill-catalog.md`
 
 **Purpose:** Quick reference catalog of all available skills
 
@@ -78,7 +78,7 @@ These files MUST be updated for every new skill creation:
 
 ### 3. composite/CLAUDE.md (Skill Registry)
 
-**Path:** `${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/composite/CLAUDE.md`
+**Path:** `${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/composite/CLAUDE.md`
 
 **Purpose:** Documentation for composite skill protocol
 
@@ -99,7 +99,7 @@ These files MUST be updated for every new skill creation:
 
 ### 4. config.py (Master Registry)
 
-**Path:** `${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/config/config.py`
+**Path:** `${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/config/config.py`
 
 **Purpose:** Python source of truth for all skills
 
@@ -118,7 +118,7 @@ These files should be updated when specific conditions apply:
 
 ### 5. protocols/skill/CLAUDE.md
 
-**Path:** `${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/CLAUDE.md`
+**Path:** `${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/CLAUDE.md`
 
 **Update When:**
 - New phase types introduced
@@ -134,7 +134,7 @@ These files should be updated when specific conditions apply:
 
 ### 6. agent-registry.md
 
-**Path:** `${PAI_DIRECTORY}/.claude/docs/agent-registry.md`
+**Path:** `${CAII_DIRECTORY}/.claude/docs/agent-registry.md`
 
 **Update When:**
 - Skill introduces new agent interaction patterns
@@ -145,7 +145,7 @@ These files should be updated when specific conditions apply:
 
 ### 7. execution-protocols.md
 
-**Path:** `${PAI_DIRECTORY}/.claude/docs/execution-protocols.md`
+**Path:** `${CAII_DIRECTORY}/.claude/docs/execution-protocols.md`
 
 **Update When:**
 - Skill introduces new execution patterns
@@ -156,7 +156,7 @@ These files should be updated when specific conditions apply:
 
 ### 8. cognitive-function-taxonomy.md
 
-**Path:** `${PAI_DIRECTORY}/.claude/docs/cognitive-function-taxonomy.md`
+**Path:** `${CAII_DIRECTORY}/.claude/docs/cognitive-function-taxonomy.md`
 
 **Update When:**
 - Skill reveals new cognitive function patterns
@@ -171,7 +171,7 @@ These files are created/updated for the specific skill:
 
 ### 9. SKILL.md (Skill Definition)
 
-**Path:** `${PAI_DIRECTORY}/.claude/skills/{skill-name}/SKILL.md`
+**Path:** `${CAII_DIRECTORY}/.claude/skills/{skill-name}/SKILL.md`
 
 **Purpose:** Primary skill definition and trigger patterns
 
@@ -190,7 +190,7 @@ These files are created/updated for the specific skill:
 
 ### 10. Skill Resources
 
-**Path:** `${PAI_DIRECTORY}/.claude/skills/{skill-name}/resources/`
+**Path:** `${CAII_DIRECTORY}/.claude/skills/{skill-name}/resources/`
 
 **Contents (minimum):**
 - `validation-checklist.md` - Skill-specific validation criteria
@@ -205,7 +205,7 @@ These files are created/updated for the specific skill:
 
 ### 11. Skill Orchestration CLAUDE.md (Optional)
 
-**Path:** `${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/composite/{skill_name}/CLAUDE.md`
+**Path:** `${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/composite/{skill_name}/CLAUDE.md`
 
 **Purpose:** Skill-specific orchestration documentation
 
@@ -292,6 +292,6 @@ Before completing documentation updates:
 
 ## References
 
-- `${PAI_DIRECTORY}/.claude/DA.md` - System identity
-- `${PAI_DIRECTORY}/.claude/docs/` - Documentation directory
-- `${PAI_DIRECTORY}/.claude/orchestration/` - Orchestration root
+- `${CAII_DIRECTORY}/.claude/DA.md` - System identity
+- `${CAII_DIRECTORY}/.claude/docs/` - Documentation directory
+- `${CAII_DIRECTORY}/.claude/orchestration/` - Orchestration root

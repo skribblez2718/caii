@@ -1,10 +1,11 @@
-# Phase 0.6: Composite Skill Validation (AUTO)
+# Phase 0.6: Composite Skill Validation
 
-**Type:** AUTO (Python execution, no agent invocation)
+**Uses Atomic Skill:** `orchestrate-validation`
+**Phase Type:** LINEAR
 
 ## Purpose
 
-Validate any composite skills referenced as building blocks and calculate composition depth.
+Validate any composite skills referenced as building blocks and calculate composition depth. The validation agent ensures all references are valid.
 
 ## Trigger
 
@@ -12,7 +13,7 @@ Phase 0 identifies composite skills to be used as building blocks.
 
 ## Actions
 
-This AUTO phase performs the following validations:
+The validation agent performs the following validations:
 
 1. **Scan Referenced Composites**
    - Read each referenced composite skill's SKILL.md

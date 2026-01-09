@@ -102,7 +102,7 @@ Protocol for modifying existing skills while maintaining backwards compatibility
 #### Adding Resources
 
 **Steps:**
-1. Create new file in `${PAI_DIRECTORY}/.claude/skills/{skill-name}/resources/`
+1. Create new file in `${CAII_DIRECTORY}/.claude/skills/{skill-name}/resources/`
 2. Update SKILL.md Directory Structure section
 3. Reference from relevant phase content files
 
@@ -263,6 +263,6 @@ After completing updates:
 
 ## References
 
-- `${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/config/config.py` - Master skill registry
-- `${PAI_DIRECTORY}/.claude/skills/develop-skill/resources/validation-checklist.md` - Validation criteria
-- `${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/CLAUDE.md` - Skill protocol documentation
+- `${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/config/config.py` - Master skill registry
+- `${CAII_DIRECTORY}/.claude/skills/develop-skill/resources/validation-checklist.md` - Validation criteria
+- `${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/CLAUDE.md` - Skill protocol documentation

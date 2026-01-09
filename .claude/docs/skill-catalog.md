@@ -1,6 +1,6 @@
 # Skill Catalog
 
-**Purpose:** Quick reference for all available skills in the Penny system.
+**Purpose:** Quick reference for all available skills in the system.
 
 ---
 
@@ -27,7 +27,7 @@ Composite skills orchestrate multiple cognitive agents through defined phase seq
 - Pattern preservation for future agent improvement
 - Anti-pattern identification to avoid future mistakes
 
-**Location:** `${PAI_DIRECTORY}/.claude/skills/develop-learnings/`
+**Location:** `${CAII_DIRECTORY}/.claude/skills/develop-learnings/`
 
 ---
 
@@ -41,7 +41,21 @@ Composite skills orchestrate multiple cognitive agents through defined phase seq
 - Agent sequencing design for new task patterns
 - System capability extension
 
-**Location:** `${PAI_DIRECTORY}/.claude/skills/develop-skill/`
+**Location:** `${CAII_DIRECTORY}/.claude/skills/develop-skill/`
+
+---
+
+### develop-command
+
+**Purpose:** Create and manage Claude Code slash commands for utility operations.
+
+**When to Use:**
+- New utility command needed for a specific operation
+- Adding command to existing category
+- Building composite command that calls other commands
+- Updating or maintaining existing commands
+
+**Location:** `${CAII_DIRECTORY}/.claude/skills/develop-command/`
 
 ---
 
@@ -76,7 +90,7 @@ Atomic skills are building blocks for Dynamic Skill Sequencing when:
 
 ### Location
 
-All atomic skills located at: `${PAI_DIRECTORY}/.claude/skills/orchestrate-*/`
+All atomic skills located at: `${CAII_DIRECTORY}/.claude/skills/orchestrate-*/`
 
 ---
 
@@ -100,12 +114,13 @@ Does task match a composite skill pattern?
 |--------------|-------------------|
 | "Create a new skill for Z" | develop-skill |
 | "Capture what we learned" | develop-learnings |
+| "Create a utility command" | develop-command |
 | Novel multi-step task | Dynamic Skill Sequencing |
 
 ---
 
 ## Related Documentation
 
-- `${PAI_DIRECTORY}/.claude/docs/execution-protocols.md` - Protocol details
-- `${PAI_DIRECTORY}/.claude/docs/cognitive-function-taxonomy.md` - Agent functions
-- `${PAI_DIRECTORY}/.claude/DA.md` - System prompt with skill definitions
+- `${CAII_DIRECTORY}/.claude/docs/execution-protocols.md` - Protocol details
+- `${CAII_DIRECTORY}/.claude/docs/cognitive-function-taxonomy.md` - Agent functions
+- `${CAII_DIRECTORY}/.claude/DA.md` - System prompt with skill definitions

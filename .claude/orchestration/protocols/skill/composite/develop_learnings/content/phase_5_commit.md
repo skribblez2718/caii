@@ -1,10 +1,11 @@
 # Phase 5: Commit
 
-**Agent:** Penny (direct execution, not cognitive agent)
+**Uses Atomic Skill:** `orchestrate-generation`
+**Phase Type:** LINEAR
 
 ## Purpose
 
-Write approved learnings to learnings files.
+Write approved learnings to learnings files using the generation agent.
 
 ## Execution Steps
 
@@ -32,7 +33,7 @@ Write approved learnings to learnings files.
 ## File Structure
 
 ```
-${PAI_DIRECTORY}/.claude/learnings/{function}/
+${CAII_DIRECTORY}/.claude/learnings/{function}/
 ├── heuristics.md        # Rules of thumb
 ├── anti-patterns.md     # What NOT to do
 ├── checklists.md        # Step-by-step verification

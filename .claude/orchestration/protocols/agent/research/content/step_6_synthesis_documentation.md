@@ -51,7 +51,7 @@ Document overall source evaluation:
 ## Memory File Update
 
 Write research results to task memory:
-- Path: `${PAI_DIRECTORY}/.claude/memory/task-{task-id}-memory.md`
+- Path: `${CAII_DIRECTORY}/.claude/memory/task-{task-id}-memory.md`
 - Append research section with:
   - Strategy used
   - Key findings by Johari quadrant

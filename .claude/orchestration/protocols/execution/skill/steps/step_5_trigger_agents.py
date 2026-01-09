@@ -62,9 +62,9 @@ class Step5TriggerAgents(ExecutionBaseStep):
     def get_skill_name(self) -> Optional[str]:
         """Extract skill name from workflow context."""
         step3 = self.state.get_step_output(3)
-        if step3 and "penny_response" in step3:
+        if step3 and "orchestrator_response" in step3:
             # Look for skill name in workflow response
-            response = step3["penny_response"]
+            response = step3["orchestrator_response"]
             # Common patterns: "develop-skill", "perform-research", etc.
             skill_indicators = [
                 "develop-skill", "develop-learnings",
@@ -80,8 +80,8 @@ class Step5TriggerAgents(ExecutionBaseStep):
     def get_context_type(self) -> Optional[str]:
         """Extract context/domain type from Step 2 output."""
         step2 = self.state.get_step_output(2)
-        if step2 and "penny_response" in step2:
-            response = step2["penny_response"].lower()
+        if step2 and "orchestrator_response" in step2:
+            response = step2["orchestrator_response"].lower()
             # Map common domain indicators
             domain_indicators = {
                 "technical": ["technical", "code", "programming", "software", "api", "system"],
@@ -105,8 +105,8 @@ class Step5TriggerAgents(ExecutionBaseStep):
 
         # Fall back to step 3 workflow response
         step3 = self.state.get_step_output(3)
-        if step3 and "penny_response" in step3:
-            return step3["penny_response"][:500]
+        if step3 and "orchestrator_response" in step3:
+            return step3["orchestrator_response"][:500]
         return ""
 
     def get_episodic_recommendations(self) -> str:
@@ -178,24 +178,24 @@ class Step5TriggerAgents(ExecutionBaseStep):
         # Get task-id
         step1 = self.state.get_step_output(1)
         task_id = None
-        if step1 and "penny_response" in step1:
-            task_id = step1["penny_response"][:150].strip()
+        if step1 and "orchestrator_response" in step1:
+            task_id = step1["orchestrator_response"][:150].strip()
             context_parts.append("TASK ID:")
             context_parts.append(task_id)
             context_parts.append("")
 
         # Get workflow
         step3 = self.state.get_step_output(3)
-        if step3 and "penny_response" in step3:
+        if step3 and "orchestrator_response" in step3:
             context_parts.append("WORKFLOW:")
-            context_parts.append(step3["penny_response"][:300])
+            context_parts.append(step3["orchestrator_response"][:300])
             context_parts.append("")
 
         # Get memory file status
         step4 = self.state.get_step_output(4)
-        if step4 and "penny_response" in step4:
+        if step4 and "orchestrator_response" in step4:
             context_parts.append("MEMORY FILE STATUS (from Step 4):")
-            context_parts.append(step4["penny_response"][:300])
+            context_parts.append(step4["orchestrator_response"][:300])
             context_parts.append("")
 
         # Check for composite skill dispatch

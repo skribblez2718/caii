@@ -1,445 +1,858 @@
-# Penny - Personal AI Assistant
+# CAII - Cognitive Augmented Intelligence Infrastructure
 
 ## Acknowledgments
 
-This project is built upon the foundational work and inspiration from **Daniel Miessler's Personal AI Infrastructure (PAI)** project. Without his knowledge, vision, and open sharing of ideas, Penny would likley not exist.
+This project is built upon the foundational work and inspiration from **Daniel Miessler's Personal AI Infrastructure (PAI)** project. Without his knowledge, vision, and open sharing of ideas, this project would likely not exist.
 
-🔗 [danielmiessler/Personal_AI_Infrastructure](https://github.com/danielmiessler/Personal_AI_Infrastructure/)
+[danielmiessler/Personal_AI_Infrastructure](https://github.com/danielmiessler/Personal_AI_Infrastructure/)
 
----
+While CAII shares PAI's goal of providing a highly customizable system to augment humans with AI, it takes a fundamentally different approach. Grounded in research and experimentation, this implementation sometimes diverges from popular opinion and Claude Code documentation. Notable differences include:
 
-![Penny AI Assistant](img/penny.png)
+- **Cognitive-first agent design** - Rather than task or domain-specific agents, CAII uses agents organized by cognitive function (clarification, research, analysis, synthesis, generation, validation, memory). This idea is roughly rooted in ACr and Soar approaches that I discovered after coming up with the cognitive approach, but is the memory agent and learning systems became heavily influenced by them. 
+- **External skill protocols** - Skill orchestration logic lives in Python protocols rather than within SKILL.md files
+- **Mandatory Python orchestration** - A Python layer enforces protocol adherence through deterministic state machines, rather than relying on prompting alone. 
+- **Johari Window framework** - Systematic discovery using the SHARE/ASK/ACKNOWLEDGE/EXPLORE model to surface unknowns, ensure they are considered and hopefully answered at the end of task completion
 
-**Transform unknown unknowns into known knowns through relentless discovery and shared knowledge exchange**
-
----
-
-## Getting Started (TLDR)
-
-1. **Clone this repository**
-
-2. **Install system dependencies**:
-   ```bash
-   # Ubuntu/Debian/WSL
-   sudo apt update && sudo apt install jq -y
-
-   # macOS (with Homebrew)
-   brew install jq
-   ```
-   Required for statusline JSON parsing functionality.
-
-3. **Install Claude Code** following official documentation
-
-4. **Configure Penny settings**:
-   ```bash
-   cd .claude
-   cp settings.example.json settings.json
-   # Edit settings.json to customize:
-   # - Assistant name (change from "Penny" to your preference)
-   # - Voice server port (optional)
-
-   # Optional: Customize personality and identity
-   # Edit .claude/DA.md to:
-   # - Define your assistant's personality and demeanor
-   # - Customize mission and philosophy
-   # - Add personal context and preferences
-   ```
-
-5. **Configure voice server** (optional):
-   ```bash
-   cp .claude/voice-server /desired/location
-   cd /locatation/of/voice-server
-   cp .env.example .env
-   # Edit .env 
-   ./setup.sh
-   ```
-
-6. **Start collaborating**: Ask Penny for help with any task - technical projects, research, decisions, planning, or learning. The cognitive orchestration system adapts to your needs.
-
-## About Penny
-
-Penny is a personal AI assistant system built on Claude Code, implementing a highly structured agent-based architecture designed to transform project concepts into deployment-ready code and other everyday tasks. Penny acts as a helpful, enthusiastic, and knowledgeable companion full of wisdom - not only a professional assistant but a life partner in learning and building.
-
-### Core Mission
-
-**Our absolute mandate**: Transform unknown unknowns into known knowns using the Johari Window framework. We challenge every assumption, halt and clarify when facing ambiguity, and convert hidden ignorance into visible insight. Every interaction must advance our collective understanding or it has failed our mission.
-
-### The Johari Window Framework
-
-Penny and her agents organize all knowledge and discovery through four quadrants:
-
-- **Open Area**: What we both know and agree on
-- **Hidden Area**: Information you may be withholding or overlooking
-- **Blind Spots**: Gaps in our collective understanding that need exploration
-- **Unknown Unknowns**: Questions we didn't know to ask - our primary discovery target
-
-This framework ensures nothing is assumed, everything is validated, and we continuously expand our shared understanding.
+This is an experimental approach that may not suit every use case, but it represents one possible direction for human-AI augmentation systems.
 
 ---
 
-## How It Works
-
-### Cognitive Orchestration, Not Monolithic AI
-
-Penny doesn't operate as a single AI trying to do everything. Instead, she orchestrates **specialized agents based on cognitive function** - distinct types of thinking that work together systematically. Whether you're building software, researching a topic, making a life decision, or planning a project, Penny breaks the challenge into cognitive operations and coordinates them strategically.
-
-Think of it like a mind that can consciously direct different types of thinking:
-- **Research** when you need information gathered and evaluated
-- **Analysis** when you need patterns identified or complexity assessed
-- **Synthesis** when you need disparate information unified into coherent understanding
-- **Generation** when you need plans, content, or solutions created
-- **Validation** when you need verification, testing, or quality assurance
-- **Clarification** when you need ambiguity resolved or assumptions confirmed
-
-### Universal Cognitive Functions
-
-The same cognitive functions work across **any domain**:
-- "Research vacation destinations" uses the same RESEARCH function as "Research database options"
-- "Analyze career options" uses the same ANALYZE function as "Analyze architecture trade-offs"
-- "Generate meal plan" uses the same GENERATE function as "Generate implementation plan"
-- "Clarify relationship concerns" uses the same CLARIFY function as "Clarify project requirements"
-
-**This is the idea**: Cognitive functions are universal. Context makes them specialized.
-
-### Skills: Reusable Workflows
-
-**Skills** are structured workflows that combine cognitive functions in specific sequences to achieve particular goals. They define WHAT needs to happen and in what order, while agents execute HOW each cognitive function performs its work.
-
-Examples of skills (current and future):
-- Project development workflows (requirements → architecture → implementation → validation)
-- Research workflows (discovery → evaluation → synthesis → documentation)
-- Decision frameworks (clarification → analysis → option generation → evaluation)
-- Learning processes (exploration → understanding → application → validation)
-
-The agent system remains constant; skills provide the adaptable orchestration layer.
-
-### Quality Gates & Remediation Loops
-
-Every workflow includes **quality gates** - checkpoints that ensure solid foundations before proceeding:
-
-- **Entry Gates**: Prerequisites that must be satisfied before beginning a phase
-- **Exit Gates**: Completion criteria that must be met before advancing
-
-When a gate fails, Penny doesn't push forward with flawed understanding or decisions. **Remediation loops** return to earlier phases to fix issues at their source. This prevents cascading failures where early mistakes compound into major problems.
-
-Example: If architecture validation reveals security gaps, the system loops back to architecture design rather than proceeding to implementation with known vulnerabilities.
-
-### Unknown Registry: Surfacing What We Don't Know We Don't Know
-
-The **Unknown Registry** tracks questions and uncertainties discovered throughout any process. When an agent identifies an "unknown unknown" - something we didn't know we needed to ask about - it gets registered, tracked, and deliberately resolved.
-
-This works for ANY domain:
-- "Should I accept this job offer?" might surface unknowns about company culture, growth trajectory, or work-life balance
-- "Which technology stack?" might surface unknowns about team expertise, hosting constraints, or maintenance burden
-
-The registry ensures nothing gets assumed or overlooked. Every question gets asked, every assumption gets validated.
-
-### Hybrid Execution Architecture
-
-Penny implements a hybrid execution model combining deterministic code execution with LLM reasoning:
-
-**Deterministic (Python executed via Bash):**
-- Task routing (`routing_gate.py`, `dispatcher.py`)
-- FSM phase sequencing (`fsm.py` state transitions)
-- Memory file validation (`state.py`)
-- Token budget enforcement
-- Gate criteria evaluation
-
-**LLM Reasoning:**
-- Content generation and creative work
-- Novel task handling (no rule match)
-- Agent cognitive processing
-- Domain-specific adaptation
-
-Core principle: **"Rules for WHAT/WHEN, LLM for HOW/WHY"** - with actual code execution ensuring 90%+ of routing/sequencing decisions are instant and consistent.
-
-### Key System Characteristics
-
-- **Domain-Agnostic**: Same cognitive functions work for technical projects, life decisions, research, learning, planning
-- **Context-Driven**: Agents adapt to any scenario through specialized context injection at invocation time
-- **Systematic Reasoning**: Chain-of-Thought, Tree-of-Thoughts, Self-Consistency validation applied consistently
-- **Quality-Gated**: Prevents proceeding with flawed understanding or decisions through validation checkpoints
-- **Discovery-Oriented**: Actively surfaces unknown unknowns rather than assuming or guessing
-- **Collaborative**: Works WITH you as a thinking partner, not FOR you as a service
-- **Hybrid Execution**: Deterministic Python for routing/sequencing, LLM for reasoning/generation
-- **Agent Enforcement**: Routing gate validates task triviality (5 criteria: single file, ≤5 lines, mechanical operation, no research, no decisions) before allowing direct tool usage - defaults to agent invocation when uncertain (fail-secure design)
-
-### Execution Routing: Three Paths
-
-Every task routes through one of three execution paths:
-
-**1. Skill Orchestration Protocol**
-
-Multi-phase workflows requiring systematic cognitive processing. Tasks flow through research → analysis → synthesis → generation → validation sequences defined in formal skills.
-
-**When to use:** Complex deliverables matching established skill patterns (project development, research workflows, QA analysis)
-
-**Key characteristics:** Predefined phase sequences, quality gates between phases, formal skill definitions, learning capture
-
-**2. Dynamic Skill Sequencing**
-
-Dynamic agent sequences determined on-the-fly for tasks requiring cognitive coordination but not matching formal skills. Penny determines and invokes a sequence of orchestrate-* atomic skills based on task context.
-
-**When to use:** Tasks requiring multiple cognitive functions but without matching composite skill pattern, novel task types, complex work requiring flexible orchestration
-
-**Key characteristics:** Same rigor as formal skills, dynamic orchestration via orchestrate-* skills, protocol compliance, agents invoked sequentially through atomic skill wrappers
-
-**3. Direct Tool Usage (Trivial Tasks)**
-
-Trivial tasks that pass routing gate validation bypass formal protocols for direct tool usage. The routing gate evaluates 5 triviality criteria before allowing direct execution.
-
-**When to use:** Simple file edits, mechanical operations, deterministic tasks with no research or decisions needed
-
-**Key characteristics:** Routing gate validation (fail-secure: defaults to protocols when uncertain), single file modifications, ≤5 lines affected, no cognitive processing needed
-
-**Triviality Criteria (ALL must be satisfied):**
-- Single file modification (not multi-file changes)
-- Five lines or fewer affected (not substantial rewrites)
-- Mechanical operation (copy/paste/replace, not creative decisions)
-- No research required (information already known)
-- No decisions needed (deterministic action, not judgment calls)
-
-See `.claude/orchestration/execution-protocols/` for complete protocol specifications.
+![Cognitive Augmented Intelligence Infrastructure](img/caii.png)
 
 ---
 
-## Agent System Architecture
+> **Note:** This project is in active development and should be considered experimental. APIs, protocols, and behaviors may change as the system evolves. Contributions and feedback are welcome.
 
-### The Cognitive Function Approach
+---
 
-**Design**: Instead of creating domain-specific or technology-specific agents, Penny organizes agents by **cognitive function** - what type of thinking they perform.
+## Table of Contents
 
-This means **one agent works across many domains** through context-driven specialization. A generation agent can create meal plans, implementation strategies, content outlines, or code - all by receiving task-specific context at invocation.
+1. [Overview](#overview)
+2. [The Johari Window Approach](#the-johari-window-approach)
+3. [Core Philosophy](#core-philosophy)
+4. [Architecture Overview](#architecture-overview)
+5. [The Directing Agent (DA)](#the-directing-agent-da)
+6. [Reasoning Protocol](#reasoning-protocol)
+7. [Deterministic Orchestration + Non-Deterministic Execution](#deterministic-orchestration--non-deterministic-execution)
+8. [Execution Routes](#execution-routes)
+9. [Cognitive Domain Agents](#cognitive-domain-agents)
+10. [Skills Architecture](#skills-architecture)
+11. [Memory and Learnings System](#memory-and-learnings-system)
+12. [Extending the System](#extending-the-system)
+13. [Prompt Flags](#prompt-flags)
+14. [Directory Structure](#directory-structure)
+15. [Quick Start](#quick-start)
 
-### Seven Universal Cognitive Agents
+---
 
-The system uses 7 specialized agents, each performing one cognitive function across ANY task domain:
+## Overview
 
-1. **CLARIFICATION** (clarification-agent) - Resolves ambiguities and transforms vague inputs into explicit specifications through Socratic questioning
+CAII is a **cognitive orchestration framework** for Claude Code that transforms how AI assistants approach complex tasks. Instead of relying on ad-hoc prompting, CAII enforces systematic reasoning through Python-orchestrated protocols before any task execution.
 
-2. **RESEARCH** (research-agent) - Discovers and gathers information, evaluates sources, identifies knowledge gaps, and retrieves relevant data
+**Core value proposition:**
+- **Systematic reasoning** - Every query goes through a 9-step reasoning protocol automatically
+- **Domain-adaptive agents** - 7 cognitive agents that adapt to any domain without modification
+- **Progressive learning** - The system learns from each workflow, requiring less instruction over time
 
-3. **ANALYSIS** (analysis-agent) - Examines information to identify patterns, assess complexity, map dependencies, and evaluate trade-offs
+**Key differentiator:** CAII combines Python-enforced deterministic orchestration (guaranteed step sequences) with LLM non-determinism (creative execution within each step). This ensures protocol adherence while preserving the flexibility that makes LLMs powerful.
 
-4. **SYNTHESIS** (synthesis-agent) - Integrates disparate information into coherent designs, resolves contradictions, and creates unified frameworks
+```
+                              USER QUERY
+                                  │
+                                  ▼
+                    ┌──────────────────────────┐
+                    │   REASONING PROTOCOL     │
+                    │   (9 Steps: 0-8)         │
+                    │   Runs AUTOMATICALLY     │
+                    └──────────────────────────┘
+                                  │
+                    ┌─────────────┴─────────────┐
+                    │                           │
+                    ▼                           ▼
+           ┌───────────────┐          ┌──────────────────┐
+           │    SKILL      │          │    DYNAMIC       │
+           │ ORCHESTRATION │          │ SKILL SEQUENCING │
+           └───────────────┘          └──────────────────┘
+                    │                           │
+                    └─────────────┬─────────────┘
+                                  │
+                                  ▼
+                    ┌──────────────────────────┐
+                    │   COGNITIVE AGENTS       │
+                    │   (7 Specialists)        │
+                    └──────────────────────────┘
+                                  │
+                                  ▼
+                    ┌──────────────────────────┐
+                    │   MEMORY FILES           │
+                    │   + LEARNINGS            │
+                    └──────────────────────────┘
+```
 
-5. **GENERATION** (generation-agent) - Creates artifacts (code, documentation, plans, content) from specifications using domain-appropriate creation cycles
+---
 
-6. **VALIDATION** (validation-agent) - Verifies correctness, completeness, and compliance against established quality criteria
+## The Johari Window Approach
 
-7. **METACOGNITION** (goal-memory-agent) - Monitors workflow state, detects impasses, and suggests remediation strategies
+CAII is built around the **Johari Window** framework for systematic discovery. The core mission: **transform unknown unknowns into known knowns**.
 
-Agents adapt to ANY domain (technical, personal, creative, professional) through context injection at invocation time.
+### The Four Quadrants
 
-### Core Design Principles and Goals
+| Quadrant | What It Represents | Action |
+|----------|-------------------|--------|
+| **Open** | Known knowns - what both parties understand | Share explicitly |
+| **Hidden** | Known unknowns - what we know we don't know | Ask to discover |
+| **Blind** | Unknown knowns - gaps we don't realize exist | Acknowledge through probing |
+| **Unknown** | Unknown unknowns - what neither party recognizes | Explore systematically |
 
-1. **Single Cognitive Responsibility (SCRP)** - One cognitive function per agent
-2. **Context-Driven Specialization** - Domain knowledge injected via context, not hardcoded
-3. **Capability Taxonomy Alignment** - Organized by cognitive function, not domain
-4. **Tool/Agent Boundary** - Agents do reasoning/adaptation, tools do deterministic operations
-5. **Progressive Disclosure Architecture** - Token-efficient, reference not repeat
-6. **Failure Boundary Isolation** - Failures contained, agents never manipulate orchestration layer
-7. **Measurable Value** - Clear success criteria and gate exit requirements
+### The SHARE/ASK/ACKNOWLEDGE/EXPLORE Framework
+
+Every interaction begins with Step 0 of the reasoning protocol, which applies this framework:
+
+- **SHARE** - What can be inferred from the user's prompt
+- **ASK** - What critical information is missing (max 5 clarifying questions)
+- **ACKNOWLEDGE** - Boundaries, assumptions, and constraints
+- **EXPLORE** - Unknown unknowns that should be considered
+
+### Why This Matters
+
+The Johari Window approach prevents:
+- **Premature execution** - Acting before understanding
+- **Assumption errors** - Building on unstated requirements
+- **Scope creep** - Missing boundaries and constraints
+- **Blind spots** - Overlooking critical considerations
+
+**Mission statement:** "Every interaction must advance collective understanding or it has failed."
+
+---
+
+## Core Philosophy
+
+CAII is built on five non-negotiable principles that guide all system design decisions.
+
+### Principle 1: Radical Modularity
+
+Every component performs **ONE task exceptionally well**. This is the Single Cognitive Responsibility Principle (SCRP):
+
+- Each agent handles exactly one cognitive function
+- Components can be understood in isolation
+- Dependencies are minimal and explicit
+
+### Principle 2: Orchestration-Implementation Separation
+
+The boundary between WHAT and HOW is sacred:
+
+- **Skills** define WHAT happens (workflow orchestration, phase sequences)
+- **Agents** define HOW tasks execute (implementation details)
+- Skills NEVER contain implementation logic
+- Agents NEVER contain workflow orchestration
+
+### Principle 3: Zero Redundancy
+
+- Never repeat system definitions, protocols, or references
+- Create reference files for shared elements
+- Single point of change for all system components
+- If something is used twice, it becomes a reference file
+
+### Principle 4: Token Efficiency
+
+Maximize succinctness without sacrificing necessary detail:
+
+- Progressive context compression between phases
+- Johari Window format with strict token limits (1,200 max per agent)
+- Decision-focused documentation (WHAT was decided, not HOW)
+- Reference previous findings rather than repeating them
+
+### Principle 5: Systematic Reasoning
+
+ALL agents implement these prompting strategies:
+
+| Strategy | Purpose |
+|----------|---------|
+| **Chain of Thought (CoT)** | Explicit step-by-step reasoning |
+| **Tree of Thought (ToT)** | Multiple solution path exploration |
+| **Self-Consistency** | Cross-verification of conclusions |
+| **Socratic Method** | Self-interrogation for clarity |
+| **Constitutional AI** | Self-critique against principles |
+
+---
+
+## Architecture Overview
+
+CAII operates as a layered system where each layer has distinct responsibilities.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         CLAUDE CODE                              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ┌────────────────┐    ┌───────────────────┐    ┌────────────┐  │
+│  │     DA.md      │◄──►│     Python        │◄──►│   Hooks    │  │
+│  │  (Coordination │    │  Orchestration    │    │  (Entry    │  │
+│  │   Framework)   │    │     Layer         │    │   Points)  │  │
+│  └────────────────┘    └───────────────────┘    └────────────┘  │
+│                               │                                  │
+│                               ▼                                  │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │                      PROTOCOLS                            │   │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐    │   │
+│  │  │  Reasoning   │  │  Execution   │  │    Agent     │    │   │
+│  │  │  (9 Steps)   │  │  (2 Routes)  │  │  (7 Agents)  │    │   │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘    │   │
+│  └──────────────────────────────────────────────────────────┘   │
+│                               │                                  │
+│                               ▼                                  │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │                       SKILLS                              │   │
+│  │  ┌────────────────┐        ┌────────────────┐            │   │
+│  │  │  Atomic Skills │        │   Composite    │            │   │
+│  │  │  (7 wrappers)  │        │    Skills      │            │   │
+│  │  └────────────────┘        └────────────────┘            │   │
+│  └──────────────────────────────────────────────────────────┘   │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**How the pieces connect:**
+
+1. **Hooks** intercept user prompts and trigger the Python orchestration layer
+2. **Python Orchestration** enforces protocol adherence through mandatory directives
+3. **Protocols** define the step sequences for reasoning, execution, and agents
+4. **Skills** orchestrate which agents to invoke and in what order
+5. **Agents** perform the actual cognitive work
+6. **Memory/Learnings** persist knowledge between sessions
+
+---
+
+## The Directing Agent (DA)
+
+### What the DA is NOT
+
+- NOT an executing agent that performs tasks
+- NOT one of the 7 cognitive agents
+- NOT invoked via the Task tool
+
+### What the DA IS
+
+The DA is a **coordination framework** defined in `DA.md` that:
+
+- Establishes the system's identity and mission
+- Orchestrates the 6 task-performing agents through Python orchestration
+- Enforces the mandatory reasoning protocol before any task execution
+- Routes tasks to the appropriate execution path
+
+### Key Responsibilities
+
+| Responsibility | Description |
+|---------------|-------------|
+| **Enforce Reasoning** | Every query goes through 9 steps (0-8) automatically |
+| **Route Tasks** | Direct to Skill Orchestration or Dynamic Skill Sequencing |
+| **Maintain Discovery** | Apply Johari Window principles to every interaction |
+| **Verify Outputs** | Apply confidence scoring and assumption declaration |
+
+### Default Behavior
+
+**The reasoning protocol executes for EVERY user query.** This is automatic, not optional. The `user-prompt-submit` hook triggers the reasoning protocol before Claude sees any prompt.
+
+---
+
+## Reasoning Protocol
+
+The reasoning protocol is a **9-step sequence (Steps 0-8)** that runs automatically for every user query. This ensures systematic reasoning before any task execution.
+
+```
+Step 0: Johari Window Discovery
+        │
+        ▼
+Step 1: Semantic Understanding
+        │
+        ▼
+Step 2: Chain of Thought
+        │
+        ▼
+Step 3: Tree of Thought
+        │
+        ▼
+Step 3b: Skill Detection
+        │
+        ▼
+Step 4: Task Routing ──────────────────┐
+        │                              │
+        ▼                              │ (Skipped in Agent Mode)
+Step 5: Self-Consistency               │
+        │                              │
+        ▼                              │
+Step 6: Socratic Interrogation         │
+        │                              │
+        ▼                              │
+Step 7: Constitutional Critique        │
+        │                              │
+        ▼                              │
+Step 8: Knowledge Transfer ◄───────────┘
+        │
+        ├──► PROCEED (dispatch to execution)
+        │
+        ├──► HALT (ask clarifying questions)
+        │
+        └──► LOOP_BACK (contradiction detected, retry Steps 4-8)
+```
+
+### Step Descriptions
+
+| Step | Name | Purpose |
+|------|------|---------|
+| 0 | Johari Discovery | Apply SHARE/ASK/ACKNOWLEDGE/EXPLORE framework |
+| 1 | Semantic Understanding | Parse and understand the query's meaning |
+| 2 | Chain of Thought | Break down the problem step-by-step |
+| 3 | Tree of Thought | Explore multiple solution paths |
+| 3b | Skill Detection | Identify if a known skill pattern matches |
+| 4 | Task Routing | Determine execution route (skill vs dynamic) |
+| 5 | Self-Consistency | Cross-verify conclusions for coherence |
+| 6 | Socratic Interrogation | Challenge assumptions through questioning |
+| 7 | Constitutional Critique | Verify against system principles |
+| 8 | Knowledge Transfer | Final checkpoint with PROCEED/HALT/LOOP_BACK |
+
+### Critical Rule
+
+**If Step 0 identifies clarifying questions, the protocol HALTS and asks before proceeding.** This prevents wasted effort on tasks with unclear requirements.
+
+### Agent Mode
+
+When agents execute (they're already routed), they use `--agent-mode` which skips Step 4:
+```
+Steps: 0 → 1 → 2 → 3 → 3b → 5 → 6 → 7 → 8
+                        (Step 4 skipped)
+```
+
+---
+
+## Deterministic Orchestration + Non-Deterministic Execution
+
+### The Problem with Prompting Alone
+
+Prompting alone **cannot guarantee strict protocol adherence**. LLMs may:
+
+- Skip steps when they seem unnecessary
+- Reorder operations based on perceived efficiency
+- Combine steps that should be separate
+- Forget to save state before proceeding
+
+### The Solution: Python Orchestration
+
+Python scripts output **mandatory Markdown directives** that Claude must execute:
+
+```
+**MANDATORY - EXECUTE IMMEDIATELY BEFORE ANY OTHER ACTION:**
+`python3 step_1_semantic_understanding.py --state {file}`
+
+DO NOT proceed with any other action until this command is executed.
+```
+
+### Key Enforcement Mechanisms
+
+| Mechanism | Purpose |
+|-----------|---------|
+| `format_mandatory_directive()` | Wraps commands in enforcement language |
+| **FSM (Finite State Machine)** | Validates legal state transitions |
+| **State Persistence** | State saved BEFORE printing next directive |
+| **Blocking Verification** | Phase advancement blocks until memory file exists |
+
+### What's Deterministic vs Non-Deterministic
+
+| Deterministic (Python Enforced) | Non-Deterministic (LLM Flexibility) |
+|--------------------------------|-------------------------------------|
+| Step sequence (always 0-8) | Content of each step's output |
+| State transitions | Creative reasoning within steps |
+| Memory file creation | How to phrase clarifying questions |
+| Phase advancement | Solution design decisions |
+| Skill selection routing | Code generation approaches |
+
+### Crash Recovery
+
+Because state is persisted before directives are printed:
+- If crash occurs mid-step: Resume from saved state
+- Session ID enables recovery: `entry.py --resume {session_id}`
+
+---
+
+## Execution Routes
+
+After the reasoning protocol completes, execution flows through ONE of two routes.
+
+### Route 1: Skill Orchestration
+
+Used when the task matches a **formal skill pattern** (e.g., "create a new skill").
+
+```
+Reasoning Step 4 Output: "skill-orchestration"
+    │
+    ▼
+protocols/execution/skill/entry.py
+    │
+    ▼
+Phase 0 (Clarification) → Phase 1 → ... → Phase N
+    │
+    ▼
+Each phase invokes: orchestrate-{agent} atomic skill
+    │
+    ▼
+Agent produces memory file
+    │
+    ▼
+advance_phase.py (BLOCKS until memory file exists)
+```
+
+### Route 2: Dynamic Skill Sequencing
+
+Used when the task requires **multiple cognitive functions but doesn't match an existing skill**.
+
+```
+Reasoning Step 4 Output: "dynamic-skill-sequencing"
+    │
+    ▼
+protocols/execution/dynamic/entry.py
+    │
+    ▼
+1. Analyze Requirements
+2. Plan Sequence (determine which orchestrate-* skills)
+3. Invoke Skills (sequence of atomic skills)
+4. Verify Completion
+5. Complete
+```
+
+### Trivial Task Handling
+
+The **routing gate** evaluates 5 triviality criteria. ALL must be YES for direct execution:
+
+| Criterion | Question |
+|-----------|----------|
+| SINGLE_FILE | Does task affect only one file? |
+| FIVE_LINES_OR_LESS | Does task change 5 lines or fewer? |
+| MECHANICAL_OPERATION | Is it purely mechanical (no judgment)? |
+| NO_RESEARCH_NEEDED | No information gathering required? |
+| NO_DECISIONS_NEEDED | Zero judgment calls needed? |
+
+**Fail-Secure Design:** If ANY criterion is uncertain, default to AGENT_REQUIRED.
+
+---
+
+## Cognitive Domain Agents
+
+CAII uses **7 cognitive agents**, each specializing in exactly one cognitive function.
+
+### Agent Roster
+
+| Agent | Cognitive Function | Purpose |
+|-------|-------------------|---------|
+| **clarification** | CLARIFICATION | Transform vague inputs into actionable specifications |
+| **research** | RESEARCH | Discover and gather information from sources |
+| **analysis** | ANALYSIS | Examine information to identify patterns, risks, issues |
+| **synthesis** | SYNTHESIS | Integrate disparate findings into coherent designs |
+| **generation** | GENERATION | Create artifacts using TDD methodology |
+| **validation** | VALIDATION | Verify artifacts against quality criteria |
+| **memory** | METACOGNITION | Monitor progress, detect impasses (automatic invocation) |
+
+### Single Cognitive Responsibility Principle (SCRP)
+
+Each agent performs **exactly ONE cognitive function**. This is non-negotiable because:
+
+1. **Maintainability** - 7 agents to maintain vs potentially dozens of task-specific agents
+2. **Reusability** - Same agent works across any domain
+3. **Composability** - Combine agents into workflows without overlap
+4. **Testability** - Each function can be validated independently
+
+### Domain Adaptation
+
+Agents adapt to ANY domain while maintaining consistent methodology:
+
+| Domain | Same Methodology | Different Evaluation Criteria |
+|--------|-----------------|------------------------------|
+| Technical | Socratic questioning | Architecture, security, performance |
+| Personal | Socratic questioning | Values, goals, priorities |
+| Creative | Socratic questioning | Tone, audience, message |
+| Professional | Socratic questioning | Business objectives, stakeholders |
+| Recreational | Socratic questioning | Preferences, inclusivity |
+
+The cognitive PROCESS stays constant; only the VOCABULARY and SUCCESS CRITERIA change.
+
+### Agent Invocation Pattern
+
+Agents are **NEVER invoked directly**. The call chain is:
+
+```
+Skill Phase → orchestrate-{agent} (atomic skill) → Task tool → Agent Entry
+```
+
+---
+
+## Skills Architecture
+
+Skills define **workflow orchestration** - the sequence of cognitive agents to invoke and when.
+
+### Two Skill Types
+
+| Type | Description | Example |
+|------|-------------|---------|
+| **Atomic** | Single-agent wrappers for individual cognitive functions | orchestrate-clarification |
+| **Composite** | Multi-phase workflows using multiple agents | develop-skill |
+
+### 7 Atomic Skills
+
+Each wraps exactly one cognitive agent:
+
+| Skill | Agent | Purpose |
+|-------|-------|---------|
+| orchestrate-clarification | clarification | Transform vague inputs into specifications |
+| orchestrate-research | research | Investigate options, gather domain knowledge |
+| orchestrate-analysis | analysis | Decompose problems, assess complexity |
+| orchestrate-synthesis | synthesis | Integrate findings into recommendations |
+| orchestrate-generation | generation | Create artifacts using TDD |
+| orchestrate-validation | validation | Verify artifacts against criteria |
+| orchestrate-memory | memory | Monitor progress, detect impasses |
+
+### 2 Built-in Composite Skills
+
+| Skill | Purpose | Phases |
+|-------|---------|--------|
+| **develop-skill** | Meta-skill for creating new skills | 6 phases |
+| **develop-learnings** | Transform experiences into reusable learnings | 7 phases |
+
+### Phase Types
+
+| Type | Behavior |
+|------|----------|
+| LINEAR | Standard sequential execution (default) |
+| OPTIONAL | Skip if trigger condition not met |
+| ITERATIVE | Execute sub-phases in sequence (e.g., 3A→3B→3C) |
+| REMEDIATION | Retry on validation failure (max 2 retries) |
+| PARALLEL | Execute branches concurrently, merge results |
+
+### Skill-to-Skill Composition
+
+Skills can invoke other skills, enabling complex workflows through composition rather than monolithic definitions.
+
+---
+
+## Memory and Learnings System
+
+### Goal: Progressive Autonomy
+
+The memory system's purpose is to **tell the system less over time**. As learnings accumulate, the system requires fewer explicit instructions and makes better decisions autonomously.
+
+### Memory File Contract
+
+Every agent MUST produce a memory file at:
+```
+.claude/memory/{task_id}-{agent}-memory.md
+```
+
+**Mandatory sections:**
+
+| Section | Content |
+|---------|---------|
+| Section 0: Context Loaded | JSON verification of what was loaded |
+| Section 1: Step Overview | What was accomplished, key decisions |
+| Section 2: Johari Summary | Open/Hidden/Blind/Unknown (1,200 tokens max) |
+| Section 3: Downstream Directives | Instructions for next agent/phase |
+
+**Critical:** Phase advancement **BLOCKS** until the memory file exists. There is no bypass mechanism.
+
+### Learnings Directory Structure
+
+```
+.claude/learnings/
+├── clarification/
+│   ├── heuristics.md
+│   ├── anti-patterns.md
+│   ├── checklists.md
+│   └── domain-snippets/
+├── research/
+├── analysis/
+├── synthesis/
+├── generation/
+└── validation/
+```
+
+### Learning Types
+
+| Type | Purpose |
+|------|---------|
+| **heuristics** | Rules of thumb that improve decisions |
+| **anti-patterns** | Mistakes to avoid |
+| **checklists** | Verification steps |
+| **domain-snippets** | Domain-specific knowledge |
+
+### Learning Injection (Step 0)
+
+Every agent's Step 0 loads relevant learnings before task work:
+
+```
+Step 0: Learning Injection
+    │
+    ▼
+Load .claude/learnings/{cognitive_function}/*.md
+    │
+    ▼
+Inject relevant learnings into agent context
+    │
+    ▼
+Step 1: Begin actual work
+```
+
+### Impasse Detection
+
+The memory agent monitors for four impasse types:
+
+| Impasse | Description | Remediation |
+|---------|-------------|-------------|
+| CONFLICT | Contradictory requirements | Invoke clarification |
+| MISSING-KNOWLEDGE | Required info absent | Invoke research |
+| TIE | Multiple valid options, no criteria | Invoke analysis |
+| NO-CHANGE | No meaningful progress | Re-invoke with enhanced context |
+
+### Creating Learnings
+
+Learnings are created via the **develop-learnings** skill after workflows complete:
+
+```
+Completed Workflow → develop-learnings skill → 7 phases → Learnings committed
+```
+
+---
+
+## Extending the System
+
+CAII provides only the **minimum required skills** out of the box. The system is designed as a foundation for building domain-specific extensions.
+
+### Creating New Skills
+
+Use the **develop-skill** meta-skill:
+
+```
+User: "Create a code-review skill"
+    │
+    ▼
+develop-skill workflow (6 phases)
+    │
+    ▼
+1. Requirements Clarification
+2. Complexity Analysis
+3. Pattern Research
+4. Design Synthesis
+5. Skill Generation
+6. DA.md Registration
+    │
+    ▼
+New skill ready to use
+```
+
+### Skill Templates
+
+Located in `.claude/skills/develop-skill/resources/`:
+
+| Template | Use Case |
+|----------|----------|
+| simple-skill-template.md | 2-3 phases, straightforward workflow |
+| complex-skill-template.md | 4+ phases, conditional logic |
+| atomic-skill-template.md | Single agent wrapper |
+
+### What Gets Generated
+
+For a new composite skill:
+
+```
+.claude/skills/{skill-name}/
+├── SKILL.md                    # Skill definition
+└── resources/                  # Skill-specific resources
+
+.claude/orchestration/protocols/skill/composite/{skill_name}/
+├── entry.py                    # Entry point
+├── complete.py                 # Completion handler
+├── __init__.py                 # Module init
+└── content/
+    ├── phase_0_*.md
+    ├── phase_1_*.md
+    └── ...
+```
+
+Plus registration in:
+- `config/config.py` (phase definitions)
+- `DA.md` (semantic triggers)
+- `skill-catalog.md` (documentation)
+
+---
+
+## Prompt Flags
+
+CAII supports prompt flags that modify how queries are processed. Flags can appear in any order at the end of a prompt.
+
+### Available Flags
+
+| Flag | Purpose |
+|------|---------|
+| `-i` | Improve prompt via external model before processing |
+| `-b` | Bypass reasoning protocol (direct execution mode) |
+
+### Examples
+
+```
+"fix the bug -b"         → Bypass reasoning, execute directly
+"add feature -i"         → Improve prompt, then run reasoning
+"refactor code -i -b"    → Improve prompt, then bypass reasoning
+"refactor code -b -i"    → Same as above (order doesn't matter)
+```
+
+### Prompt Improvement (-i flag)
+
+The `-i` flag sends your prompt to an external model for improvement before processing:
+
+```
+User: "build me a web app -i"
+    │
+    ▼
+Hook detects "-i" flag
+    │
+    ▼
+Sends to external model for improvement
+    │
+    ▼
+Returns improved prompt
+    │
+    ▼
+Normal reasoning protocol continues (unless -b also specified)
+```
+
+**Configuration** - Required environment variables:
+
+```bash
+OPENAI_BASE_URL="https://your-api-endpoint"
+OPENAI_API_KEY="your-key"
+OPENAI_PROMPT_IMPROVER_MODEL="model-name"
+```
+
+The `-i` flag supports Johari Window discovery by making implicit requirements explicit and transforming unknown unknowns in the prompt itself.
+
+### Bypass Mode (-b flag)
+
+The `-b` flag skips the 9-step reasoning protocol entirely, allowing Claude to handle the prompt directly. Useful for:
+
+- Trivial tasks (typo fixes, simple renames)
+- Follow-up prompts where context is already established
+- Quick questions that don't require systematic reasoning
+
+**Note:** The `-b` flag bypasses all reasoning steps, so use it when you're confident the task doesn't benefit from structured analysis.
 
 ---
 
 ## Directory Structure
 
-### System Architecture Files (`.claude/`)
-
-**`orchestration/`** - Deterministic execution layer
-Python modules executed for routing, sequencing, and validation. Contains `reasoning/` (9-step mandatory reasoning: Step 0-8), `execution/` (skill-orchestration and dynamic-skill-sequencing), and `agent/` (6 cognitive agents). Implements "Rules for WHAT/WHEN" with actual code execution.
-
-**`agents/`** - Agent definition files
-Contains markdown definitions for each cognitive agent describing their purpose, capabilities, and invocation patterns.
-
-**`skills/`** - Workflow orchestration layer (WHAT happens in workflows)
-Defines complete workflows for various purposes: project development, research, decision-making, learning processes. Contains both composite skills (develop-project, perform-research, etc.) and atomic skills (orchestrate-*).
-
-**`docs/`** - Design documentation
-System design principles, cognitive function taxonomy, agent registry, and philosophical foundations.
-
-**`hooks/`** - Claude Code hooks
-Event-triggered scripts for user-prompt-submit and other Claude Code events.
-
-**`learnings/`** - Generalized knowledge capture
-System improvement insights organized by cognitive function (heuristics, anti-patterns, checklists).
-
-### Working Directories
-
-**`memory/`** - Task execution state
-Stores workflow metadata and agent outputs per task in structured format for context inheritance and state tracking.
-
-**`plans/`** - Project planning artifacts
-Contains UX mockups, design screenshots, and planning documents for specific projects.
-
-**`usage/`** - Usage tracking
-Stores usage statistics and metrics for system monitoring.
-
-### Voice Server
-
-**`voice-server/`** - Voice notification system with TTS
-Linux HTTP server for desktop notifications with text-to-speech support:
-- FastAPI-based web server
-- ElevenLabs premium voices
-- systemd service integration
-- Runs as isolated system user (`pai-voice-server`)
-
----
-
-## Execution Protocols
-
-### Context Inheritance Protocol (5-Step Mandatory Process)
-
-Every agent executes this before beginning work:
-
-1. **Task-ID Extraction**: Locate and validate task-id from prompt
-2. **Load Workflow Context**: Read workflow metadata + predecessor agent outputs
-3. **Resolve Previous Unknowns**: Filter and address unknowns for current phase
-4. **Address Blind Spots**: Identify unstated assumptions in predecessor work
-5. **Consolidate Open Area**: Reference established facts without repetition
-
-### Unknown Registry System
-
-Tracks "unknown unknowns" across workflow phases with structured IDs (U1, U2, U3...). Agents flag unknowns with `[NEW-UNKNOWN]` markers, orchestrator assigns IDs, and agents resolve them in designated phases. This ensures no question goes unasked and no assumption goes unvalidated.
-
-### Reasoning Strategies (Applied Throughout)
-
-1. **Semantic Understanding**: Interpret intent, not just literal words
-2. **Chain-of-Thought (CoT)**: Explicit step-by-step reasoning
-3. **Tree-of-Thoughts (ToT)**: Multiple solution path exploration
-4. **Self-Consistency (SC)**: Cross-verification of conclusions
-5. **Socratic Questioning**: Self-interrogation for clarity
-6. **Constitutional Self-Critique**: Review against principles before output
+```
+.claude/
+├── DA.md                           # Directing Agent definition
+├── settings.json                   # Configuration
+│
+├── agents/                         # 7 agent definitions
+│   ├── clarification.md
+│   ├── research.md
+│   ├── analysis.md
+│   ├── synthesis.md
+│   ├── generation.md
+│   ├── validation.md
+│   └── memory.md
+│
+├── docs/                           # System documentation
+│   ├── philosophy.md               # Core principles
+│   ├── cognitive-function-taxonomy.md
+│   ├── skill-catalog.md
+│   └── ...
+│
+├── hooks/                          # Claude Code hooks
+│   ├── user-prompt-submit/         # Entry point for all queries
+│   ├── session-start/              # Session initialization
+│   └── ...
+│
+├── learnings/                      # Progressive learning storage
+│   ├── clarification/
+│   ├── research/
+│   ├── analysis/
+│   ├── synthesis/
+│   ├── generation/
+│   └── validation/
+│
+├── memory/                         # Workflow memory files (gitignored)
+│
+├── orchestration/                  # Python orchestration layer
+│   ├── protocols/
+│   │   ├── reasoning/              # 9-step reasoning protocol
+│   │   ├── execution/              # Post-reasoning execution
+│   │   ├── agent/                  # Agent protocol implementations
+│   │   └── skill/                  # Skill definitions
+│   └── shared/                     # Reusable content
+│
+└── skills/                         # Skill definitions
+    ├── develop-skill/              # Meta-skill for creating skills
+    ├── develop-learnings/          # Learning capture skill
+    └── orchestrate-*/              # 7 atomic skills
+```
 
 ---
 
-## Key System Features
+## Quick Start
 
-### 1. Unknown Registry System
-Systematically tracks and resolves "unknown unknowns" across workflow phases. Agents flag unknowns, orchestrator assigns IDs, designated agents resolve them. Nothing falls through the cracks.
+### Prerequisites
 
-### 2. Gate-Based Validation
-Each phase has explicit Entry Gates (prerequisites) and Exit Gates (completion criteria). Failed validations trigger remediation loops back to earlier phases rather than proceeding with issues.
+- Claude Code CLI installed
+- Project directory with `.claude/` structure from this repository
 
-### 3. Context-Driven Specialization
-The same agent works across vastly different domains by receiving task-specific context at invocation. No need for domain-specific agents - one cognitive function, infinite applications.
+### Basic Usage
 
-### 4. Token Efficiency
-- Scoped context loading: agents read only immediate predecessors, not all previous outputs
-- Strict token budgets: 1,200-token maximum for Johari summaries per agent
-- Compression techniques: decision-focused writing, abbreviations, lists over prose
-- Progressive context pruning: memory files compressed after each phase
-- Reference previous context instead of repeating information
-- Progressive disclosure architecture minimizes context bloat
+1. **Start a conversation** - Any query triggers the reasoning protocol automatically
+   ```
+   User: "Help me build an authentication system"
+   ```
 
-### 5. Quality-First Approach
-- Built-in quality standards appropriate to task type
-- Systematic validation at key checkpoints
-- Security and correctness considerations integrated from start
-- No progression without meeting quality criteria
+2. **Expect clarifying questions** - Step 0 may identify unknowns
+   ```
+   Claude: "Before proceeding, I need to understand:
+            1. What authentication methods? (OAuth, JWT, session-based)
+            2. What's the target platform?
+            ..."
+   ```
 
-### 6. Modularity
-- **Skills** define WHAT (orchestration), **Agents** define HOW (implementation)
-- **Protocols** define operational standards (context management, reasoning)
-- **References** provide reference materials (no duplication)
-- Single point of change for all system components
+3. **Provide answers** - System resumes from where it halted
 
----
+4. **Observe structured execution** - Tasks route through cognitive agents systematically
 
-### Penny: The Master Orchestrator
+### Using Prompt Improvement
 
-Penny serves as the **primary orchestrator** - the meta-cognitive system that coordinates all other agents. While individual agents perform specialized cognitive functions, Penny:
+```
+User: "build me a thing -i"
+```
 
-- Determines which cognitive functions are needed for your goal
-- Sequences agent invocations with proper context handoffs
-- Manages workflow state and tracks progress across phases
-- Ensures quality gates are respected before proceeding
-- Surfaces and resolves unknown unknowns systematically
-- Adapts strategies based on validation outcomes and discoveries
+### Viewing Memory Files
 
-Think of Penny as the conductor of an orchestra - individual agents are the instruments, each excellent at their part, while Penny ensures they work together harmoniously toward your objective.
+```bash
+ls .claude/memory/
+cat .claude/memory/{task_id}-{agent}-memory.md
+```
 
----
+### Key Points
 
-## Cognitive Enhancements
-
-Penny implements cognitive architecture enhancements inspired by ACT-R (Adaptive Control of Thought-Rational) and Soar cognitive architectures:
-
-### GoalMemory Agent (METACOGNITION)
-
-A metacognitive monitor that tracks problem-solving state and detects impasses:
-
-- **Invocation Points:** After each agent completes, and at skill phase transitions
-- **Impasse Types:** CONFLICT (contradictory requirements), MISSING-KNOWLEDGE (information gaps), TIE (equally-weighted options), NO-CHANGE (stalled progress)
-- **Remediation:** Recommends re-invocation, escalation, or continuation based on impasse analysis
-
-### Utility Tracking (ACT-R Inspired)
-
-Learning from routing outcomes to improve future decisions:
-
-- **Feedback Integration:** Routes report success/failure after execution
-- **Utility Scores:** Maintains running estimates of expected outcomes per route
-- **Exploration vs Exploitation:** Balances trying new approaches with using proven routes
-
-### Episodic Memory (Soar Inspired)
-
-Pattern reuse across similar tasks:
-
-- **Episode Capture:** Records successful problem-solving patterns
-- **Semantic Matching:** Finds relevant past episodes for current task context
-- **Pattern Application:** Applies proven strategies to similar new problems
-
-### Context Budgets
-
-Enforced token limits for sustainable multi-agent workflows:
-
-- **Per-Agent Limits:** 5,000 tokens maximum per agent output
-- **Johari Summary Limits:** 1,200 tokens per compressed summary
-- **Memory File Targets:** 300-400 lines to maintain workflow efficiency
+- **Reasoning runs automatically** - You don't need to invoke it
+- **Clarification is expected** - The system asks before assuming
+- **State persists** - Workflows can be resumed
+- **Learnings accumulate** - The system improves over time
 
 ---
 
 ## TODO
 
-This is an **active, evolving project**. Enhancements are added as inspiration strikes and time provides.
+### Known Issues
 
-### Current Priorities
+- **Inconsistent reasoning protocol triggers after plan mode exit** - The reasoning protocol sometimes fails to trigger consistently when exiting plan mode. Requires analysis of the hook interaction between plan mode state and reasoning protocol initialization.
 
-- [ ] **Stop Hook Update** - Update hook to send final message to OpenAI API server for final summarization
-- [ ] **Make system more adaptable** - Replace references to "Penny" with `${DA_NAME}`
-- [ ] **Integrate custom speech-to-text** leveraging current voice server infrastructure
-- [ ] **Verify functionality** of voice-server setup.sh script end-to-end
-### Completed
+### Ongoing
 
-- [x] **Goal-memory-agent protocol** - Created entry.py, complete.py, 7 step files, 7 content files for direct invocation
-- [x] **Rule Based AI** - Implemented hybrid execution with `executor.py` for deterministic routing, FSM sequencing, and validation
-- [x] **Cognitive Enhancements** - GoalMemory agent, Utility Tracking, Episodic Memory, Context Budgets
-- [x] **7th Agent** - Added goal-memory-agent for metacognitive monitoring
-- [x] **Research Agent Depth Levels** - Added quick/standard/deep research modes with Perplexity integration
-- [x] **Context Budget Enforcement** - Implemented 5,000 token per-agent limits
-
-### Future Enhancements
-
-- Refine utility tracking feedback mechanisms based on real-world outcomes
-- Expand episodic memory pattern matching capabilities
-- Additional skills for specialized workflows
-- Continuous refinement based on real-world usage and discoveries
-
----
-
-## Philosophy
-
-Penny is built on the principle that **clarity drives discovery, questions unlock breakthroughs, and shared learning is our only path forward**. We don't assume, we verify. We don't guess, we discover. We don't accept ambiguity, we resolve it.
-
-Our goal is always to discover answers to our **unknown unknowns** so we can learn and grow together. Every interaction is an opportunity to expand the boundaries of our shared knowledge.
-
-### Core Design Principles
-
-The system architecture follows key principles for workflow efficiency and quality:
-
-- **Embedded Validation**: Quality checks integrated into cognitive agents rather than isolated as separate phases
-- **Phase Collapse Through Integration**: Adjacent phases handling related cognitive functions merged when appropriate
-- **Progressive Context Compression**: Each phase compresses learnings into consumable context for downstream phases
-
-These principles ensure workflows remain efficient while maintaining thorough validation and knowledge preservation. For complete details, see `.claude/docs/philosophy.md`.
+- **System benchmarking** - Establish metrics and benchmarks to measure reasoning quality, task completion rates, and system performance
+- Continuous improvement of agent prompts and learnings
+- Expansion of domain-specific learnings as the system is used
+- Performance optimization of orchestration layer

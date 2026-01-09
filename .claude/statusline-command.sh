@@ -26,7 +26,7 @@ session_cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
 cache_read_tokens=$(echo "$input" | jq -r '.context_window.current_usage.cache_read_input_tokens // 0')
 
 # Usage tracking file (single file, resets each month)
-usage_dir="${PAI_DIRECTORY}/.claude/usage"
+usage_dir="${CAII_DIRECTORY}/.claude/usage"
 current_month=$(date +%Y-%m)
 usage_file="${usage_dir}/usage.json"
 
@@ -122,10 +122,10 @@ monthly_output_fmt=$(format_tokens "$cumulative_output")
 cache_read_fmt=$(format_tokens "$cache_read_tokens")
 
 # Count items from specified directories
-# - Commands from ${PAI_DIRECTORY}/.claude/commands/
+# - Commands from ${CAII_DIRECTORY}/.claude/commands/
 # - MCPs from settings.json
-# - Skills from ${PAI_DIRECTORY}/.claude/skills/
-claude_dir="${PAI_DIRECTORY}/.claude"
+# - Skills from ${CAII_DIRECTORY}/.claude/skills/
+claude_dir="${CAII_DIRECTORY}/.claude"
 commands_count=0
 mcps_count=0
 skills_count=0
@@ -198,7 +198,7 @@ WHITE='\033[38;2;255;255;255m'
 
 # Line-specific color assignments
 # LINE 1 - Updated with white connecting words and orange model
-LINE1_PRIMARY="$BRIGHT_PURPLE"       # Primary purple for "Penny"
+LINE1_PRIMARY="$BRIGHT_PURPLE"       # Primary purple for DA name
 MODEL_COLOR="$BRIGHT_ORANGE"         # Orange for model name
 CONNECTING_WORDS="$WHITE"            # White for "here running on", "in", "wielding", "and"
 NUMBERS_COLOR="$WHITE"               # White for all numbers
@@ -284,8 +284,9 @@ fi
 # Cyan color for directory (Atom One Dark cyan)
 DIR_COLOR='\033[38;2;86;182;194m'  # #56b6c2 - Atom One Dark cyan for directory
 
-# LINE 1 - Penny (purple), connecting words (white), model (orange), numbers (white), categories (dark blue)
-printf "${LINE1_PRIMARY}Penny${RESET}${CONNECTING_WORDS} here, running on ${RESET}${MODEL_COLOR}🧠 ${model_name}${RESET}${CONNECTING_WORDS} in ${RESET}${DIR_COLOR}📁 ${dir_name}${RESET}${CONNECTING_WORDS}, wielding: ${RESET}${CONNECTING_WORDS}🪄  ${RESET}${NUMBERS_COLOR}${commands_count}${RESET} ${CATEGORY_COLOR}Commands${RESET}${CONNECTING_WORDS}, ${RESET}${CONNECTING_WORDS}🎯 ${RESET}${NUMBERS_COLOR}${skills_count}${RESET} ${CATEGORY_COLOR}Skills${RESET}${CONNECTING_WORDS}, and ${RESET}${CONNECTING_WORDS}🔌 ${RESET}${NUMBERS_COLOR}${mcps_count}${RESET} ${CATEGORY_COLOR}MCPs${RESET}\n"
+# LINE 1 - DA name (purple), connecting words (white), model (orange), numbers (white), categories (dark blue)
+da_name="${DA_NAME:-AI Assistant}"
+printf "${LINE1_PRIMARY}${da_name}${RESET}${CONNECTING_WORDS} here, running on ${RESET}${MODEL_COLOR}🧠 ${model_name}${RESET}${CONNECTING_WORDS} in ${RESET}${DIR_COLOR}📁 ${dir_name}${RESET}${CONNECTING_WORDS}, wielding: ${RESET}${CONNECTING_WORDS}🪄  ${RESET}${NUMBERS_COLOR}${commands_count}${RESET} ${CATEGORY_COLOR}Commands${RESET}${CONNECTING_WORDS}, ${RESET}${CONNECTING_WORDS}🎯 ${RESET}${NUMBERS_COLOR}${skills_count}${RESET} ${CATEGORY_COLOR}Skills${RESET}${CONNECTING_WORDS}, and ${RESET}${CONNECTING_WORDS}🔌 ${RESET}${NUMBERS_COLOR}${mcps_count}${RESET} ${CATEGORY_COLOR}MCPs${RESET}\n"
 
 # LINE 2 - Commands label (dark blue), Command names (white)
 printf "${LINE2_PRIMARY}🪄 Commands${RESET}${SEPARATOR_COLOR}: ${RESET}${command_names_formatted}${RESET}\n"

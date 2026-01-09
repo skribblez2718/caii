@@ -8,7 +8,7 @@
 
 ## Context Sources
 
-- `${PAI_DIRECTORY}/.claude/memory/task-{task-id}-memory.md`
+- `${CAII_DIRECTORY}/.claude/memory/task-{task-id}-memory.md`
 - Research agent outputs (findings, patterns)
 - Analysis agent outputs (decomposition, risks, dependencies)
 - User requirements and constraints

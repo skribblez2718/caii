@@ -126,7 +126,7 @@ ELSE
 ### G-H-001: Use Absolute Imports Only in Python Projects
 
 **Integration status:** integrated
-**Integrated into:** ["${PAI_DIRECTORY}/.claude/skills/develop-mcp-server/SKILL.md:Phase4:Step3"]
+**Integrated into:** ["${CAII_DIRECTORY}/.claude/skills/develop-mcp-server/SKILL.md:Phase4:Step3"]
 
 **Rationale:**
 - Eliminates import path ambiguity
@@ -152,7 +152,7 @@ Using relative imports causes ImportError when running scripts directly, pytest 
 - Highly domain-specific and task-specific
 - Useful for historical reference but not active guidance
 
-**Action:** Move to `${PAI_DIRECTORY}/.claude/learnings/archive/{function}/{date}/` with metadata
+**Action:** Move to `${CAII_DIRECTORY}/.claude/learnings/archive/{function}/{date}/` with metadata
 - Preserves historical record
 - Removes from active learning files
 - Can be retrieved if needed
@@ -190,7 +190,7 @@ A learning about a specific API's authentication quirk that was generalized into
 **Principle:** Ask clarifying questions when requirements are ambiguous.
 
 **Integration status:** integrated
-**Integrated into:** ["${PAI_DIRECTORY}/.claude/skills/develop-project/SKILL.md:Phase1:Step2"]
+**Integrated into:** ["${CAII_DIRECTORY}/.claude/skills/develop-project/SKILL.md:Phase1:Step2"]
 
 (No rationale, no examples, no failure modes, no additional content)
 
@@ -311,7 +311,7 @@ Update learning entry to confirm integration status:
 
 ```markdown
 **Integration status:** integrated
-**Integrated into:** ["${PAI_DIRECTORY}/.claude/skills/develop-mcp-server/SKILL.md:Phase4:Step3"]
+**Integrated into:** ["${CAII_DIRECTORY}/.claude/skills/develop-mcp-server/SKILL.md:Phase4:Step3"]
 ```
 
 No other changes needed.
@@ -322,7 +322,7 @@ Move file to archive and add archival metadata:
 
 ```markdown
 **Integration status:** integrated (archived)
-**Integrated into:** ["${PAI_DIRECTORY}/.claude/skills/develop-mcp-server/SKILL.md:Phase4:Step3"]
+**Integrated into:** ["${CAII_DIRECTORY}/.claude/skills/develop-mcp-server/SKILL.md:Phase4:Step3"]
 **Archived:** 2025-11-24
 **Archived reason:** Task-specific context, generalized pattern now in skill
 ```

@@ -14,7 +14,7 @@ Research similar skill patterns and identify reusable components.
 When researching skill patterns, investigate:
 
 1. **Existing Skill Review**
-   - Examine `${PAI_DIRECTORY}/.claude/skills/*/SKILL.md` files
+   - Examine `${CAII_DIRECTORY}/.claude/skills/*/SKILL.md` files
    - Identify similar workflow patterns
    - Note effective phase structures
 

@@ -55,7 +55,7 @@ Generate as appropriate:
 ## Memory File Update
 
 Write analysis results to task memory:
-- Path: `${PAI_DIRECTORY}/.claude/memory/task-{task-id}-memory.md`
+- Path: `${CAII_DIRECTORY}/.claude/memory/task-{task-id}-memory.md`
 - Append analysis section with:
   - Framework used
   - Key findings by Johari quadrant

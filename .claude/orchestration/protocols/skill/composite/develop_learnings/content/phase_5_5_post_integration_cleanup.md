@@ -49,7 +49,7 @@ ELSE:
 
 ## Resources
 
-- `${PAI_DIRECTORY}/.claude/skills/develop-learnings/resources/retention-criteria.md`
+- `${CAII_DIRECTORY}/.claude/skills/develop-learnings/resources/retention-criteria.md`
 
 ## Gate Exit Criteria
 

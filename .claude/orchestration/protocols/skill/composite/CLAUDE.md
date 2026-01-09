@@ -167,7 +167,7 @@ Resources are stored in `.claude/skills/{skill-name}/resources/`:
 
 Phase content files reference resources using the full path:
 ```markdown
-**Reference:** `${PAI_DIRECTORY}/.claude/skills/{skill-name}/resources/{file}.md`
+**Reference:** `${CAII_DIRECTORY}/.claude/skills/{skill-name}/resources/{file}.md`
 ```
 
 **Why Separate Locations?**

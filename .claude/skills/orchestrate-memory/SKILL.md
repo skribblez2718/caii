@@ -12,7 +12,7 @@ type: atomic
 
 ## Important Note
 
-**This skill is typically invoked AUTOMATICALLY** by the orchestration layer after agent completions and at phase transitions. However, it can also be explicitly invoked when Penny determines additional metacognitive assessment is beneficial - such as after completing complex tasks or when progress appears stalled.
+**This skill is typically invoked AUTOMATICALLY** by the orchestration layer after agent completions and at phase transitions. However, it can also be explicitly invoked when the orchestrator determines additional metacognitive assessment is beneficial - such as after completing complex tasks or when progress appears stalled.
 
 ## Interface
 
@@ -32,29 +32,6 @@ type: atomic
 | impasse_detected | boolean | Whether an impasse was detected |
 | impasse_type | string | Type of impasse if detected (CONFLICT, MISSING-KNOWLEDGE, TIE, NO-CHANGE) |
 | action | string | Recommended action (continue, re-invoke, escalate, abort) |
-
-## Agent Sequence
-
-### Step 1: Metacognitive Assessment
-
-**Agent:** memory
-**Cognitive Function:** METACOGNITION
-
-**Context Loading:** IMMEDIATE_PREDECESSORS
-**Predecessors:** The agent that just completed (analysis, research, etc.)
-
-**Gate Entry:**
-- Previous agent output available
-- Workflow state accessible
-
-**Gate Exit:**
-- Progress assessed
-- Impasse detection complete
-- Remediation recommendation provided
-
-**Memory Output:** Standard format per `${PAI_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/`
-- Agent: memory
-- Task: {task_id}
 
 ## Impasse Types (from Soar Cognitive Architecture)
 
@@ -87,7 +64,7 @@ The memory agent is designed for concise, actionable output. Prioritize essentia
 
 ## Manual Invocation
 
-Penny can explicitly invoke when metacognitive assessment would be beneficial:
+The orchestrator can explicitly invoke when metacognitive assessment would be beneficial:
 
 ```
 /orchestrate-memory --task-id {task-id}
@@ -101,6 +78,6 @@ Penny can explicitly invoke when metacognitive assessment would be beneficial:
 
 ## References
 
-- `${PAI_DIRECTORY}/.claude/agents/memory.md` - Full agent definition
-- `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/memory/` - Protocol implementation
-- `${PAI_DIRECTORY}/.claude/docs/cognitive-enhancements.md` - GoalMemory integration documentation
+- `${CAII_DIRECTORY}/.claude/agents/memory.md` - Full agent definition
+- `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/memory/` - Protocol implementation
+- `${CAII_DIRECTORY}/.claude/docs/cognitive-enhancements.md` - GoalMemory integration documentation

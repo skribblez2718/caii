@@ -46,25 +46,57 @@ Ask ONLY when essential information is missing:
 
 ---
 
-## CRITICAL RULE
+## CRITICAL RULE: MANDATORY AskUserQuestion INVOCATION
 
-**If ANY clarifying questions exist, STOP.**
+**If ANY clarifying questions exist, you MUST:**
 
-Send ONE consolidated clarifying turn with all questions. Wait for answers before proceeding to Step 1.
+1. **STOP** - Do not proceed to Step 1
+2. **INVOKE AskUserQuestion tool** - Not just print questions as markdown
+3. **WAIT** for user response before continuing
 
-**DO NOT PROCEED** with Steps 1-8 until ambiguity is resolved.
+### AskUserQuestion Tool Format
+
+When questions exist, invoke with this structure:
+
+```
+AskUserQuestion tool parameters:
+{
+  "questions": [
+    {
+      "question": "Clear, specific question ending with ?",
+      "header": "Short label (max 12 chars)",
+      "options": [
+        {"label": "Option A", "description": "What this means"},
+        {"label": "Option B", "description": "What this means"}
+      ],
+      "multiSelect": false
+    }
+  ]
+}
+```
+
+**DO NOT:**
+- Print questions as markdown and continue
+- Assume answers to unresolved questions
+- Proceed with Steps 1-8 until ALL questions are answered
 
 ---
 
 ## Output Requirements
 
-After processing this step, present:
+After processing this step:
+
+### If NO clarification needed:
 
 1. **SHARE summary:** Key inferences about the task (2-4 bullet points)
-2. **Questions (if any):** Prioritized list (max 5), each with context for why it matters
-3. **Assumptions:** What will be assumed if proceeding without clarification
-4. **Blind spots identified:** Potential unknowns surfaced through exploration
+2. **Assumptions:** What will be assumed during reasoning
+3. **Blind spots identified:** Potential unknowns surfaced
 
-**If no clarification needed:** State "No critical ambiguities detected - proceeding to formal reasoning" and continue to Step 1.
+State: "No critical ambiguities detected - proceeding to formal reasoning" and continue to Step 1.
 
-**If clarification needed:** State "HALTING FOR CLARIFICATION" and present questions. Wait for user response.
+### If clarification IS needed:
+
+1. **SHARE summary:** Key inferences about the task (2-4 bullet points)
+2. **HALT:** State "HALTING FOR CLARIFICATION"
+3. **INVOKE AskUserQuestion tool** with your questions (max 5, prioritized by importance)
+4. **WAIT** for user response - do NOT proceed to Step 1

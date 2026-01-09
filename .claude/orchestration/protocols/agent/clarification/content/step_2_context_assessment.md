@@ -9,7 +9,7 @@
 
 ## Context Loading
 
-Load from `${PAI_DIRECTORY}/.claude/memory/task-{task-id}-memory.md`:
+Load from `${CAII_DIRECTORY}/.claude/memory/task-{task-id}-memory.md`:
 - Original request/requirement
 - Any previous agent outputs
 - User-provided context

@@ -23,7 +23,7 @@ type: atomic
 | Output | Type | Description |
 |--------|------|-------------|
 | status | PASS\|FAIL | Execution result |
-| memory_file | string | Path to output (`${PAI_DIRECTORY}/.claude/memory/task-{id}-{agent-name}-memory.md`) |
+| memory_file | string | Path to output (`${CAII_DIRECTORY}/.claude/memory/task-{id}-{agent-name}-memory.md`) |
 
 ## Agent Sequence
 
@@ -57,7 +57,7 @@ type: atomic
 
 ## References
 
-- `${PAI_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` - Memory output format
-- `${PAI_DIRECTORY}/.claude/docs/context-loading-reference.md` - Context loading patterns
-- `${PAI_DIRECTORY}/.claude/docs/agent-protocol-reference.md` - Quick reference checklist
-- `${PAI_DIRECTORY}/.claude/skills/develop-skill/resources/agent-invocation-template.md` - Invocation patterns
+- `${CAII_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` - Memory output format
+- `${CAII_DIRECTORY}/.claude/docs/context-loading-reference.md` - Context loading patterns
+- `${CAII_DIRECTORY}/.claude/docs/agent-protocol-reference.md` - Quick reference checklist
+- `${CAII_DIRECTORY}/.claude/skills/develop-skill/resources/agent-invocation-template.md` - Invocation patterns

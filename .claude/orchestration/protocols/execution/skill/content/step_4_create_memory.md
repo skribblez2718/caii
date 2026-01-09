@@ -4,7 +4,7 @@
 
 ## Memory File Location
 
-Create: `${PAI_DIRECTORY}/.claude/memory/task-{task-id}-memory.md`
+Create: `${CAII_DIRECTORY}/.claude/memory/task-{task-id}-memory.md`
 
 ## Required Sections
 
@@ -70,7 +70,7 @@ After creating the file, verify:
 
 Create the memory file and output:
 ```
-MEMORY FILE CREATED: ${PAI_DIRECTORY}/.claude/memory/task-{task-id}-memory.md
+MEMORY FILE CREATED: ${CAII_DIRECTORY}/.claude/memory/task-{task-id}-memory.md
 SECTIONS VERIFIED: [list of sections]
 STATUS: READY FOR AGENT INVOCATION
 ```

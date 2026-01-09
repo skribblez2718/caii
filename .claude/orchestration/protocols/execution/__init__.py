@@ -2,7 +2,7 @@
 protocols/execution
 ===================
 
-Python-enforced execution protocols for the Penny AI system.
+Python-enforced execution protocols for the orchestration system.
 
 This package provides:
 - Two execution protocol types (skill, dynamic)

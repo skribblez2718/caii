@@ -44,8 +44,40 @@ Ask ONLY when essential information is missing:
 
 ---
 
-## CRITICAL RULE
+## CRITICAL RULE: Question Documentation for Subagents
 
-**If ANY clarifying questions exist, STOP.**
+**If ANY clarifying questions exist:**
 
-Send ONE consolidated clarifying turn with all questions. Wait for answers before proceeding to the next step.
+### Subagent Limitation
+As a subagent, you **CANNOT** invoke `AskUserQuestion` directly. Instead:
+
+1. **Document all questions** in memory file Section 4 (User Questions)
+2. **Set flag:** `clarification_required: true`
+3. **Return your output** - the main orchestrator will present questions to user
+
+### Memory File Section 4 Format
+
+```json
+{
+  "clarification_required": true,
+  "questions": [
+    {
+      "id": "Q1",
+      "priority": "P0",
+      "question": "Clear question text ending with ?",
+      "context": "Why this question matters",
+      "options": ["Option A", "Option B"],
+      "default": "Option A",
+      "multi_select": false
+    }
+  ],
+  "blocking": true
+}
+```
+
+### Priority Levels
+- **P0:** Blocking - cannot proceed without answer
+- **P1:** Important - significantly affects approach
+- **P2:** Clarifying - refines understanding but can assume default
+
+**DO NOT PROCEED** to next step with unresolved P0 questions. Document them and let the main orchestrator handle user interaction.

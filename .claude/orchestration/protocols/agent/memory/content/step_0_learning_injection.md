@@ -2,9 +2,9 @@
 
 ## Instructions
 
-1. Load INDEX section from `${PAI_DIRECTORY}/.claude/learnings/metacognition/heuristics.md` (~100-150 tokens)
-2. Load INDEX section from `${PAI_DIRECTORY}/.claude/learnings/metacognition/anti-patterns.md` (~50-100 tokens)
-3. Load INDEX section from `${PAI_DIRECTORY}/.claude/learnings/metacognition/checklists.md` (~50-100 tokens)
+1. Load INDEX section from `${CAII_DIRECTORY}/.claude/learnings/metacognition/heuristics.md` (~100-150 tokens)
+2. Load INDEX section from `${CAII_DIRECTORY}/.claude/learnings/metacognition/anti-patterns.md` (~50-100 tokens)
+3. Load INDEX section from `${CAII_DIRECTORY}/.claude/learnings/metacognition/checklists.md` (~50-100 tokens)
 4. Scan INDEX for patterns matching current impasse context
 5. If pattern match found: Perform targeted grep for that specific section
 6. Apply loaded heuristics/anti-patterns/checklists to current assessment

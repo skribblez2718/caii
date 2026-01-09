@@ -264,9 +264,82 @@ This will:
 2. Extract generalizable heuristics
 3. Identify anti-patterns to avoid
 4. Create reusable checklists
-5. Store learnings in `${{PAI_DIRECTORY}}/.claude/learnings/`
+5. Store learnings in `${{CAII_DIRECTORY}}/.claude/learnings/`
 
 ---"""
+
+
+def build_learnings_question(task_id: str, reason: Optional[str] = None) -> dict:
+    """
+    Build AskUserQuestion-compatible question for develop-learnings prompt.
+
+    Args:
+        task_id: The completed task ID
+        reason: Optional reason from learning trigger criteria
+
+    Returns:
+        Question dict for AskUserQuestion tool
+    """
+    context = "Capture insights from this task for future reference."
+    if reason:
+        context = f"{reason}. {context}"
+
+    return {
+        "question": "Would you like to capture learnings from this task?",
+        "header": "Learnings",
+        "options": [
+            {
+                "label": "Yes, capture learnings",
+                "description": f"Run develop-learnings skill to extract heuristics, anti-patterns, and checklists from task {task_id[:8]}..."
+            },
+            {
+                "label": "No, skip this time",
+                "description": "Continue without capturing learnings. Can run /develop-learnings manually later."
+            }
+        ],
+        "multiSelect": False
+    }
+
+
+def build_learnings_directive(task_id: str, reason: Optional[str] = None) -> str:
+    """
+    Build complete AskUserQuestion invocation directive for learnings prompt.
+
+    This generates the directive that the main orchestrator prints after
+    task completion to ask the user about running develop-learnings.
+
+    Args:
+        task_id: The completed task ID
+        reason: Optional reason from learning trigger criteria
+
+    Returns:
+        Formatted directive string for Claude to invoke AskUserQuestion
+    """
+    import json
+    question = build_learnings_question(task_id, reason)
+    questions_json = json.dumps({"questions": [question]}, indent=2)
+
+    reason_text = f"**Trigger reason:** {reason}\n\n" if reason else ""
+
+    return f"""
+---
+
+## Task Complete: Learnings Opportunity
+
+{reason_text}You **MUST** invoke the `AskUserQuestion` tool to ask the user about capturing learnings:
+
+```json
+{questions_json}
+```
+
+**If user selects "Yes, capture learnings":**
+- Invoke the Skill tool with: `skill: "develop-learnings", args: "--source-task {task_id}"`
+
+**If user selects "No, skip this time":**
+- Continue with normal workflow completion
+
+---
+"""
 
 
 # CLI for testing

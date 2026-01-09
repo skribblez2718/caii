@@ -10,7 +10,7 @@ tool usage.
 
 Note: Skill routing is now handled semantically through the reasoning protocol's
 Step 3b (skill detection) and Step 4 (task routing), not by keyword matching.
-Penny's semantic understanding from DA.md provides robust skill selection.
+The orchestrator's semantic understanding from DA.md provides robust skill selection.
 
 Philosophy Alignment:
 - PRINCIPLE 2: Orchestration-Implementation Separation
@@ -102,7 +102,7 @@ class GateDecision(Enum):
 class RoutingGate:
     """Validates task triviality using LLM-based self-assessment.
 
-    This gate uses structured prompts to guide Penny through explicit
+    This gate uses structured prompts to guide the orchestrator through explicit
     evaluation of all 5 trivial criteria, then parses the yes/no responses
     to make a routing decision.
 
@@ -280,7 +280,7 @@ Replace "YES or NO" with your actual answer. Use UPPERCASE YES or NO only."""
         (fail-secure behavior - when in doubt, require agent).
 
         Args:
-            response: Penny's response containing YES/NO answers
+            response: The orchestrator's response containing YES/NO answers
 
         Returns:
             TrivialCriteria: Dataclass with boolean values for each criterion
@@ -380,7 +380,7 @@ Replace "YES or NO" with your actual answer. Use UPPERCASE YES or NO only."""
 
         Args:
             task_description: Description of the task being evaluated
-            llm_response: Penny's response to the assessment prompt
+            llm_response: The orchestrator's response to the assessment prompt
             context: Optional additional context
 
         Returns:
@@ -541,10 +541,10 @@ def assess_task_triviality(task_description: str) -> str:
         task_description: Description of task to evaluate
 
     Returns:
-        str: Formatted self-assessment prompt for Penny
+        str: Formatted self-assessment prompt for the orchestrator
 
     Example:
         >>> prompt = assess_task_triviality("Update version in package.json")
-        >>> # Present prompt to Penny for self-assessment
+        >>> # Present prompt to the orchestrator for self-assessment
     """
     return RoutingGate.generate_assessment_prompt(task_description)

@@ -336,39 +336,14 @@ def get_memory_path(task_id: str, agent_name: str, base_path: Optional[Path] = N
 
 def print_validation_report(result: ValidationResult) -> None:
     """
-    Print a detailed validation report.
+    Print a minimal validation report.
 
-    Useful for debugging validation failures.
+    Only prints on validation failure, keeps output minimal.
     """
-    print()
-    print("=" * 70)
-    print("# Memory File Validation Report")
-    print("=" * 70)
-    print()
-    print(f"Agent: `{result.agent_name}`")
-    print(f"Path: `{result.memory_path}`")
-    print(f"Timestamp: {result.timestamp}")
-    print()
+    if result.is_valid:
+        return  # No output for valid files
 
-    print("## File Status")
-    print(f"- Exists: {'✅ Yes' if result.exists else '❌ No'}")
-    print(f"- Content Length: {result.content_length} characters")
-    print(f"- Minimum Met: {'✅ Yes' if result.has_minimum_content else '❌ No'}")
-    print()
-
-    print("## Required Sections")
-    for section in result.required_sections:
-        found = section in result.found_sections
-        status = '✅' if found else '❌'
-        print(f"  {status} {section}")
-    print()
-
-    if result.errors:
-        print("## Errors")
-        for error in result.errors:
-            print(f"  ❌ {error}")
-        print()
-
-    print("## Result")
-    print(result.summary())
-    print("=" * 70)
+    # Only print errors for invalid files
+    print(f"Validation failed: {result.agent_name}")
+    for error in result.errors:
+        print(f"  - {error}")

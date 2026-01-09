@@ -39,7 +39,7 @@ Move detailed phase output to archive, replace with summary link.
 ### Steps
 
 1. **Extract** completed phase full output
-2. **Write** to `${PAI_DIRECTORY}/.claude/memory/archives/task-{id}-phase-{n}.md`
+2. **Write** to `${CAII_DIRECTORY}/.claude/memory/archives/task-{id}-phase-{n}.md`
 3. **Generate** compressed summary (1,200 tokens max)
 4. **Replace** phase section with summary + archive link
 5. **Update** workflow metadata with archive reference

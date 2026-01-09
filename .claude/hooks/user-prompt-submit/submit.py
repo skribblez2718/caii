@@ -4,7 +4,17 @@ UserPromptSubmit Hook - Reasoning Protocol Enforcement
 
 This hook executes the Mandatory Reasoning Protocol for EVERY prompt.
 
-For Penny (main orchestrator):
+Supported prompt flags (can appear in any order at end of prompt):
+    -i    Improve prompt via external model before processing
+    -b    Bypass reasoning protocol (direct execution mode)
+
+Examples:
+    "fix the bug -b"         → Bypass reasoning, execute directly
+    "add feature -i"         → Improve prompt, then run reasoning
+    "refactor code -i -b"    → Improve prompt, then bypass reasoning
+    "refactor code -b -i"    → Same as above (order doesn't matter)
+
+For the main orchestrator:
     - Uses entry.py with full 8-step protocol
 
 For Cognitive Agents (subagents):
@@ -14,6 +24,10 @@ For Cognitive Agents (subagents):
 For Plan Mode:
     - Exits early (no orchestration during read-only planning)
     - The Stop hook detects plan mode exit and triggers orchestration then
+
+For Bypass Mode (-b flag):
+    - Exits early, allowing Claude to handle the prompt directly
+    - Useful for trivial tasks and follow-up prompts
 
 This is the ENFORCEMENT mechanism that guarantees Python orchestration runs.
 """
@@ -44,6 +58,22 @@ class HookInput(TypedDict, total=False):
     prompt: str
 
 
+class ParsedPrompt(TypedDict):
+    """Result of parsing flags from a prompt."""
+
+    content: str    # The prompt text with flags stripped
+    improve: bool   # -i flag: improve prompt via external model
+    bypass: bool    # -b flag: bypass reasoning protocol
+
+
+# Known prompt flags - add new flags here
+# Maps flag string to attribute name in ParsedPrompt
+PROMPT_FLAGS: dict[str, str] = {
+    '-i': 'improve',    # Improve prompt via external model
+    '-b': 'bypass',     # Bypass reasoning protocol
+}
+
+
 def _read_json_from_stdin(stdin: TextIO = sys.stdin) -> HookInput:
     """
     Read and return a JSON object from ``stdin`` as a :class:`HookInput`.
@@ -60,6 +90,55 @@ def _extract_prompt(payload: HookInput) -> str:
     """
     value: Any = payload.get("prompt", "")
     return value if isinstance(value, str) else ""
+
+
+def parse_prompt_flags(prompt: str) -> ParsedPrompt:
+    """
+    Parse CLI-style flags from the end of a prompt.
+
+    Flags can appear in any order at the end of the prompt.
+    Only flags at the very end are recognized - flags embedded
+    in the middle of text are treated as content.
+
+    Examples:
+        "my prompt -b"      → content="my prompt", bypass=True
+        "my prompt -i -b"   → content="my prompt", improve=True, bypass=True
+        "my prompt -b -i"   → content="my prompt", improve=True, bypass=True
+        "my prompt"         → content="my prompt", all flags False
+        "use -i flag -b"    → content="use -i flag", bypass=True
+
+    Args:
+        prompt: The raw user prompt potentially ending with flags
+
+    Returns:
+        ParsedPrompt with content and flag states
+    """
+    result: ParsedPrompt = {
+        'content': prompt,
+        'improve': False,
+        'bypass': False,
+    }
+
+    # Split prompt into words and scan from the end
+    words = prompt.rstrip().split()
+    if not words:
+        return result
+
+    # Collect flags from the end of the prompt
+    flags_found: list[str] = []
+    while words and words[-1] in PROMPT_FLAGS:
+        flag = words.pop()
+        flags_found.append(flag)
+
+    # Set flag states
+    for flag in flags_found:
+        attr_name = PROMPT_FLAGS[flag]
+        result[attr_name] = True  # type: ignore[literal-required]
+
+    # Reconstruct content without flags
+    result['content'] = ' '.join(words).rstrip()
+
+    return result
 
 
 def is_plan_mode(payload: HookInput) -> bool:
@@ -162,32 +241,30 @@ def improve_prompt(prompt: str) -> Optional[str]:
     return None
 
 
-def handle_prompt_improvement(prompt: str) -> None:
+def handle_prompt_improvement(prompt: str, pai_dir: str) -> Tuple[bool, str]:
     """
-    Handle -i suffix: improve prompt via external model and print to stdout.
+    Handle -i flag: improve prompt via external model.
 
-    Simply prints the improved prompt to stdout so the user can see it
-    and Claude receives it as additional context. This is the simplest
-    approach recommended by Claude Code docs.
+    Returns the improved prompt (or original on failure) so the caller
+    can continue with normal reasoning protocol flow.
 
     Args:
-        prompt: The user's original prompt (including -i suffix)
-    """
-    # Strip -i suffix
-    clean_prompt = prompt.rstrip()[:-2].rstrip()
+        prompt: The user's prompt (flags already stripped by parser)
+        pai_dir: CAII_DIRECTORY path for reasoning protocol
 
-    # Attempt improvement
-    improved = improve_prompt(clean_prompt)
+    Returns:
+        Tuple of (success, prompt_to_use) - prompt_to_use is improved or original
+    """
+    # Attempt improvement (prompt already has flags stripped)
+    improved = improve_prompt(prompt)
 
     if improved:
-        # Success: Print improved prompt to stdout
-        # User sees it, Claude receives it as context
-        print(improved, flush=True)
-        sys.exit(0)
+        # Success: Return improved prompt
+        return (True, improved)
     else:
-        # Failure: Let original prompt through (without -i suffix)
+        # Failure: Return original prompt
         print("Prompt improvement failed, using original", file=sys.stderr)
-        sys.exit(0)
+        return (False, prompt)
 
 
 def check_pending_dispatch(pai_dir: str) -> Tuple[bool, str]:
@@ -198,7 +275,7 @@ def check_pending_dispatch(pai_dir: str) -> Tuple[bool, str]:
     directive printed by complete.py wasn't processed.
 
     Args:
-        pai_dir: PAI_DIRECTORY path
+        pai_dir: CAII_DIRECTORY path
 
     Returns:
         Tuple of (has_pending, dispatch_directive)
@@ -216,7 +293,7 @@ def check_pending_dispatch(pai_dir: str) -> Tuple[bool, str]:
             directive_command = dispatch_info.get("directive_command", "")
             route = dispatch_info.get("route", "")
 
-            # Use MANDATORY_DIRECTIVE format that Penny recognizes from her DA.md training
+            # Use MANDATORY_DIRECTIVE format that the orchestrator recognizes from DA.md training
             directive = f"""
 **MANDATORY - EXECUTE IMMEDIATELY BEFORE ANY OTHER ACTION:**
 `{directive_command}`
@@ -249,7 +326,7 @@ def check_active_session(pai_dir: str) -> Tuple[bool, str]:
     continuing an unrelated session when the user starts a new task.
 
     Args:
-        pai_dir: PAI_DIRECTORY path
+        pai_dir: CAII_DIRECTORY path
 
     Returns:
         Tuple of (has_active, session_id) - session_id is empty if no active session
@@ -285,7 +362,7 @@ def main() -> None:
     Execute appropriate reasoning protocol entry point.
 
     For Plan Mode: Exits early (Stop hook handles plan mode exit triggering)
-    For Penny: Uses entry.py (full 8 steps)
+    For Main Orchestrator: Uses entry.py (full 8 steps)
     For Agents: Uses entry.py --agent-mode (skips Step 4)
 
     The stdout becomes part of Claude's context, containing either:
@@ -303,24 +380,35 @@ def main() -> None:
         if not prompt.strip():
             sys.exit(0)  # Empty prompt, nothing to do
 
-        # Check for -i suffix (prompt improvement request)
-        # Handled before plan mode so improvements work in any mode
-        if prompt.rstrip().endswith('-i'):
-            handle_prompt_improvement(prompt)
-            return  # Exit after handling (handle_prompt_improvement calls sys.exit)
+        # Get CAII_DIRECTORY early (needed for prompt improvement)
+        pai_dir = os.environ.get("CAII_DIRECTORY")
+        if not pai_dir:
+            print("ERROR: CAII_DIRECTORY not set", file=sys.stderr)
+            sys.exit(1)
 
-        # Plan mode: exit early, Stop hook handles triggering on plan mode exit
+        # Parse flags from prompt (order-independent)
+        parsed = parse_prompt_flags(prompt)
+        prompt = parsed['content']
+
+        # Handle -i flag: improve prompt via external model
+        # Works in all modes (including plan mode)
+        if parsed['improve']:
+            success, prompt = handle_prompt_improvement(prompt, pai_dir)
+            if success:
+                print(f"**Improved Prompt:**\n{prompt}\n", flush=True)
+
+        # Handle -b flag: bypass reasoning protocol entirely
+        # Exit silently - Claude sees just the clean prompt
+        if parsed['bypass']:
+            sys.exit(0)
+
+        # Plan mode: exit early AFTER prompt improvement and bypass check
+        # Stop hook handles triggering orchestration on plan mode exit
         if is_plan_mode(payload):
             sys.exit(0)
 
-        # Get PAI_DIRECTORY from environment
-        pai_dir = os.environ.get("PAI_DIRECTORY")
-        if not pai_dir:
-            print("ERROR: PAI_DIRECTORY not set", file=sys.stderr)
-            sys.exit(1)
-
         # Check for pending dispatch FIRST (ensures execution chain continues)
-        # Only check for Penny context, not subagents
+        # Only check for main orchestrator context, not subagents
         if not is_subagent_session():
             has_pending, dispatch_directive = check_pending_dispatch(pai_dir)
             if has_pending:
@@ -331,15 +419,15 @@ def main() -> None:
         # Determine context type and set flags
         is_agent = is_subagent_session()
 
-        # Both Penny and Agent contexts use unified entry.py
+        # Both main orchestrator and Agent contexts use unified entry.py
         entry_script = Path(pai_dir) / ".claude/orchestration/protocols/reasoning/entry.py"
-        context_type = "agent" if is_agent else "penny"
+        context_type = "agent" if is_agent else "orchestrator"
 
         if not entry_script.exists():
             print(f"ERROR: {entry_script.name} not found: {entry_script}", file=sys.stderr)
             sys.exit(1)
 
-        # Check for active session to resume (only for Penny, not agents)
+        # Check for active session to resume (only for main orchestrator, not agents)
         session_to_resume = None
         if not is_agent:
             has_active, active_session_id = check_active_session(pai_dir)

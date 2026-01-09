@@ -34,6 +34,7 @@ from config.config import (
     ProtocolType,
     PROTOCOL_STEPS,
     PROTOCOL_TOTAL_STEPS,
+    PROTOCOL_TO_DIR,
     get_step_content_path,
     get_protocol_steps_dir,
     EXECUTION_PROTOCOLS_ROOT,
@@ -341,14 +342,16 @@ document your results clearly.
             return 1
 
         # Extract session ID from filename
-        # Format: {protocol-name}-{session-id}.json
+        # Format: {dir-name}-{session-id}.json (e.g., dynamic-da8c22f7-b01.json)
+        # Note: dir_name comes from PROTOCOL_TO_DIR, not ptype.name
         filename = state_path.stem
-        protocol_prefix = f"{ptype.name.lower().replace('_', '-')}-"
+        dir_name = PROTOCOL_TO_DIR[ptype]  # e.g., "dynamic" or "skill"
+        protocol_prefix = f"{dir_name}-"
         if filename.startswith(protocol_prefix):
             session_id = filename[len(protocol_prefix):]
         else:
-            # Fallback: split on last dash
-            parts = filename.rsplit("-", 1)
+            # Fallback: split on first dash (dir_name doesn't contain dashes)
+            parts = filename.split("-", 1)
             session_id = parts[-1] if len(parts) > 1 else filename
 
         state = ExecutionState.load(ptype, session_id)

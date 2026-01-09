@@ -56,17 +56,17 @@ class Step5Complete(BaseStep):
         """Extract task ID from workflow context."""
         # Try step 1 output
         step1 = self.state.get_step_output(1)
-        if step1 and "penny_response" in step1:
+        if step1 and "orchestrator_response" in step1:
             # Use first 50 chars as a simplified task ID
-            response = step1["penny_response"][:50].strip()
+            response = step1["orchestrator_response"][:50].strip()
             return f"dynamic-{hash(response) % 10000:04d}"
         return f"dynamic-{self.state.session_id[:8]}"
 
     def _extract_task_description(self) -> str:
         """Extract task description from workflow context."""
         step1 = self.state.get_step_output(1)
-        if step1 and "penny_response" in step1:
-            return step1["penny_response"][:500]
+        if step1 and "orchestrator_response" in step1:
+            return step1["orchestrator_response"][:500]
         return f"Dynamic skill sequencing task {self.state.session_id}"
 
     def _extract_skills_invoked(self) -> List[str]:
@@ -74,8 +74,8 @@ class Step5Complete(BaseStep):
         skills = []
 
         step3 = self.state.get_step_output(3)
-        if step3 and "penny_response" in step3:
-            response = step3["penny_response"]
+        if step3 and "orchestrator_response" in step3:
+            response = step3["orchestrator_response"]
             # Look for orchestrate-* skill mentions
             skill_indicators = [
                 "orchestrate-clarification", "orchestrate-research",
@@ -157,34 +157,16 @@ class Step5Complete(BaseStep):
     def print_next_directive(self) -> None:
         """
         Override to indicate protocol completion instead of next step.
-        Also triggers develop-learnings evaluation.
         """
-        print("## Dynamic Skill Sequencing Complete")
-        print()
         print("**DYNAMIC_SKILL_SEQUENCING_COMPLETE**")
-        print()
 
         # Trigger develop-learnings evaluation
         if EPISODIC_MEMORY_AVAILABLE:
             episode = self._create_episode_for_learning_trigger()
             if episode:
                 should_learn, reason = should_trigger_learnings(episode)
-
                 if should_learn:
                     print(format_trigger_prompt(episode, reason))
-                else:
-                    # Fallback: suggest learnings capture as an option
-                    print("---")
-                    print()
-                    print("## Learnings Capture Opportunity")
-                    print()
-                    print("This dynamic skill sequence completed cognitive processing that may")
-                    print("have generated valuable insights. Consider capturing learnings:")
-                    print()
-                    print("```")
-                    print(f"/develop-learnings --source-task {episode.task_id}")
-                    print("```")
-                    print()
 
 
 # Allow running as script

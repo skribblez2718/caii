@@ -2,7 +2,7 @@
 universal_learnings.py
 ======================
 
-Universal learning capture system for the Penny AI system.
+Universal learning capture system for the orchestration system.
 
 This module evaluates EVERY completed task (not just skills/agents) for
 potential learning opportunities. This supports the core system principle
@@ -168,10 +168,10 @@ def should_evaluate_for_learnings(context: TaskContext) -> Tuple[bool, str]:
 
 def generate_learning_evaluation_prompt(context: TaskContext, reason: str) -> str:
     """
-    Generate a prompt for Penny to evaluate learnings from a task.
+    Generate a prompt for the orchestrator to evaluate learnings from a task.
 
     This is NOT a directive to execute develop-learnings skill, but rather
-    a prompt for Penny to consider what was learned and whether formal
+    a prompt for the orchestrator to consider what was learned and whether formal
     capture is warranted.
 
     Args:

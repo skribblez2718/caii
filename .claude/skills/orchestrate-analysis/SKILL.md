@@ -25,30 +25,6 @@ type: atomic
 | status | PASS\|FAIL | Execution result |
 | memory_file | string | Path to analysis output (`.claude/memory/task-{id}-analysis-memory.md`) |
 
-## Agent Sequence
-
-### Step 1: Analysis
-
-**Agent:** analysis
-**Cognitive Function:** ANALYSIS
-
-**Context Loading:** IMMEDIATE_PREDECESSORS
-**Predecessors:** clarification (or workflow-metadata if first)
-
-**Gate Entry:**
-- Analysis scope defined
-- Input artifacts available
-
-**Gate Exit:**
-- Complexity assessed
-- Risks identified
-- Dependencies mapped
-- Patterns recognized
-
-**Memory Output:** Standard format per `${PAI_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/`
-- Agent: analysis
-- Task: {task_id}
-
 ## Exit Criteria
 
 - [ ] Problem decomposed into components
@@ -59,7 +35,7 @@ type: atomic
 
 ## References
 
-- `${PAI_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` - Memory output format
-- `${PAI_DIRECTORY}/.claude/docs/context-loading-reference.md` - Context loading patterns
-- `${PAI_DIRECTORY}/.claude/docs/agent-protocol-reference.md` - Quick reference checklist
-- `${PAI_DIRECTORY}/.claude/skills/develop-skill/resources/agent-invocation-template.md` - Invocation patterns
+- `${CAII_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` - Memory output format
+- `${CAII_DIRECTORY}/.claude/docs/context-loading-reference.md` - Context loading patterns
+- `${CAII_DIRECTORY}/.claude/docs/agent-protocol-reference.md` - Quick reference checklist
+- `${CAII_DIRECTORY}/.claude/skills/develop-skill/resources/agent-invocation-template.md` - Invocation patterns

@@ -48,7 +48,7 @@ This schema defines the structure for all learning entries across cognitive func
   - Format: `["{file-path}:{section}:{subsection}", ...]`
   - Only present if integration_status = "integrated"
   - Allows tracing learning to skill rules
-  - Example: `integrated_into: ["${PAI_DIRECTORY}/.claude/skills/develop-project/SKILL.md:Phase2:Step3b"]`
+  - Example: `integrated_into: ["${CAII_DIRECTORY}/.claude/skills/develop-project/SKILL.md:Phase2:Step3b"]`
 
 ### Body Fields
 
@@ -116,7 +116,7 @@ This schema defines the structure for all learning entries across cognitive func
 - Origin unknowns: []
 - Domain tags: [python, imports]
 - Integration status: integrated
-- Integrated into: ["${PAI_DIRECTORY}/.claude/skills/develop-mcp-server/SKILL.md:Phase4:Step3"]
+- Integrated into: ["${CAII_DIRECTORY}/.claude/skills/develop-mcp-server/SKILL.md:Phase4:Step3"]
 - Situation: When generating Python code for any project structure.
 - Principle: Always use absolute imports starting from the package root (from src.module), never relative imports.
 - Rationale: Eliminates import path ambiguity, prevents ImportError in various execution contexts, enables proper pytest execution.

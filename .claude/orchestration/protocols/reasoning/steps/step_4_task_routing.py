@@ -50,7 +50,7 @@ class Step4TaskRouting(BaseStep):
     When loop-back occurs, previous routing attempts are shown for context.
 
     Routing is PURELY SEMANTIC - no keyword matching or confidence thresholds.
-    Penny decides based on her understanding of DA.md patterns.
+    The orchestrator decides based on understanding of DA.md patterns.
 
     Note: Agent mode sessions skip this step - they go from Step 3b directly
     to Step 5 (Self-Consistency).
@@ -72,10 +72,10 @@ class Step4TaskRouting(BaseStep):
 
     def get_extra_context(self) -> str:
         """
-        Generate semantic routing prompt for Penny to make the routing decision.
+        Generate semantic routing prompt for the orchestrator to make the routing decision.
 
         PURELY SEMANTIC routing - no keyword matching or confidence thresholds.
-        Penny decides based on her understanding of DA.md patterns.
+        The orchestrator decides based on understanding of DA.md patterns.
         """
         context_parts = []
 
@@ -98,7 +98,7 @@ class Step4TaskRouting(BaseStep):
         """
         Process the routing decision.
 
-        Note: The actual routing decision is made by Penny when
+        Note: The actual routing decision is made by the orchestrator when
         processing the step content. This method provides structure
         for capturing the decision.
         """
@@ -106,7 +106,7 @@ class Step4TaskRouting(BaseStep):
             "routing_decision_pending": True,
             "iteration": self.state.iteration_count,
             "is_loop_back": self.is_loop_back,
-            "instruction": "Capture routing decision from Penny's response"
+            "instruction": "Capture routing decision from the orchestrator's response"
         }
 
     def execute(self) -> bool:

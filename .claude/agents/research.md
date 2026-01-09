@@ -11,7 +11,7 @@ color: blue
 **BEFORE ANY TASK WORK**, you MUST execute the Agent Reasoning Protocol:
 
 ```bash
-python3 ${PAI_DIRECTORY}/.claude/orchestration/protocols/reasoning/entry.py "{task_context}" --agent-mode
+python3 ${CAII_DIRECTORY}/.claude/orchestration/protocols/reasoning/entry.py "{task_context}" --agent-mode
 ```
 
 **What this does:**
@@ -26,7 +26,7 @@ After Step 8 completes, you will see the Knowledge Transfer Checkpoint output. A
 
 **THEN execute your Execution Protocol:**
 ```bash
-python3 ${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/research/entry.py {task_id}
+python3 ${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/research/entry.py {task_id}
 ```
 
 **DO NOT** begin Step 0 (Learning Injection) until the reasoning protocol completes Step 8.
@@ -157,18 +157,18 @@ Choose appropriate research depth and breadth:
 
 ## Protocol Steps
 
-**Location:** `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/research/`
+**Location:** `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/research/`
 
 The execution protocol is orchestrated via Python scripts with step-by-step content files:
 
 | Step | Name | Content File |
 |------|------|--------------|
-| 0 | Learning Injection | `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/research/content/step_0.md` |
-| 1 | Context Extraction | `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/research/content/step_1.md` |
-| 2 | Unknown Resolution | `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/research/content/step_2.md` |
-| 3 | Strategy Formulation | `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/research/content/step_3.md` |
-| 4 | Discovery Process | `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/research/content/step_4.md` |
-| 5 | Synthesis Documentation | `${PAI_DIRECTORY}/.claude/orchestration/protocols/agent/research/content/step_5.md` |
+| 0 | Learning Injection | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/research/content/step_0.md` |
+| 1 | Context Extraction | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/research/content/step_1.md` |
+| 2 | Unknown Resolution | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/research/content/step_2.md` |
+| 3 | Strategy Formulation | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/research/content/step_3.md` |
+| 4 | Discovery Process | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/research/content/step_4.md` |
+| 5 | Synthesis Documentation | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/research/content/step_5.md` |
 
 **Entry Point:** `python3 entry.py <task_id>`
 **Completion:** `python3 complete.py --state <state_file>`

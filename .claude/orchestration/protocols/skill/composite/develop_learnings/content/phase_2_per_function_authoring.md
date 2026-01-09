@@ -50,10 +50,10 @@ Each proposal must include:
 
 ## Resources
 
-- `${PAI_DIRECTORY}/.claude/learnings/{function}/heuristics.md` (INDEX only)
-- `${PAI_DIRECTORY}/.claude/learnings/{function}/anti-patterns.md` (INDEX only)
-- `${PAI_DIRECTORY}/.claude/learnings/{function}/checklists.md` (INDEX only)
-- `${PAI_DIRECTORY}/.claude/skills/develop-learnings/resources/learnings-schema.md`
+- `${CAII_DIRECTORY}/.claude/learnings/{function}/heuristics.md` (INDEX only)
+- `${CAII_DIRECTORY}/.claude/learnings/{function}/anti-patterns.md` (INDEX only)
+- `${CAII_DIRECTORY}/.claude/learnings/{function}/checklists.md` (INDEX only)
+- `${CAII_DIRECTORY}/.claude/skills/develop-learnings/resources/learnings-schema.md`
 
 ## Gate Exit Criteria
 

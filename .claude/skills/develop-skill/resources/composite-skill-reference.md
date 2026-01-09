@@ -139,7 +139,7 @@ Each composite skill documents its configuration interface in its SKILL.md. When
 
 Before a skill can reference composites:
 
-1. **Verify target skill exists** in `${PAI_DIRECTORY}/.claude/skills/` directory
+1. **Verify target skill exists** in `${CAII_DIRECTORY}/.claude/skills/` directory
 2. **Check target has `composition_depth: 0`** in frontmatter
 3. **Validate configuration against interface** documented in target's SKILL.md
 4. **Set parent's `composition_depth: 1`** in frontmatter
@@ -297,6 +297,6 @@ uses_composites: [perform-research]
 
 ## References
 
-- `${PAI_DIRECTORY}/.claude/skills/develop-skill/resources/validation-checklist.md` - Validation requirements
-- `${PAI_DIRECTORY}/.claude/skills/develop-skill/resources/complex-skill-template.md` - Template with composite sections
-- `${PAI_DIRECTORY}/.claude/orchestration/protocols/execution/skill/` - Workflow lifecycle
+- `${CAII_DIRECTORY}/.claude/skills/develop-skill/resources/validation-checklist.md` - Validation requirements
+- `${CAII_DIRECTORY}/.claude/skills/develop-skill/resources/complex-skill-template.md` - Template with composite sections
+- `${CAII_DIRECTORY}/.claude/orchestration/protocols/execution/skill/` - Workflow lifecycle

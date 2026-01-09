@@ -10,7 +10,7 @@ Agent loads only the workflow metadata file. Used for initial agents like clarif
 
 ## Context References
 
-- `${PAI_DIRECTORY}/.claude/memory/task-{id}-memory.md` (workflow metadata) [ALWAYS_REQUIRED]
+- `${CAII_DIRECTORY}/.claude/memory/task-{id}-memory.md` (workflow metadata) [ALWAYS_REQUIRED]
 
 ## Context Scope
 

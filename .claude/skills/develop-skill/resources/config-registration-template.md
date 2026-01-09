@@ -4,7 +4,7 @@
 
 Templates for registering new composite skills in the master skill registry.
 
-**Target File:** `${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/config/config.py`
+**Target File:** `${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/config/config.py`
 
 **IMPORTANT:** These templates generate code for MANUAL insertion. Do NOT auto-inject into config.py. Always review generated code before insertion.
 
@@ -88,10 +88,10 @@ Add BEFORE the `SKILL_PHASES` dictionary in config.py.
 |-----------|-------------|
 | `LINEAR` | Standard sequential phase (most common) |
 | `OPTIONAL` | Conditional phase with skip trigger |
-| `AUTO` | Python-only, no agent invocation |
 | `ITERATIVE` | Multi-iteration phase (3A, 3B, 3C) |
 | `REMEDIATION` | Retry after validation failure |
 | `PARALLEL` | Execute branches concurrently |
+| `AUTO` | **DEPRECATED** - Do not use. All phases must invoke agents. |
 
 ### Atomic Skill Values
 
@@ -103,7 +103,9 @@ Add BEFORE the `SKILL_PHASES` dictionary in config.py.
 | `"orchestrate-synthesis"` | SYNTHESIS |
 | `"orchestrate-generation"` | GENERATION |
 | `"orchestrate-validation"` | VALIDATION |
-| `None` | AUTO phases (no agent) |
+| `"orchestrate-memory"` | METACOGNITION |
+
+**IMPORTANT:** `uses_atomic_skill: None` is deprecated. All phases MUST specify an agent. If a phase produces output, use `orchestrate-generation`. If a phase verifies/validates, use `orchestrate-validation`.
 
 ### Example Phase Definitions
 
@@ -275,5 +277,5 @@ After inserting registration code:
 
 ## References
 
-- `${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/config/config.py` - Master registry
-- `${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/CLAUDE.md` - Skill protocol
+- `${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/config/config.py` - Master registry
+- `${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/CLAUDE.md` - Skill protocol

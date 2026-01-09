@@ -4,7 +4,7 @@ Determine the cognitive workflow for this task.
 
 ## Skill Lookup
 
-**Check for existing skill:** `${PAI_DIRECTORY}/.claude/skills/{skill-name}/SKILL.md`
+**Check for existing skill:** `${CAII_DIRECTORY}/.claude/skills/{skill-name}/SKILL.md`
 
 If a matching skill exists:
 1. Read the SKILL.md file

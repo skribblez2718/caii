@@ -19,11 +19,11 @@ Check `metadata.workflow_mode` from Phase 0:
 
 ### 1. SKILL.md (Skills Side)
 
-**Location:** `${PAI_DIRECTORY}/.claude/skills/{skill-name}/SKILL.md`
+**Location:** `${CAII_DIRECTORY}/.claude/skills/{skill-name}/SKILL.md`
 
 **Reference templates from:**
-- `${PAI_DIRECTORY}/.claude/skills/develop-skill/resources/simple-skill-template.md`
-- `${PAI_DIRECTORY}/.claude/skills/develop-skill/resources/complex-skill-template.md`
+- `${CAII_DIRECTORY}/.claude/skills/develop-skill/resources/simple-skill-template.md`
+- `${CAII_DIRECTORY}/.claude/skills/develop-skill/resources/complex-skill-template.md`
 
 **SKILL.md Structure:**
 
@@ -78,7 +78,7 @@ uses_composites: [{list}]
 
 ### 2. Python Orchestration Files (Orchestration Side)
 
-**Location:** `${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/composite/{skill_name}/`
+**Location:** `${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/composite/{skill_name}/`
 
 **Note:** Directory name uses underscores (e.g., `my_skill`), skill name uses hyphens (e.g., `my-skill`).
 
@@ -168,7 +168,7 @@ Examples:
 
 ### 3. Resources Directory (Skills Side)
 
-**Location:** `${PAI_DIRECTORY}/.claude/skills/{skill-name}/resources/`
+**Location:** `${CAII_DIRECTORY}/.claude/skills/{skill-name}/resources/`
 
 **Always create:**
 
@@ -198,7 +198,7 @@ Examples:
 
 ### 4. config.py Registration Code
 
-**Location:** `${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/config/config.py`
+**Location:** `${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/config/config.py`
 
 **Generate registration code for MANUAL insertion:**
 
@@ -258,8 +258,8 @@ Examples:
 When generating skill artifacts:
 
 1. **Apply Skill Templates**
-   - Use templates from `${PAI_DIRECTORY}/.claude/skills/develop-skill/resources/`
-   - Reference `${PAI_DIRECTORY}/.claude/skills/develop-skill/resources/python-orchestration-templates.md`
+   - Use templates from `${CAII_DIRECTORY}/.claude/skills/develop-skill/resources/`
+   - Reference `${CAII_DIRECTORY}/.claude/skills/develop-skill/resources/python-orchestration-templates.md`
    - Select simple vs complex template based on Phase 1 analysis
 
 2. **Include Context Loading Patterns**
@@ -317,12 +317,12 @@ When generating skill artifacts:
 ## Output
 
 1. **Files Created:**
-   - `${PAI_DIRECTORY}/.claude/skills/{skill-name}/SKILL.md`
-   - `${PAI_DIRECTORY}/.claude/skills/{skill-name}/resources/validation-checklist.md`
-   - `${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/composite/{skill_name}/entry.py`
-   - `${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/composite/{skill_name}/complete.py`
-   - `${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/composite/{skill_name}/__init__.py`
-   - `${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/composite/{skill_name}/content/phase_*.md`
+   - `${CAII_DIRECTORY}/.claude/skills/{skill-name}/SKILL.md`
+   - `${CAII_DIRECTORY}/.claude/skills/{skill-name}/resources/validation-checklist.md`
+   - `${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/composite/{skill_name}/entry.py`
+   - `${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/composite/{skill_name}/complete.py`
+   - `${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/composite/{skill_name}/__init__.py`
+   - `${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/composite/{skill_name}/content/phase_*.md`
 
 2. **Registration Code:**
    - config.py entries (presented for manual insertion)

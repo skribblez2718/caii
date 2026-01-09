@@ -1,6 +1,6 @@
 # Agent Protocol Reference Guide
 
-**Purpose:** Reference documentation for cognitive agent protocols in the Penny AI system
+**Purpose:** Reference documentation for cognitive agent protocols in the system
 
 ---
 
@@ -64,7 +64,7 @@ Before completing work, EVERY agent verifies:
 | Step number and name | `Step 2: Research Execution` |
 | Purpose statement | Purpose: Investigate authentication patterns |
 | Gate entry/exit criteria | Entry: Requirements clear, Exit: Patterns identified |
-| Context files to read | `${PAI_DIRECTORY}/.claude/memory/task-xxx-clarification-memory.md` |
+| Context files to read | `${CAII_DIRECTORY}/.claude/memory/task-xxx-clarification-memory.md` |
 | Previous agent dependencies | Predecessor: clarification |
 
 ### Agent Always Produces
@@ -83,8 +83,8 @@ Before completing work, EVERY agent verifies:
 
 | Type | Path Pattern |
 |------|--------------|
-| Workflow metadata | `${PAI_DIRECTORY}/.claude/memory/task-{id}-memory.md` |
-| Agent outputs | `${PAI_DIRECTORY}/.claude/memory/task-{id}-{agent}-memory.md` |
+| Workflow metadata | `${CAII_DIRECTORY}/.claude/memory/task-{id}-memory.md` |
+| Agent outputs | `${CAII_DIRECTORY}/.claude/memory/task-{id}-{agent}-memory.md` |
 
 ---
 
@@ -147,7 +147,7 @@ Before completing work, EVERY agent verifies:
 
 ## Related Documentation
 
-- `${PAI_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` - Execution protocols
-- `${PAI_DIRECTORY}/.claude/docs/context-loading-reference.md` - Context pattern selection
-- `${PAI_DIRECTORY}/.claude/docs/code-generation-reference.md` - Code generation standards
-- `${PAI_DIRECTORY}/.claude/docs/context-pruning-reference.md` - Compression techniques
+- `${CAII_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` - Execution protocols
+- `${CAII_DIRECTORY}/.claude/docs/context-loading-reference.md` - Context pattern selection
+- `${CAII_DIRECTORY}/.claude/docs/code-generation-reference.md` - Code generation standards
+- `${CAII_DIRECTORY}/.claude/docs/context-pruning-reference.md` - Compression techniques

@@ -30,8 +30,8 @@ class Step3ReadSkill(ExecutionBaseStep):
     def get_extra_context(self) -> str:
         """Include domain classification from Step 2."""
         prev = self.get_previous_output()
-        if prev and "penny_response" in prev:
-            return f"FROM STEP 2 (Domain Classification):\n{prev['penny_response'][:500]}"
+        if prev and "orchestrator_response" in prev:
+            return f"FROM STEP 2 (Domain Classification):\n{prev['orchestrator_response'][:500]}"
         return ""
 
 

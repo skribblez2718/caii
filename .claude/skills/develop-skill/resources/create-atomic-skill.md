@@ -33,12 +33,12 @@ Before creating, verify:
 ### Step 2: Create Directory
 
 ```bash
-mkdir -p ${PAI_DIRECTORY}/.claude/skills/orchestrate-{function}
+mkdir -p ${CAII_DIRECTORY}/.claude/skills/orchestrate-{function}
 ```
 
 ### Step 3: Generate SKILL.md
 
-Use template from `${PAI_DIRECTORY}/.claude/skills/develop-skill/resources/atomic-skill-template.md` with:
+Use template from `${CAII_DIRECTORY}/.claude/skills/develop-skill/resources/atomic-skill-template.md` with:
 - name: `orchestrate-{function}`
 - description: "Atomic skill for {function} using {agent-name} agent"
 - type: atomic
@@ -53,7 +53,7 @@ Verify the new atomic skill:
 
 ## Template Reference
 
-See `${PAI_DIRECTORY}/.claude/skills/develop-skill/resources/atomic-skill-template.md` for the complete template structure.
+See `${CAII_DIRECTORY}/.claude/skills/develop-skill/resources/atomic-skill-template.md` for the complete template structure.
 
 ## Example: Creating orchestrate-analysis
 

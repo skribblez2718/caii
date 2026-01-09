@@ -1,13 +1,11 @@
 """
-Stop hook - Handles voice notifications and plan mode exit detection
+Stop hook - Handles voice notifications when Claude completes a task.
 
-Two responsibilities:
-1. Voice notifications: Send task summary to voice server when Claude finishes
-2. Plan exit detection: Block Claude and inject reasoning protocol after plan approval
+Sends task summary to voice server for audio notification when Claude finishes responding.
+Skips notification when in plan mode.
 
-The plan exit detection uses signal files created by the PreToolUse hook on ExitPlanMode.
-Stop hooks can return {"decision": "block", "reason": "..."} to prevent Claude from
-stopping and inject instructions into Claude's context.
+Note: Plan exit detection is now handled by PostToolUse hook for ExitPlanMode,
+which directly injects the reasoning protocol directive into Claude's context.
 """
 
 import sys
@@ -17,7 +15,6 @@ import urllib.request
 import urllib.error
 import tempfile
 import subprocess
-from datetime import datetime
 from pathlib import Path
 from typing import Optional, TypedDict
 
@@ -94,7 +91,7 @@ def summarize_with_ai(text: str) -> Optional[str]:
     # Get environment variables
     base_url = os.environ.get("OPENAI_BASE_URL", "http://127.0.0.1:8080/v1")
     api_key = os.environ.get("OPENAI_API_KEY", "")
-    model = os.environ.get("OPENAI_SUMMARIZATION_MODEL", "penny-summarizer")
+    model = os.environ.get("OPENAI_SUMMARIZATION_MODEL", "summarizer")
 
     if not api_key:
         print("OPENAI_API_KEY not set, skipping AI summarization", file=sys.stderr)
@@ -166,7 +163,7 @@ def generate_summary(text: str) -> Optional[str]:
     3. Fall back to simple truncation if AI fails
 
     Args:
-        text: The full response text from Penny
+        text: The full response text from the assistant
 
     Returns:
         Voice-optimized summary, None if text is empty
@@ -256,9 +253,10 @@ def send_to_voice_server(summary: str, port: str = "8001") -> bool:
     """
     try:
         url = f"http://127.0.0.1:{port}/v1/audio/speech"
+        da_name = os.environ.get("DA_NAME", "AI Assistant")
         payload = {
             "model": "tts-1",
-            "input": f"Penny Task Complete: {summary}",
+            "input": f"{da_name} Task Complete: {summary}",
             "voice": "alloy",
             "response_format": "mp3"
         }
@@ -281,7 +279,7 @@ def send_to_voice_server(summary: str, port: str = "8001") -> bool:
 
             # Send desktop notification
             try:
-                subprocess.run(['notify-send', 'Penny Task Complete', summary],
+                subprocess.run(['notify-send', f'{da_name} Task Complete', summary],
                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             except:
                 pass
@@ -315,101 +313,22 @@ def send_to_voice_server(summary: str, port: str = "8001") -> bool:
 
 #########################[ end send_to_voice_server ]########################
 
-#########################[ start plan_exit_detection ]########################
-def check_plan_exit_signal() -> Optional[dict]:
-    """
-    Check if plan mode just exited (signaled by PreToolUse hook).
-
-    The PreToolUse hook creates a signal file when ExitPlanMode is invoked.
-    We read it here and return block response to inject reasoning protocol.
-
-    Returns:
-        Block response dict if plan just exited, None otherwise
-    """
-    pai_dir = os.environ.get("PAI_DIRECTORY", "")
-    if not pai_dir:
-        return None
-
-    signal_file = Path(pai_dir) / ".claude/state/plan-just-exited.json"
-    if not signal_file.exists():
-        return None
-
-    try:
-        signal_data = json.loads(signal_file.read_text())
-
-        # Check if signal is fresh (within last 5 minutes)
-        timestamp_str = signal_data.get("timestamp", "")
-        if timestamp_str:
-            timestamp = datetime.fromisoformat(timestamp_str)
-            age_seconds = (datetime.now() - timestamp).total_seconds()
-
-            if age_seconds > 300:  # Signal is stale (> 5 minutes)
-                signal_file.unlink()
-                return None
-
-        plan_content = signal_data.get("plan_content", "")
-        entry_script = signal_data.get("entry_script", "")
-        plan_file = signal_data.get("plan_file", "")
-
-        # Delete signal file (one-time use)
-        signal_file.unlink()
-
-        # Truncate plan content for the directive (keep it manageable)
-        plan_summary = plan_content[:3000] if plan_content else ""
-        if len(plan_content) > 3000:
-            plan_summary += "\n\n... [plan truncated for context]"
-
-        # Return JSON to BLOCK Claude from stopping and inject reasoning directive
-        block_response = {
-            "decision": "block",
-            "reason": f"""PLAN APPROVED - Execute reasoning protocol NOW.
-
-**MANDATORY - EXECUTE IMMEDIATELY:**
-`python3 {entry_script} "PLAN_APPROVED: Execute the approved plan"`
-
-## Approved Plan Context
-**Plan File:** {plan_file}
-
-{plan_summary}
-"""
-        }
-        return block_response
-
-    except Exception as e:
-        print(f"Error processing plan exit signal: {e}", file=sys.stderr)
-        # Clean up stale signal file on error
-        try:
-            signal_file.unlink()
-        except:
-            pass
-        return None
-
-
-#########################[ end plan_exit_detection ]##########################
-
 #########################[ start main ]######################################
 def main():
     """
-    Main hook function - handles plan exit detection and voice summaries.
+    Main hook function - handles voice summaries on task completion.
 
     Flow:
     1. Read JSON payload from stdin
-    2. Check for plan exit signal (block Claude and inject reasoning if found)
-    3. Skip voice summary if in plan mode
-    4. Read transcript and generate voice summary
-    5. Send to voice server
+    2. Skip voice summary if in plan mode
+    3. Read transcript and generate voice summary
+    4. Send to voice server
+
+    Note: Plan exit detection is now handled by PostToolUse hook for ExitPlanMode.
     """
     try:
         # Read JSON payload from stdin
         hook_data = json.load(sys.stdin)
-
-        # PRIORITY 1: Check for plan exit signal FIRST
-        # If plan just exited, block Claude and inject reasoning directive
-        block_response = check_plan_exit_signal()
-        if block_response:
-            # Output JSON to stdout - this blocks Claude and injects the directive
-            print(json.dumps(block_response))
-            return 0
 
         # Get current permission mode
         current_mode = hook_data.get('permission_mode', 'default')

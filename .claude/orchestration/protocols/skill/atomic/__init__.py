@@ -14,6 +14,7 @@ Available Atomic Skills:
 - orchestrate_synthesis → synthesis-agent
 - orchestrate_generation → generation-agent
 - orchestrate_validation → validation-agent
+- orchestrate_memory → memory-agent
 """
 
 from __future__ import annotations
@@ -36,6 +37,7 @@ from skill.atomic.orchestrate_research import OrchestrateResearch
 from skill.atomic.orchestrate_synthesis import OrchestrateSynthesis
 from skill.atomic.orchestrate_generation import OrchestrateGeneration
 from skill.atomic.orchestrate_validation import OrchestrateValidation
+from skill.atomic.orchestrate_memory import OrchestrateMemory
 
 __all__ = [
     "BaseAtomicSkill",
@@ -45,6 +47,7 @@ __all__ = [
     "OrchestrateSynthesis",
     "OrchestrateGeneration",
     "OrchestrateValidation",
+    "OrchestrateMemory",
 ]
 
 # Registry for quick lookup
@@ -55,6 +58,7 @@ ATOMIC_SKILL_CLASSES = {
     "orchestrate-synthesis": OrchestrateSynthesis,
     "orchestrate-generation": OrchestrateGeneration,
     "orchestrate-validation": OrchestrateValidation,
+    "orchestrate-memory": OrchestrateMemory,
 }
 
 

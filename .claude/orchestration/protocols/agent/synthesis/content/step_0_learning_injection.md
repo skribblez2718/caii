@@ -2,9 +2,9 @@
 
 ## Instructions
 
-1. Load INDEX section from `${PAI_DIRECTORY}/.claude/learnings/synthesis/heuristics.md` (~100-150 tokens)
-2. Load INDEX section from `${PAI_DIRECTORY}/.claude/learnings/synthesis/anti-patterns.md` (~50-100 tokens)
-3. Load INDEX section from `${PAI_DIRECTORY}/.claude/learnings/synthesis/checklists.md` (~50-100 tokens)
+1. Load INDEX section from `${CAII_DIRECTORY}/.claude/learnings/synthesis/heuristics.md` (~100-150 tokens)
+2. Load INDEX section from `${CAII_DIRECTORY}/.claude/learnings/synthesis/anti-patterns.md` (~50-100 tokens)
+3. Load INDEX section from `${CAII_DIRECTORY}/.claude/learnings/synthesis/checklists.md` (~50-100 tokens)
 4. Scan INDEX for patterns matching current task domain/context
 5. If pattern match found: Perform targeted grep for that specific section in full learnings file
 6. Apply loaded heuristics/anti-patterns/checklists to current synthesis task

@@ -118,7 +118,7 @@ User Request
 **Wrong:**
 ```
 User: "What's in config.json?"
-Penny:
+Assistant:
   [Reads config.json]
   [Creates .claude/memory/task-adhoc-123-memory.md]
   [Writes Johari summary of config file]
@@ -127,7 +127,7 @@ Penny:
 **Right:**
 ```
 User: "What's in config.json?"
-Penny:
+Assistant:
   [Reads config.json]
   [Summarizes contents directly to user]
 ```
@@ -137,13 +137,13 @@ Penny:
 **Wrong:**
 ```
 User: "Find all TypeScript files"
-Penny: [Invokes research to find TypeScript files]
+Assistant: [Invokes research to find TypeScript files]
 ```
 
 **Right:**
 ```
 User: "Find all TypeScript files"
-Penny: [Uses Glob tool directly with pattern "**/*.ts"]
+Assistant: [Uses Glob tool directly with pattern "**/*.ts"]
 ```
 
 ### Don't: Overthink Simple Tasks
@@ -151,7 +151,7 @@ Penny: [Uses Glob tool directly with pattern "**/*.ts"]
 **Wrong:**
 ```
 User: "Run npm install"
-Penny: "This task requires multiple phases:
+Assistant: "This task requires multiple phases:
 1. Clarification of dependencies needed
 2. Analysis of package.json
 3. Synthesis of installation strategy
@@ -162,7 +162,7 @@ Would you like me to create a formal workflow?"
 **Right:**
 ```
 User: "Run npm install"
-Penny: [Runs npm install via Bash]
+Assistant: [Runs npm install via Bash]
 [Reports results]
 ```
 
@@ -272,6 +272,6 @@ Even for direct execution, maintain quality:
 
 ## Related Documentation
 
-- `${PAI_DIRECTORY}/.claude/orchestration/protocols/execution/routing_gate.py` - Triviality validation for direct tool usage
-- `${PAI_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/memory-protocol.md` - Memory requirements when agents invoked
-- `${PAI_DIRECTORY}/.claude/docs/philosophy.md` - System design principles
+- `${CAII_DIRECTORY}/.claude/orchestration/protocols/execution/routing_gate.py` - Triviality validation for direct tool usage
+- `${CAII_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/memory-protocol.md` - Memory requirements when agents invoked
+- `${CAII_DIRECTORY}/.claude/docs/philosophy.md` - System design principles

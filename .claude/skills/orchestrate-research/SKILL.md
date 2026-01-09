@@ -26,29 +26,6 @@ type: atomic
 | status | PASS\|FAIL | Execution result |
 | memory_file | string | Path to research output (`.claude/memory/task-{id}-research-memory.md`) |
 
-## Agent Sequence
-
-### Step 1: Research
-
-**Agent:** research
-**Cognitive Function:** RESEARCH
-
-**Context Loading:** IMMEDIATE_PREDECESSORS
-**Predecessors:** clarification (or workflow-metadata if first)
-
-**Gate Entry:**
-- Research scope defined
-- Information gaps identified
-
-**Gate Exit:**
-- Sources evaluated
-- Options compared
-- Findings documented
-
-**Memory Output:** Standard format per `${PAI_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/`
-- Agent: research
-- Task: {task_id}
-
 ## Research Depth Configuration
 
 | Depth | Behavior | Use Case |
@@ -66,7 +43,7 @@ type: atomic
 
 ## References
 
-- `${PAI_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` - Memory output format
-- `${PAI_DIRECTORY}/.claude/docs/context-loading-reference.md` - Context loading patterns
-- `${PAI_DIRECTORY}/.claude/docs/agent-protocol-reference.md` - Quick reference checklist
-- `${PAI_DIRECTORY}/.claude/skills/develop-skill/resources/agent-invocation-template.md` - Invocation patterns
+- `${CAII_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/` - Memory output format
+- `${CAII_DIRECTORY}/.claude/docs/context-loading-reference.md` - Context loading patterns
+- `${CAII_DIRECTORY}/.claude/docs/agent-protocol-reference.md` - Quick reference checklist
+- `${CAII_DIRECTORY}/.claude/skills/develop-skill/resources/agent-invocation-template.md` - Invocation patterns

@@ -48,40 +48,9 @@ def parse_args(agent_name: str) -> argparse.Namespace:
 
 
 def _print_mandatory_steps(config: dict, agent_name: str) -> None:
-    """
-    ENFORCEMENT: Print all mandatory steps that MUST be executed.
-
-    This ensures visibility into what steps are required and warns
-    that memory file will be rejected if steps are missing.
-    """
-    steps = config.get("steps", [])
-    total_steps = len(steps)
-
-    print("=" * 70)
-    print("# MANDATORY Steps for This Agent")
-    print("=" * 70)
-    print()
-    print(f"You MUST execute ALL {total_steps} steps below.")
-    print("Memory file will be REJECTED if any step is missing.")
-    print()
-
-    for i, step in enumerate(steps):
-        # Steps can be strings (step names) or dicts with name/description
-        if isinstance(step, str):
-            step_name = step
-            step_desc = ""
-        else:
-            step_name = step.get("name", f"Step {i}")
-            step_desc = step.get("description", "")
-        print(f"  [ ] Step {i}: {step_name}")
-        if step_desc:
-            print(f"       {step_desc[:60]}...")
-
-    print()
-    print("**ENFORCEMENT:** Each step must produce output in the memory file.")
-    print("Use step markers: `## Step N: <step_name>` to track completion.")
-    print("=" * 70)
-    print()
+    """Print minimal step list (no banners)."""
+    # No output - steps are already tracked in state and enforced by complete.py
+    pass
 
 
 def agent_entry(agent_name: str) -> None:

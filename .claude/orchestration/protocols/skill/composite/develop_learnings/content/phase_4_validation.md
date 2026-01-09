@@ -5,7 +5,7 @@
 ## Configuration
 
 - `validation_target`: synthesis (Phase 3)
-- `quality_criteria`: see `${PAI_DIRECTORY}/.claude/skills/develop-learnings/resources/learnings-update-rubric.md`
+- `quality_criteria`: see `${CAII_DIRECTORY}/.claude/skills/develop-learnings/resources/learnings-update-rubric.md`
 
 ## Purpose
 
@@ -58,7 +58,7 @@ When validating learnings:
 
 ## Resources
 
-- `${PAI_DIRECTORY}/.claude/skills/develop-learnings/resources/learnings-update-rubric.md`
+- `${CAII_DIRECTORY}/.claude/skills/develop-learnings/resources/learnings-update-rubric.md`
 
 ## Gate Exit Criteria
 

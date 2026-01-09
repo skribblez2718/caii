@@ -35,7 +35,11 @@ from skill.core.state import SkillExecutionState
 from skill.core.fsm import SkillPhaseState
 from skill.memory_verifier import list_memory_files, verify_format
 from skill.episode_store_helper import store_skill_episode, create_episode_from_skill_state
-from skill.learning_trigger import should_trigger_learnings, format_trigger_prompt
+from skill.learning_trigger import (
+    should_trigger_learnings,
+    format_trigger_prompt,
+    build_learnings_directive,
+)
 from skill.episodic_memory import load_all_episodes
 
 # Skills that bypass mandatory learnings capture
@@ -223,9 +227,11 @@ def skill_complete(skill_name: str) -> None:
     memory_files = list_memory_files(state.task_id)
     valid_count = sum(1 for mf in memory_files if verify_format(mf)[0])
 
-    # Calculate duration
+    # Calculate duration (use timezone-aware datetime for consistency)
     start_time = datetime.fromisoformat(state.started_at)
-    duration = datetime.now() - start_time
+    # Handle both timezone-aware and naive datetimes
+    now = datetime.now(start_time.tzinfo) if start_time.tzinfo else datetime.now()
+    duration = now - start_time
 
     # Update state
     state.metadata["completed_at"] = datetime.now().isoformat()
@@ -236,73 +242,24 @@ def skill_complete(skill_name: str) -> None:
     # Store episode in episodic memory
     episode_id, episode = _store_completion_episode(state, skill_name)
 
-    # Minimal output
-    print(f"## {skill_name} Complete")
-    print(f"Task: `{state.task_id[:20]}...`")
-    print(f"Duration: {duration.total_seconds():.1f}s")
-    print(f"Memory files: {valid_count}/{len(memory_files)}")
-    print(f"Episode stored: `{episode_id}`")
-    print()
+    # Minimal output - completion marker only
     print(f"**{skill_name.upper().replace('-', '_')}_COMPLETE**")
-    print()
 
-    # ENFORCEMENT: Mandatory learnings capture
-    # Skip for skills in bypass list (prevent recursion or for performance)
+    # Learnings capture trigger - ALWAYS ask for multi-agent tasks
     if skill_name not in SKILLS_BYPASSING_LEARNINGS:
-        # Transition FSM to LEARNINGS_PENDING state
         if state.fsm:
             state.fsm.require_learnings()
             state.save()
 
-        # Build the develop-learnings command
-        learnings_entry = Path(__file__).parent / "develop_learnings" / "entry.py"
-        learnings_task_id = f"learnings-{state.task_id[:8]}"
-        learnings_command = f"python3 {learnings_entry} {learnings_task_id} --source-task {state.task_id}"
+        # Check learning trigger criteria for enhanced reason in prompt
+        should_learn, reason = should_trigger_learnings(episode)
+        reason_text = reason if should_learn else None
 
-        print()
-        print("=" * 70)
-        print("# MANDATORY: Learnings Capture Required")
-        print("=" * 70)
-        print()
-        print("This workflow has completed all phases. Learnings MUST be captured")
-        print("before the workflow is considered FULLY COMPLETE.")
-        print()
-        print("## Why This Matters")
-        print()
-        print("- Unknown unknowns resolved during this workflow become permanent knowledge")
-        print("- Patterns and anti-patterns are preserved for future use")
-        print("- Cognitive agents improve with each captured learning")
-        print()
-        print("Learnings are organized by cognitive function and stored in:")
-        print("`${PAI_DIRECTORY}/.claude/learnings/{function}/`")
-        print()
-        print("=" * 70)
-        print()
-        print("**MANDATORY - EXECUTE IMMEDIATELY BEFORE ANY OTHER ACTION:**")
-        print(f"`{learnings_command}`")
-        print()
-        print("⚠️ DO NOT proceed with any other action until this command is executed.")
-        print("The develop-learnings skill will capture insights from the completed workflow.")
-        print()
-        print("=" * 70)
-        print(f"**STATUS:** LEARNINGS_PENDING (not fully complete)")
-        print("=" * 70)
-        print()
+        # Print AskUserQuestion directive - ALWAYS ask the user
+        print(build_learnings_directive(state.task_id, reason_text))
     else:
-        # For bypassed skills, mark as fully complete
         if state.fsm:
-            # These skills don't need to capture learnings
             state.fsm.state = SkillPhaseState.FULLY_COMPLETE
             state.fsm.history.append("FULLY_COMPLETE")
             state.save()
-
-        # Trigger automatic state cleanup
-        cleaned = _trigger_cleanup()
-
-        print()
-        print("=" * 70)
-        print(f"**STATUS:** FULLY_COMPLETE")
-        if cleaned > 0:
-            print(f"**CLEANUP:** {cleaned} old state files removed")
-        print("=" * 70)
-        print()
+        _trigger_cleanup()

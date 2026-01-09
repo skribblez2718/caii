@@ -203,7 +203,7 @@ With pruning:
 
 ## Related Documentation
 
-- `${PAI_DIRECTORY}/.claude/orchestration/shared-content/context-loading/` - Pattern execution files
-- `${PAI_DIRECTORY}/.claude/orchestration/shared-content/context-pruning/` - Pruning execution files
-- `${PAI_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/johari-format.md` - Output format
-- `${PAI_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/memory-protocol.md` - Memory requirements
+- `${CAII_DIRECTORY}/.claude/orchestration/shared-content/context-loading/` - Pattern execution files
+- `${CAII_DIRECTORY}/.claude/orchestration/shared-content/context-pruning/` - Pruning execution files
+- `${CAII_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/johari-format.md` - Output format
+- `${CAII_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/memory-protocol.md` - Memory requirements

@@ -2,15 +2,15 @@
 semantic_routing.py
 ===================
 
-Semantic routing system for the Penny AI system.
+Semantic routing system for the orchestration system.
 
 This module generates routing prompts for PURE SEMANTIC routing.
-No keyword matching - Penny makes routing decisions based on her
+No keyword matching - the orchestrator makes routing decisions based on
 understanding of task requirements and skill patterns from DA.md.
 
 Key Principles:
 1. Routing is based on semantic understanding of user intent
-2. Penny evaluates query against "When to Use" patterns from DA.md
+2. The orchestrator evaluates query against "When to Use" patterns from DA.md
 3. Direct execution is only for genuinely trivial tasks
 4. When in doubt, route to skill orchestration (fail-secure)
 """
@@ -38,7 +38,7 @@ EXECUTION_ROUTES = {
             "Multi-phase cognitive work required (clarify → research → analyze → synthesize → generate → validate)",
             "Complex deliverable spanning multiple components",
             "Production-grade output needed with TDD and security review",
-            "Penny system modifications (skills, agents, protocols, architecture) - route to develop-skill",
+            "System modifications (skills, agents, protocols, architecture) - route to develop-skill",
         ],
         "examples": [
             "Build me a CLI tool",
@@ -51,7 +51,7 @@ EXECUTION_ROUTES = {
         ],
     },
     "dynamic-skill-sequencing": {
-        "description": "Penny determines and invokes sequence of orchestrate-* skills",
+        "description": "The orchestrator determines and invokes sequence of orchestrate-* skills",
         "when_to_use": [
             "Task requires multiple cognitive functions but doesn't match existing composite skill",
             "Novel task requiring coordination of clarification, research, analysis, synthesis, generation, or validation",
@@ -68,14 +68,14 @@ EXECUTION_ROUTES = {
 
 def generate_routing_prompt(context: SemanticRoutingContext) -> str:
     """
-    Generate a semantic routing prompt for Penny to make the routing decision.
+    Generate a semantic routing prompt for the orchestrator to make the routing decision.
 
     This prompt provides context for PURE SEMANTIC routing:
     - User query
     - Route definitions with examples
     - Domain and complexity context
 
-    NO keyword suggestions - Penny uses semantic understanding.
+    NO keyword suggestions - the orchestrator uses semantic understanding.
 
     Args:
         context: Semantic routing context

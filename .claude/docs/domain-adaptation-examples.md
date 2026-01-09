@@ -9,11 +9,11 @@
 Dual file pattern for workflow state and agent outputs:
 
 **Workflow Metadata:**
-- Path: `${PAI_DIRECTORY}/.claude/memory/task-{task-id}-memory.md`
+- Path: `${CAII_DIRECTORY}/.claude/memory/task-{task-id}-memory.md`
 - Content: Centralized state + domain context
 
 **Agent Outputs:**
-- Path: `${PAI_DIRECTORY}/.claude/memory/task-{task-id}-{agent-name}-memory.md`
+- Path: `${CAII_DIRECTORY}/.claude/memory/task-{task-id}-{agent-name}-memory.md`
 - Content: Per-agent files
 
 ## Examples

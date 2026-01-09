@@ -2,9 +2,9 @@
 
 ## Overview
 
-Templates for generating the Python orchestration files required for composite skills to integrate with the Penny orchestration system.
+Templates for generating the Python orchestration files required for composite skills to integrate with the orchestration system.
 
-**Target Directory:** `${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/composite/{skill_name}/`
+**Target Directory:** `${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/composite/{skill_name}/`
 
 **Note:** Directory uses underscores (e.g., `my_skill`), skill name uses hyphens (e.g., `my-skill`).
 
@@ -280,6 +280,6 @@ When generating Python orchestration files:
 
 ## References
 
-- `${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/composite/common_skill_entry.py` - Entry logic
-- `${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/composite/common_skill_complete.py` - Completion logic
-- `${PAI_DIRECTORY}/.claude/orchestration/protocols/skill/composite/CLAUDE.md` - Composite skill protocol
+- `${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/composite/common_skill_entry.py` - Entry logic
+- `${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/composite/common_skill_complete.py` - Completion logic
+- `${CAII_DIRECTORY}/.claude/orchestration/protocols/skill/composite/CLAUDE.md` - Composite skill protocol

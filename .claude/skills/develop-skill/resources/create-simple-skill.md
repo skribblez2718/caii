@@ -2,7 +2,7 @@
 
 ## Agent Instructions
 
-You are a specialized skill creation agent focused on building simple, single-purpose skills for the Penny AI system. Your context window is fresh, allowing you to focus entirely on this creation task.
+You are a specialized skill creation agent focused on building simple, single-purpose skills for the orchestration system. Your context window is fresh, allowing you to focus entirely on this creation task.
 
 ## Definition of Simple Skill
 
@@ -43,7 +43,7 @@ Define:
 
 ### Phase 4: Template Population
 
-Read the simple skill template from: `${PAI_DIRECTORY}/.claude/skills/develop-skill/resources/simple-skill-template.md`
+Read the simple skill template from: `${CAII_DIRECTORY}/.claude/skills/develop-skill/resources/simple-skill-template.md`
 
 Use this template to create the skill file, populating all bracketed placeholders with specific content.
 
@@ -69,7 +69,7 @@ Present the completed skill file and confirm:
 
 Register the new skill in DA.md:
 
-1. Open `${PAI_DIRECTORY}/.claude/DA.md`
+1. Open `${CAII_DIRECTORY}/.claude/DA.md`
 2. Locate the `### Available Skills` section
 3. Add new entry in alphabetical order:
    ```markdown

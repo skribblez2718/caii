@@ -64,7 +64,7 @@ Create registry of all unresolved unknowns:
 ## Memory File Update
 
 Write clarification results to task memory:
-- Path: `${PAI_DIRECTORY}/.claude/memory/task-{task-id}-memory.md`
+- Path: `${CAII_DIRECTORY}/.claude/memory/task-{task-id}-memory.md`
 - Append clarification section with:
   - Specifications generated
   - Johari summary

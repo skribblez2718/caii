@@ -1,7 +1,7 @@
 """
 develop-skill Composite Skill
 
-Meta-skill for creating and updating workflow skills in the Penny AI system
+Meta-skill for creating and updating workflow skills in the orchestration system
 using 6 universal cognitive agents.
 
 Phases:

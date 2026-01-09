@@ -2,10 +2,10 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "env": {
     "DISABLE_INTERLEAVED_THINKING": "true",
-    "DA_NAME": "Penny",
+    "DA_NAME": "",
     "CAII_DIRECTORY": "/path/to/your/project",
     "PROJECT_ROOT": "/path/to/your/projects",
-    "VOICE_SERVER_PORT": "8001",
+    "VOICE_SERVER_PORT": "voice-server-port",
     "OPENAI_BASE_URL": "openai-ai-api-compatible-endpoint",
     "OPENAI_API_KEY": "your-openai-api-key",
     "OPENAI_SUMMARIZATION_MODEL": "your-summarizer-model-id",
@@ -69,18 +69,19 @@
             "command": "python3 ${CAII_DIRECTORY}/.claude/hooks/pre-tool-use/agent-start.py"
           }
         ]
-      },
+      }
+    ],
+    "PostToolUse": [
       {
         "matcher": "ExitPlanMode",
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ${CAII_DIRECTORY}/.claude/hooks/pre-tool-use/plan-mode-exit.py"
+            "command": "python3 ${CAII_DIRECTORY}/.claude/hooks/post-tool-use/exit-plan-mode.py"
           }
         ]
       }
     ],
-    "PostToolUse": [],
     "PermissionRequest": [
       {
         "hooks": [

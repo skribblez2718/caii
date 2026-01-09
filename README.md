@@ -848,7 +848,22 @@ cat .claude/memory/{task_id}-{agent}-memory.md
 
 ### Known Issues
 
-- **Inconsistent reasoning protocol triggers after plan mode exit** - The reasoning protocol sometimes fails to trigger consistently when exiting plan mode. Requires analysis of the hook interaction between plan mode state and reasoning protocol initialization.
+- **Inconsistent reasoning protocol triggers after plan mode exit** - The reasoning protocol sometimes fails to trigger consistently when exiting plan mode. Fix implemented (PostToolUse hook) but not yet verified.
+- **Skill orchestration invoked for direct execution work** - Determine why skill orchestration is sometimes triggered for tasks that should be handled via direct tool execution. Analyze routing gate logic and triviality evaluation.
+
+### Documentation
+
+- **Add setup/usage instructions to README** - Comprehensive setup guide including prerequisites, installation, configuration, and first-run instructions
+- **Document environment variables and their usage** - Create reference for all required and optional environment variables (CAII_DIRECTORY, DA_NAME, OPENAI_*, VOICE_SERVER_PORT, etc.)
+
+### UI/UX Improvements
+
+- **Remove banners from skill orchestration** - Clean up verbose banner output during skill orchestration protocol execution
+
+### Voice Integration
+
+- **Create voice-server GitHub repo** - Publish the text-to-speech voice server that supports the stop hook notifications as a standalone repository
+- **Integrate speech-to-text** - Add speech-to-text capability to complement the existing text-to-speech functionality for full voice interaction
 
 ### Ongoing
 

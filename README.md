@@ -6,6 +6,12 @@ This project is built upon the foundational work and inspiration from **Daniel M
 
 [danielmiessler/Personal_AI_Infrastructure](https://github.com/danielmiessler/Personal_AI_Infrastructure/)
 
+---
+
+![Cognitive Augmented Intelligence Infrastructure](img/caii.png)
+
+---
+
 While CAII shares PAI's goal of providing a highly customizable system to augment humans with AI, it takes a fundamentally different approach. This implementation sometimes diverges from popular opinion and Claude Code documentation, though these divergences are based on my personal research and experimentation. Notable differences include:
 
 - **Cognitive-first agent design** - Rather than task or domain-specific agents, CAII uses agents organized by cognitive function (clarification, research, analysis, synthesis, generation, validation, memory). This approach draws inspiration from established cognitive architectures, particularly [ACT-R](https://act-r.psy.cmu.edu/about/) (Adaptive Control of Thought—Rational) developed by John Anderson at Carnegie Mellon University, and [Soar](https://soar.eecs.umich.edu/), created by Allen Newell, John Laird, and Paul Rosenbloom. ACT-R models cognition through the interaction of declarative memory (facts and knowledge) and procedural memory (production rules), while Soar uses universal subgoaling and chunking to automatically generate goal hierarchies and compile learned behaviors into efficient rules. CAII's memory agent and learning systems became heavily influenced by these architectures—particularly Soar's chunking mechanism, which converts complex reasoning into automatic/reactive processing over time. The decision to use cognitive-based agents versus task/domain-specific agents stemmed primarily from maintainability concerns. As the system grows, so would the number of task-specific agents, and so would the overhead in maintaining them. Claude Code also supports only a limited number of agents before "performance may degrade." With the cognitive approach, we should only ever need a small number of agents that receive context "on the spot," adapting to any domain without modification.
@@ -21,10 +27,6 @@ While CAII shares PAI's goal of providing a highly customizable system to augmen
   - **Context efficiency** - By delegating cognitive work to agents with their own context windows, the DA's context window remains as clean as possible, preserving capacity for coordination and user interaction
 
 This is an experimental approach that may not suit every use case, but it represents one possible direction for human-AI augmentation systems.
-
----
-
-![Cognitive Augmented Intelligence Infrastructure](img/caii.png)
 
 ---
 

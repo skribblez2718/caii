@@ -33,14 +33,6 @@ from core.state import ExecutionState
 
 from core.dispatcher import dispatch
 
-from core.routing_gate import (
-    TrivialCriteria,
-    GateDecision,
-    RoutingGate,
-    RoutingGateWorkflow,
-    assess_task_triviality,
-)
-
 __all__ = [
     # FSM exports
     "SkillOrchestrationState",
@@ -55,10 +47,4 @@ __all__ = [
     "ExecutionState",
     # Dispatcher exports
     "dispatch",
-    # Routing gate exports
-    "TrivialCriteria",
-    "GateDecision",
-    "RoutingGate",
-    "RoutingGateWorkflow",
-    "assess_task_triviality",
 ]

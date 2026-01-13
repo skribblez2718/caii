@@ -151,26 +151,60 @@ composite/{skill}/complete.py
         └→ print("SKILL_COMPLETE")
 ```
 
+## Agent Invocation Template (CRITICAL)
+
+When atomic skills invoke agents via the Task tool, the DA **MUST** structure the prompt using the standardized Agent Prompt Template format. Plain text prompts are NOT acceptable.
+
+### Required Template Sections
+
+| Section | Required | Source |
+|---------|----------|--------|
+| Task Context | Yes | task_id, skill_name, phase_id, domain, agent_name |
+| Role Extension | Yes | DA generates dynamically (3-5 task-specific focus areas) |
+| Johari Context | If available | From reasoning protocol Step 0 |
+| Task Instructions | Yes | Specific cognitive work for this agent |
+| Related Research Terms | Yes | DA generates dynamically (7-10 keywords) |
+| Output Requirements | Yes | Memory file path: `.claude/memory/{task_id}-{agent}-memory.md` |
+
+### Why Template Format Is Required
+
+- **Consistency:** All agents receive context in the same structure
+- **Johari Transfer:** Reasoning discoveries flow to agents via template
+- **Task Specialization:** Role Extension adapts agents to specific tasks
+- **Traceability:** Explicit memory file paths ensure workflow completion
+
+### Template Integration Points
+
+| File | Role |
+|------|------|
+| `core/agent_invoker.py` | Formats Task tool invocation with template context |
+| `atomic/orchestrate_*.py` | Entry points that invoke agent_invoker |
+| Individual `SKILL.md` files | "Agent Invocation Format" section with template requirements |
+| `DA.md` | "Agent Prompt Template Requirements" section |
+
+**Reference:** See `shared/templates/SKILL-TEMPLATE-REFERENCE.md` for the complete template documentation.
+
 ## Skill Registries (from config.py)
 
 ### Atomic Skills
 
-| Skill | Agent | Cognitive Function |
-|-------|-------|-------------------|
-| orchestrate-clarification | clarification | CLARIFICATION |
-| orchestrate-research | research | RESEARCH |
-| orchestrate-analysis | analysis | ANALYSIS |
-| orchestrate-synthesis | synthesis | SYNTHESIS |
-| orchestrate-generation | generation | GENERATION |
-| orchestrate-validation | validation | VALIDATION |
-| orchestrate-memory | memory | METACOGNITION |
+| Skill | Cognitive Function | Semantic Trigger | NOT for |
+|-------|-------------------|------------------|---------|
+| orchestrate-clarification | CLARIFICATION | ambiguity resolution, requirements refinement | well-defined tasks with clear specifications |
+| orchestrate-research | RESEARCH | knowledge gaps, options exploration | tasks with complete information |
+| orchestrate-analysis | ANALYSIS | complexity decomposition, risk assessment | simple tasks without dependencies |
+| orchestrate-synthesis | SYNTHESIS | integration of findings, design creation | single-source tasks without integration |
+| orchestrate-generation | GENERATION | artifact creation, TDD implementation | read-only or research tasks |
+| orchestrate-validation | VALIDATION | quality verification, acceptance testing | tasks without deliverables to verify |
+| orchestrate-memory | METACOGNITION | progress tracking, impasse detection | simple linear workflows |
 
 ### Composite Skills
 
-| Skill | Phases | Purpose |
-|-------|--------|---------|
-| develop-skill | 6 | Meta-skill for creating workflow skills |
-| develop-learnings | 7 | Transform experiences to learnings |
+| Skill | Semantic Trigger | NOT for | Phases |
+|-------|------------------|---------|--------|
+| develop-skill | create/modify skills, update workflows, new skill | system mods, direct code, architecture | 9 |
+| develop-learnings | capture learnings, document insights, preserve knowledge | mid-workflow, skill creation, active execution | 7 |
+| develop-command | create/modify slash commands, utility commands | workflow skills, multi-phase operations | 3 |
 
 ## Phase Types (from config.py)
 

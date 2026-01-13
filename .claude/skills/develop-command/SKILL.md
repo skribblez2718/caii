@@ -1,6 +1,8 @@
 ---
 name: develop-command
 description: Create and manage Claude Code slash commands for utility operations
+semantic_trigger: create command, slash command, modify command, utility command
+not_for: workflow skills, multi-phase operations, cognitive workflows
 tags: command-creation, utility, bash, claude-code, automation
 type: composite
 composition_depth: 0
@@ -32,7 +34,7 @@ Invoke when **utility commands need to be created or modified**:
 - **Category expansion:** Add a new command to an existing category -> "Add backup to clean category"
 - **Composite command:** Build a command that orchestrates other commands -> "Create deploy-all that runs build, test, deploy"
 - **DA.md registration:** Ensure command is properly documented -> "Register the new git:squash command"
-- **Command maintenance:** Update or fix an existing command -> "Modify clean-state to also clear logs"
+- **Command maintenance:** Update or fix an existing command -> "Modify state to also clear logs"
 
 ## Core Principles
 
@@ -159,7 +161,7 @@ description: Deploy everything with full validation
 Execute complete deployment:
 
 ```bash
-/clean:clean-state
+/clean:state
 /build:compile
 /test:run-all
 /deploy:push

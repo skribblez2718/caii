@@ -107,7 +107,8 @@ def format_mandatory_directive(command: str, context: str = "") -> str:
 **MANDATORY - EXECUTE IMMEDIATELY BEFORE ANY OTHER ACTION:**
 `{command}`
 
-⚠️ The Mandatory Reasoning Protocol MUST complete ALL steps before task work begins.
-{context}DO NOT proceed with any other action until this command is executed.
-"""
+⚠️ CRITICAL: Execute this command NOW. Do NOT respond with text first.
+⚠️ The reasoning protocol MUST complete before ANY task work begins.
+⚠️ FAILURE to execute this directive breaks the system's reliability guarantee.
+{context}"""
     return directive.strip()

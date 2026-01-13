@@ -85,10 +85,37 @@ orchestration/
 │   ├── agent/              # 7 cognitive agents (spawned via Task tool)
 │   └── skill/              # Composite + atomic skill definitions
 └── shared/                 # Reusable markdown content snippets
+    └── templates/          # Agent prompt templates (CRITICAL)
 ```
 
-Note: Skill routing uses the orchestrator's semantic understanding (DA.md "When to Use" patterns),
-not keyword-based pattern matching.
+## Agent Prompt Template System
+
+When invoking agents via atomic skills, the DA **MUST** use the standardized Agent Prompt Template format. This ensures consistent context passing and Johari knowledge transfer.
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `shared/templates/agent-system-prompt.md` | Full template with all placeholders |
+| `shared/templates/SKILL-TEMPLATE-REFERENCE.md` | Shared reference for SKILL.md files |
+| `shared/templates/CLAUDE.md` | Template system documentation |
+| Individual `SKILL.md` files | "Agent Invocation Format" section |
+
+### Required Template Sections
+
+| Section | Required | Source |
+|---------|----------|--------|
+| Task Context | Yes | task_id, skill_name, phase_id, domain, agent_name |
+| Role Extension | Yes | DA generates dynamically (3-5 focus areas) |
+| Johari Context | If available | From reasoning protocol Step 0 |
+| Task Instructions | Yes | Specific cognitive work |
+| Related Research Terms | Yes | DA generates dynamically (7-10 keywords) |
+| Output Requirements | Yes | Memory file path |
+
+See DA.md "Agent Prompt Template Requirements" section for full details.
+
+Note: Skill routing uses the orchestrator's semantic understanding (DA.md Skill Routing Table with semantic_trigger and not_for columns),
+not keyword-based pattern matching. When routing confidence is not HIGH, the system HALTs and asks for user clarification.
 
 ## Shared Path Management (orchestration/__init__.py)
 
@@ -145,7 +172,6 @@ step_4_task_routing.py
     └→ outputs one of:
         • skill-orchestration (skill matched)
         • dynamic-skill-sequencing (no match, needs agents)
-    Note: Trivial task evaluation happens in execution layer (routing_gate.py)
 
 # 5. Execution protocol triggers skill
 protocols/skill/composite/{skill}/entry.py {task_id}

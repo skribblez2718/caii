@@ -1,6 +1,8 @@
 ---
 name: develop-skill
 description: Meta-skill for creating and updating workflow skills with full Python orchestration integration
+semantic_trigger: create skill, modify skill, update workflow, new skill
+not_for: system modifications, direct code execution, architecture changes
 tags: meta-skill, skill-creation, workflow-design, orchestration, python-integration
 type: composite
 composition_depth: 0

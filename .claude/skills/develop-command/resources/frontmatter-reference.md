@@ -83,24 +83,27 @@ argument-hint: <number-of-commits>
 
 **Type:** string
 **Default:** Session default model
+**Required:** No - commands use the active session's model by default
 
-Override the model used for this command.
+Override the model used for this command. This field is **optional**; if omitted, the command executes using whatever model is active in the current Claude Code session.
 
 ```yaml
 ---
 description: Complex code analysis
-model: claude-opus-4-20250514
+model: opus
 ---
 ```
 
-**Available Models:**
-- `claude-opus-4-20250514` - Most capable
-- `claude-sonnet-4-20250514` - Balanced
-- `claude-haiku-3-20250514` - Fast/efficient
+**Available Models (short names preferred):**
+- `opus` - Most capable
+- `sonnet` - Balanced (default for most sessions)
+- `haiku` - Fast/efficient
+
+**Note:** Full model IDs (e.g., `claude-opus-4-20250514`) also work but short names are simpler and automatically use the latest model version.
 
 **Use Cases:**
 - Complex analysis requiring Opus
-- Quick utilities using Haiku
+- Quick utilities using Haiku (runs almost instantly)
 - Specific capability requirements
 
 ### disable-model-invocation
@@ -197,7 +200,7 @@ allowed-tools:
   - Bash
   - Read
   - Write
-model: claude-sonnet-4-20250514
+model: sonnet
 version: "2.0.0"
 hooks:
   pre:

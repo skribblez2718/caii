@@ -101,58 +101,12 @@ class TestReasoningEntryInit:
 class TestReasoningEntryStepSequence:
     """Tests for step sequence logic."""
 
-    def test_full_step_sequence(self):
-        """FULL_STEP_SEQUENCE includes all 9 steps."""
-        from reasoning.entry import FULL_STEP_SEQUENCE
-
-        assert FULL_STEP_SEQUENCE == [0, 1, 2, 3, 4, 5, 6, 7, 8]
-        assert len(FULL_STEP_SEQUENCE) == 9
-
     def test_agent_step_sequence_skips_step4(self):
         """AGENT_STEP_SEQUENCE skips Step 4."""
         from reasoning.entry import AGENT_STEP_SEQUENCE
 
         assert 4 not in AGENT_STEP_SEQUENCE
         assert AGENT_STEP_SEQUENCE == [0, 1, 2, 3, 5, 6, 7, 8]
-
-    def test_get_step_sequence_returns_full_for_orchestrator(self):
-        """get_step_sequence() returns full sequence when not agent mode."""
-        from reasoning.entry import get_step_sequence, FULL_STEP_SEQUENCE
-
-        result = get_step_sequence(is_agent_mode=False)
-
-        assert result == FULL_STEP_SEQUENCE
-
-    def test_get_step_sequence_returns_agent_for_agent_mode(self):
-        """get_step_sequence() returns agent sequence in agent mode."""
-        from reasoning.entry import get_step_sequence, AGENT_STEP_SEQUENCE
-
-        result = get_step_sequence(is_agent_mode=True)
-
-        assert result == AGENT_STEP_SEQUENCE
-
-    def test_get_next_step_normal_progression(self):
-        """get_next_step() returns correct next step."""
-        from reasoning.entry import get_next_step
-
-        assert get_next_step(0, is_agent_mode=False) == 1
-        assert get_next_step(1, is_agent_mode=False) == 2
-        assert get_next_step(3, is_agent_mode=False) == 4
-        assert get_next_step(7, is_agent_mode=False) == 8
-
-    def test_get_next_step_agent_mode_skips_step4(self):
-        """get_next_step() skips Step 4 in agent mode."""
-        from reasoning.entry import get_next_step
-
-        # After step 3 should be step 5 (skips 4)
-        assert get_next_step(3, is_agent_mode=True) == 5
-
-    def test_get_next_step_returns_none_at_end(self):
-        """get_next_step() returns None after last step."""
-        from reasoning.entry import get_next_step
-
-        assert get_next_step(8, is_agent_mode=False) is None
-        assert get_next_step(8, is_agent_mode=True) is None
 
 
 class TestReasoningEntryDirective:

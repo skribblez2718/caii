@@ -33,66 +33,11 @@ if str(_PROTOCOLS_DIR) not in sys.path:
 from reasoning.steps.base import BaseStep
 
 
-# Available skills for semantic matching
-# These descriptions are used by the orchestrator to semantically determine skill applicability
-COMPOSITE_SKILLS = {
-    "develop-skill": {
-        "description": "Meta-skill for creating/updating workflow skills and system modifications",
-        "when_to_use": [
-            "New workflow pattern or orchestration capability needed",
-            "Existing skill needs enhancement or modification",
-            "ANY system modifications (skills, agents, protocols, architecture)",
-            "Meta-work on workflows themselves",
-        ],
-        "examples": [
-            "Create a skill for code review workflows",
-            "Update develop-skill to include new phases",
-            "Modify the routing system",
-            "Update agent protocols",
-        ],
-    },
-    "develop-learnings": {
-        "description": "Transform workflow experiences into structured, reusable learnings",
-        "when_to_use": [
-            "Post-workflow capture of insights needed",
-            "Resolved unknowns should become permanent knowledge",
-            "Pattern or anti-pattern worth preserving discovered",
-            "Agent improvement based on discoveries needed",
-        ],
-        "examples": [
-            "Capture what we learned from this project",
-            "Document this approach for future use",
-            "Remember not to do this again",
-        ],
-    },
-}
-
-ATOMIC_SKILLS = {
-    "orchestrate-clarification": {
-        "description": "Transform vague inputs into actionable specifications",
-        "when_to_use": ["Ambiguity must be resolved before cognitive work can proceed"],
-    },
-    "orchestrate-research": {
-        "description": "Investigate options and gather domain knowledge",
-        "when_to_use": ["Knowledge gaps must be filled before design decisions"],
-    },
-    "orchestrate-analysis": {
-        "description": "Decompose complex problems and map dependencies",
-        "when_to_use": ["Complexity needs systematic decomposition"],
-    },
-    "orchestrate-synthesis": {
-        "description": "Integrate findings into coherent designs",
-        "when_to_use": ["Multiple inputs need integration into coherent whole"],
-    },
-    "orchestrate-generation": {
-        "description": "Generate artifacts using TDD methodology",
-        "when_to_use": ["Specifications are ready for artifact creation"],
-    },
-    "orchestrate-validation": {
-        "description": "Verify artifacts against quality criteria",
-        "when_to_use": ["Quality verification required before completion"],
-    },
-}
+# Skill information is now centralized in:
+# - DA.md (Skill Routing Table section) - used at session start
+# - skill/config/config.py (COMPOSITE_SKILLS, ATOMIC_SKILLS) - master registry with semantic_trigger/not_for
+#
+# This step references the DA.md context already loaded at session start, avoiding duplication.
 
 
 class Step3bSkillDetection(BaseStep):
@@ -134,71 +79,42 @@ class Step3bSkillDetection(BaseStep):
 
     def get_extra_context(self) -> str:
         """
-        Present available skills for the orchestrator's semantic evaluation.
+        Present skill detection instructions referencing DA.md routing table.
+
+        The Skill Routing Table in DA.md contains semantic_trigger and not_for
+        fields for each skill. This step references that context (already loaded
+        at session start) rather than duplicating skill information here.
         """
         query = getattr(self.state, "user_query", "")
 
-        context_parts = [
-            "## Step 3b: Semantic Skill Detection",
-            "",
-            "Evaluate the user's query against available skills using your semantic understanding",
-            "from DA.md. **DO NOT use keyword matching** - use semantic understanding of intent.",
-            "",
-            f"**User Query:** {query}",
-            "",
-            "---",
-            "",
-            "## Available Composite Skills",
-            "",
-        ]
+        return f"""## Step 3b: Semantic Skill Detection
 
-        for skill_name, skill_info in COMPOSITE_SKILLS.items():
-            context_parts.append(f"### {skill_name}")
-            context_parts.append(f"**Description:** {skill_info['description']}")
-            context_parts.append("")
-            context_parts.append("**When to Use:**")
-            for condition in skill_info["when_to_use"]:
-                context_parts.append(f"- {condition}")
-            context_parts.append("")
-            context_parts.append("**Examples:**")
-            for example in skill_info["examples"]:
-                context_parts.append(f"- \"{example}\"")
-            context_parts.append("")
+Evaluate the user's query against the **Skill Routing Table** in your DA.md context.
 
-        context_parts.extend([
-            "---",
-            "",
-            "## Available Atomic Skills (for dynamic sequencing)",
-            "",
-        ])
+**User Query:** {query}
 
-        for skill_name, skill_info in ATOMIC_SKILLS.items():
-            context_parts.append(f"- **{skill_name}**: {skill_info['description']}")
+---
 
-        context_parts.extend([
-            "",
-            "---",
-            "",
-            "## Your Semantic Evaluation",
-            "",
-            "Based on the user's query and your understanding of these skill patterns:",
-            "",
-            "1. **Evaluate semantically** - Does the query's INTENT match a skill's purpose?",
-            "2. **Consider context** - What is the user trying to accomplish?",
-            "3. **Apply DA.md patterns** - Use the 'When to Use' guidance you received at session start",
-            "",
-            "**Respond with your detection in this format:**",
-            "```",
-            "SKILL_DETECTED: [yes|no]",
-            "SKILL_NAME: [skill-name or null]",
-            "SKILL_TYPE: [composite|atomic|null]",
-            "CONFIDENCE: [high|medium|low]",
-            "REASONING: [Brief semantic justification]",
-            "```",
-            "",
-        ])
+## Semantic Evaluation Instructions
 
-        return "\n".join(context_parts)
+1. **Reference DA.md Skill Routing Table** - Compare query intent against semantic_trigger and not_for columns
+2. **Evaluate semantically** - Does the query's INTENT match a skill's semantic trigger?
+3. **Check NOT for exclusions** - Does the query match any skill's "NOT for" criteria?
+
+## Confidence-Based Action
+
+- **HIGH confidence** → Proceed to routing
+- **MEDIUM/LOW confidence** → Flag for user clarification (will HALT in Step 8)
+
+**Respond with your detection in this format:**
+```
+SKILL_DETECTED: [yes|no]
+SKILL_NAME: [skill-name or null]
+SKILL_TYPE: [composite|atomic|null]
+CONFIDENCE: [high|medium|low]
+REASONING: [Brief semantic justification referencing semantic_trigger match]
+```
+"""
 
     def execute(self) -> bool:
         """

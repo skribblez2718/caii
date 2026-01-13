@@ -17,17 +17,15 @@
 
 Composite skills orchestrate multiple cognitive agents through defined phase sequences.
 
+| Skill | Semantic Trigger | NOT for | Location |
+|-------|------------------|---------|----------|
+| develop-skill | create/modify skills, update workflows, new skill | system mods, direct code, architecture changes | `.claude/skills/develop-skill/` |
+| develop-learnings | capture learnings, document insights, preserve knowledge | mid-workflow tasks, skill creation, active execution | `.claude/skills/develop-learnings/` |
+| develop-command | create/modify slash commands, utility commands | workflow skills, multi-phase operations | `.claude/skills/develop-command/` |
+
 ### develop-learnings
 
 **Purpose:** Transform completed workflow experiences into structured, reusable learnings organized by cognitive function.
-
-**When to Use:**
-- Post-workflow capture of insights and patterns
-- Unknown→Known transitions that should become permanent knowledge
-- Pattern preservation for future agent improvement
-- Anti-pattern identification to avoid future mistakes
-
-**Location:** `${CAII_DIRECTORY}/.claude/skills/develop-learnings/`
 
 ---
 
@@ -35,27 +33,11 @@ Composite skills orchestrate multiple cognitive agents through defined phase seq
 
 **Purpose:** Meta-skill for creating and updating workflow skills using 6 universal cognitive agents. Supports composite-to-composite skill composition.
 
-**When to Use:**
-- New workflow pattern needed for a task type
-- Existing skill needs enhancement or modification
-- Agent sequencing design for new task patterns
-- System capability extension
-
-**Location:** `${CAII_DIRECTORY}/.claude/skills/develop-skill/`
-
 ---
 
 ### develop-command
 
 **Purpose:** Create and manage Claude Code slash commands for utility operations.
-
-**When to Use:**
-- New utility command needed for a specific operation
-- Adding command to existing category
-- Building composite command that calls other commands
-- Updating or maintaining existing commands
-
-**Location:** `${CAII_DIRECTORY}/.claude/skills/develop-command/`
 
 ---
 
@@ -63,15 +45,15 @@ Composite skills orchestrate multiple cognitive agents through defined phase seq
 
 Atomic skills wrap single cognitive agents for use in Dynamic Skill Sequencing. Each maps to exactly one cognitive function.
 
-| Skill | Cognitive Function | Purpose |
-|-------|-------------------|---------|
-| orchestrate-clarification | CLARIFIER | Transform vague inputs into actionable specifications |
-| orchestrate-research | RESEARCHER | Investigate options, gather domain knowledge |
-| orchestrate-analysis | ANALYZER | Decompose problems, assess complexity, identify risks |
-| orchestrate-synthesis | SYNTHESIZER | Integrate findings into coherent recommendations |
-| orchestrate-generation | GENERATOR | Create artifacts using TDD methodology |
-| orchestrate-validation | VALIDATOR | Verify artifacts against quality criteria |
-| orchestrate-memory | METACOGNITION | Monitor progress, detect impasses, suggest remediation |
+| Skill | Cognitive Function | Semantic Trigger | NOT for |
+|-------|-------------------|------------------|---------|
+| orchestrate-clarification | CLARIFICATION | ambiguity resolution, requirements refinement | well-defined tasks with clear specifications |
+| orchestrate-research | RESEARCH | knowledge gaps, options exploration | tasks with complete information |
+| orchestrate-analysis | ANALYSIS | complexity decomposition, risk assessment | simple tasks without dependencies |
+| orchestrate-synthesis | SYNTHESIS | integration of findings, design creation | single-source tasks without integration |
+| orchestrate-generation | GENERATION | artifact creation, TDD implementation | read-only or research tasks |
+| orchestrate-validation | VALIDATION | quality verification, acceptance testing | tasks without deliverables to verify |
+| orchestrate-memory | METACOGNITION | progress tracking, impasse detection | simple linear workflows |
 
 ### When to Use Atomic Skills
 
@@ -79,6 +61,8 @@ Atomic skills are building blocks for Dynamic Skill Sequencing when:
 - Task requires multiple cognitive functions but doesn't match a composite skill
 - Flexible orchestration is needed for novel task patterns
 - Single cognitive function needs isolated invocation
+
+**Routing heuristic:** clarification (if ambiguous) → research (if gaps) → analysis (if complex) → synthesis (if integration needed) → generation (if artifacts needed) → validation (if verification required)
 
 ### Example Skill Sequences
 
@@ -110,12 +94,15 @@ Does task match a composite skill pattern?
 
 ### Quick Reference
 
-| Task Pattern | Recommended Skill |
-|--------------|-------------------|
-| "Create a new skill for Z" | develop-skill |
-| "Capture what we learned" | develop-learnings |
-| "Create a utility command" | develop-command |
-| Novel multi-step task | Dynamic Skill Sequencing |
+| Query Intent | Matches Semantic Trigger | Skill |
+|--------------|-------------------------|-------|
+| "Create a new skill for Z" | create skill, new skill | develop-skill |
+| "Modify the validation workflow" | modify skill, update workflow | develop-skill |
+| "Capture what we learned" | capture learnings, document insights | develop-learnings |
+| "Create a /clean command" | create command, slash command | develop-command |
+| Novel multi-step task | (no match) | Dynamic Skill Sequencing |
+
+**Confidence-Based Routing:** When confidence is not HIGH, HALT and ask user for clarification rather than guessing.
 
 ---
 

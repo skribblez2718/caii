@@ -24,12 +24,6 @@ Post-reasoning execution routing. After the 8-step reasoning protocol determines
 │          └─────────────┘                 └─────────────┘                    │
 │                 │                               │                            │
 │                 └───────────────┬───────────────┘                            │
-│                                 ▼                                            │
-│                       ┌─────────────────┐                                   │
-│                       │ routing_gate.py │ (evaluates triviality)            │
-│                       │ TRIVIAL_APPROVED│ → Direct tools (skip agents)      │
-│                       │ AGENT_REQUIRED  │ → Invoke cognitive agents         │
-│                       └─────────────────┘                                   │
 │                                 │                                            │
 └─────────────────────────────────┼────────────────────────────────────────────┘
                   │                 │
@@ -81,7 +75,6 @@ protocols/execution/
 ├── core/                  # Core execution components
 │   ├── __init__.py
 │   ├── dispatcher.py      # Route dispatcher (reasoning → execution)
-│   ├── routing_gate.py    # Triviality gate for direct tool usage
 │   ├── state.py           # ExecutionState class
 │   └── fsm.py             # Finite state machines per protocol
 │
@@ -113,7 +106,6 @@ protocols/execution/
 protocols/reasoning/steps/step_4_task_routing.py
     └→ Outputs route: "skill-orchestration" | "dynamic-skill-sequencing"
     └→ print(directive: "python dispatcher.py --reasoning-session {id} --route {route}")
-    # Note: Trivial task evaluation happens via routing_gate.py AFTER dispatch
 
 # 2. Dispatcher receives route and creates execution session
 core/dispatcher.py --reasoning-session {id} --route {route}
@@ -151,49 +143,6 @@ step_3_invoke_skills.py (dynamic-skill-sequencing)
     └→ For each atomic skill: protocols/skill/atomic/orchestrate-*/entry.py
 ```
 
-## Routing Gate Logic
-
-**Important Clarification:** The routing gate (`routing_gate.py`) is DEFINED but NOT AUTOMATICALLY INVOKED in the current execution flow.
-
-- **Skill vs. Dynamic routing:** Handled by reasoning protocol Step 3b (skill detection) + Step 4 (task routing)
-- **Triviality validation:** The routing gate MODULE exists for evaluating trivial tasks
-- **Current status:** The gate is available for OPTIONAL invocation by the orchestrator when deciding whether a task can use direct tools vs. requiring agents
-
-**When triviality evaluation occurs:** The orchestrator (Claude) can invoke `RoutingGate.validate_triviality()` at any point after receiving the route to determine if direct tools suffice. This is a semantic decision by the orchestrator, not an automatic protocol step.
-
-The gate handles ONLY triviality validation, not skill routing.
-
-```
-┌────────────────────────────────────────────────────────────────────────────┐
-│                         ROUTING GATE (routing_gate.py)                     │
-│                                                                            │
-│  Task Query Arrives (from Step 4 - Task Routing)                           │
-│        │                                                                   │
-│        ▼                                                                   │
-│  ┌─────────────────────────────┐                                          │
-│  │    Triviality Check         │                                          │
-│  │ generate_assessment_prompt()│                                          │
-│  │   └→ LLM self-assessment    │                                          │
-│  └─────────────────────────────┘                                          │
-│        │                                                                   │
-│        ▼                                                                   │
-│  ┌─────────────────────────────────────────────────────────────────────┐  │
-│  │         TRIVIAL CRITERIA (ALL 5 must be YES for TRIVIAL)            │  │
-│  │  ┌────────────────────────────────────────────────────────────────┐ │  │
-│  │  │ 1. SINGLE_FILE:        Affects only one file?                  │ │  │
-│  │  │ 2. FIVE_LINES_OR_LESS: Changes ≤5 lines?                       │ │  │
-│  │  │ 3. MECHANICAL_OPERATION: Purely mechanical (typo, rename)?     │ │  │
-│  │  │ 4. NO_RESEARCH_NEEDED: Requires no information gathering?      │ │  │
-│  │  │ 5. NO_DECISIONS_NEEDED: Requires zero judgment calls?          │ │  │
-│  │  └────────────────────────────────────────────────────────────────┘ │  │
-│  └─────────────────────────────────────────────────────────────────────┘  │
-│        │                                                                   │
-│        ├── All 5 YES ──→ TRIVIAL_APPROVED (direct tools)                  │
-│        ├── Parse fail + uncertainty markers ──→ CLARIFICATION_NEEDED      │
-│        └── Any NO or parse fail ──→ AGENT_REQUIRED (fail-secure)          │
-└────────────────────────────────────────────────────────────────────────────┘
-```
-
 ## Data Contracts
 
 ### ExecutionState (JSON)
@@ -219,8 +168,8 @@ The gate handles ONLY triviality validation, not skill routing.
 
 | Protocol | Path |
 |----------|------|
-| skill-orchestration | `skill/state/skill-orchestration-{session_id}.json` |
-| dynamic-skill-sequencing | `dynamic/state/dynamic-skill-sequencing-{session_id}.json` |
+| skill-orchestration | `skill/state/skill-{session_id}.json` |
+| dynamic-skill-sequencing | `dynamic/state/dynamic-{session_id}.json` |
 
 ## Key Configuration (config/config.py)
 
@@ -264,15 +213,11 @@ DYNAMIC_SKILL_SEQUENCING_STEPS = {
    └→ Provides execute() orchestration
    └→ Provides print_next_directive() with format_mandatory_directive()
 
-4. Routing gate is FAIL-SECURE
-   └→ If ANY trivial criterion is uncertain → AGENT_REQUIRED
-   └→ If parse fails → AGENT_REQUIRED (not TRIVIAL)
-
-5. Step 5 (trigger_agents) is the ONLY step that invokes agents
+4. Step 5 (trigger_agents) is the ONLY step that invokes agents
    └→ All agent invocation flows through Task tool
    └→ Never call agent entry.py directly
 
-6. FSM transitions are STRICT
+5. FSM transitions are STRICT
    └→ Steps must execute in order (no skipping)
    └→ core/fsm.py defines valid transitions per protocol
 ```
@@ -285,8 +230,6 @@ DYNAMIC_SKILL_SEQUENCING_STEPS = {
 | `config/config.py` | `get_state_file_path()` | Build state file path |
 | `config/config.py` | `get_step_script_path()` | Build step script path |
 | `core/dispatcher.py` | `dispatch()` | Main dispatcher entry point |
-| `core/routing_gate.py` | `RoutingGate.validate_triviality()` | Trivial criteria check |
-| `core/routing_gate.py` | `RoutingGateWorkflow.execute_gate()` | Full gate with retry logic |
 | `steps/base.py` | `ExecutionBaseStep.execute()` | Step execution orchestration |
 | `steps/base.py` | `ExecutionBaseStep.main()` | CLI entry point for steps |
 | `core/state.py` | `ExecutionState.start_step()` | Begin step, update FSM |
@@ -310,11 +253,9 @@ DYNAMIC_SKILL_SEQUENCING_STEPS = {
 ### ❌ Dangerous - Will Break System
 
 - Removing state.save() before print_next_directive()
-- Bypassing routing gate checks
 - Removing format_mandatory_directive() wrappers
 - Calling agent entry.py directly (must use Task tool)
 - Changing state file path format without updating all references
-- Removing fail-secure defaults in routing_gate.py
 
 ## Debugging Tips
 

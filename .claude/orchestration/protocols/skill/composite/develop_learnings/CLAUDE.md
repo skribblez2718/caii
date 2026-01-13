@@ -14,11 +14,13 @@ Transform completed workflow experiences into structured, reusable learnings.
 | 5 | Commit | orchestrate-generation |
 | 5.5 | Post-Integration Cleanup | orchestrate-analysis |
 
-## When Used
+## Routing
 
-- Post-workflow capture of insights
-- Converting unknown→known knowledge
-- Preserving patterns and anti-patterns
+**Semantic Trigger:** capture learnings, document insights, preserve knowledge, post-workflow capture
+
+**NOT for:** mid-workflow tasks, skill creation, active execution
+
+> This skill is for post-workflow knowledge capture. It should NOT be invoked during active execution.
 
 ## Learning Types
 

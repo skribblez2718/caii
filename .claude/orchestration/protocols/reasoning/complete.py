@@ -83,8 +83,6 @@ def print_halted_summary(state: ProtocolState) -> None:
         for i, question in enumerate(state.clarification_questions, 1):
             print(f"{i}. {question}")
 
-    print(f"Resume: `python entry.py --resume {state.session_id}`")
-
 
 def complete_protocol(state: ProtocolState) -> bool:
     """
@@ -142,19 +140,41 @@ def print_dispatch_directive(state: ProtocolState) -> None:
 
     Also sets dispatch_pending in state so the hook can ensure
     execution chain continues even if this print is not processed.
+
+    The context includes Johari schema from Step 0 to guide agent invocation.
+    The DA uses this when building agent prompts with role_extension and research_terms.
     """
     # Get dispatcher path relative to orchestration root
     dispatcher_script = Path(__file__).parent.parent / "protocols/execution" / "dispatcher.py"
 
     directive_command = f"python {dispatcher_script} --reasoning-session {state.session_id} --route {state.routing_decision}"
 
+    # Extract Johari schema from Step 0 output (if available)
+    step_0_output = state.step_outputs.get(0, {})
+    johari_schema = step_0_output.get("johari_schema", {})
+
     # Set dispatch pending in state (hook will check this)
+    # Include Johari schema and template requirements for downstream agent invocation
     state.set_dispatch_pending(
         route=state.routing_decision,
         directive_command=directive_command,
         context={
             "routing_justification": state.routing_justification,
             "user_query": state.user_query,
+            "johari_schema": johari_schema,
+            "johari_usage": (
+                "When invoking agents, the DA should extract Johari findings from "
+                "Step 0 analysis and pass them to the agent prompt under 'Prior Knowledge "
+                "(Johari Window)' section with Open/Blind/Hidden/Unknown quadrants."
+            ),
+            "template_requirement": (
+                "When invoking agents via atomic skills (orchestrate-*), use the Agent "
+                "Prompt Template format. Include: Task Context, Role Extension (generate "
+                "3-5 task-specific focus areas dynamically), Johari Context (from above), "
+                "Task Instructions, Research Terms (generate 7-10 keywords), and Output "
+                "Requirements (memory file path). See DA.md 'Agent Prompt Template Requirements' "
+                "or the skill's SKILL.md 'Agent Invocation Format' section for full template."
+            ),
         }
     )
     state.save()

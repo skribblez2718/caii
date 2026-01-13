@@ -1,8 +1,8 @@
 ---
-description: Clean all state, research, and plan files
+description: Clean all state, research, plan, and memory files
 ---
 
-Delete all orchestration state files, research files, and plan files with a single command.
+Delete all orchestration state files, research files, plan files, and memory files with a single command.
 
 Execute this cleanup:
 
@@ -19,6 +19,10 @@ echo "Research cleanup complete"
 find .claude/plans -type f ! -name '.gitkeep' -delete
 find .claude/plans -mindepth 1 -type d -exec rm -rf {} + 2>/dev/null || true
 echo "Plans cleanup complete"
+
+# Clear memory files (preserve .gitkeep)
+find .claude/memory -type f ! -name '.gitkeep' -delete
+echo "Memory cleanup complete"
 
 echo ""
 echo "All cleanup complete!"

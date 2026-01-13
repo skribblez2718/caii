@@ -95,14 +95,6 @@ python3 ${CAII_DIRECTORY}/.claude/orchestration/protocols/execution/dynamic-skil
 | Full research | orchestrate-clarification → orchestrate-research → orchestrate-analysis → orchestrate-synthesis |
 | Compare options | orchestrate-research → orchestrate-analysis → orchestrate-synthesis |
 
-## Note on Trivial Tasks
-
-Trivial task evaluation is handled by the **routing gate** in the execution layer, NOT as a route choice here. The reasoning protocol always outputs one of two routes:
-- `skill-orchestration`
-- `dynamic-skill-sequencing`
-
-After routing completes, the execution layer's `routing_gate.py` evaluates whether a task is trivial and can skip agent invocation. This happens AFTER the reasoning protocol finishes.
-
 **When uncertain about complexity, default to `dynamic-skill-sequencing`.**
 
 ## Output Requirements

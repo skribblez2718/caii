@@ -1,8 +1,8 @@
 ---
 name: memory
-description: Metacognitive assessment of workflow state, progress tracking, and impasse detection. Monitors for conflicts, missing knowledge, and stalls.
+description: "Metacognitive assessment of workflow state, progress tracking, and impasse detection. Monitors for conflicts, missing knowledge, and stalls."
 tools: Bash(python3:*), Read
-model: sonnet
+model: haiku
 color: purple
 ---
 

@@ -29,7 +29,7 @@ Complex operations should compose simple commands.
 **Good:**
 ```bash
 # deploy-all.md
-/clean:clean-state
+/clean:state
 /build:compile
 /test:run-all
 /deploy:push

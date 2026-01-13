@@ -214,13 +214,12 @@ SEPARATOR_COLOR='\033[38;2;171;178;191m' # #abb2bf - Subtle gray for separators 
 RESET='\033[0m'                      # Reset all formatting
 
 # Format MCP names from claude mcp list output (already stored in mcp_names_raw)
+# Preserve original case and formatting exactly as reported by Claude Code
 mcp_names_formatted=""
 
-# Format MCP names - convert hyphens to spaces, title case (same as commands/skills)
 for mcp in $mcp_names_raw; do
-    # Capitalize words and replace hyphens with spaces for display
-    formatted_name=$(echo "$mcp" | sed 's/-/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2));}1')
-    formatted="${MCP_NAMES_COLOR}${formatted_name}${RESET}"
+    # Use MCP name exactly as extracted - no transformation
+    formatted="${MCP_NAMES_COLOR}${mcp}${RESET}"
 
     if [ -z "$mcp_names_formatted" ]; then
         mcp_names_formatted="$formatted"
@@ -234,22 +233,23 @@ if [ -z "$mcp_names_formatted" ]; then
     mcp_names_formatted="${SEPARATOR_COLOR}None${RESET}"
 fi
 
-# Get Command names - all in white
+# Get Command names - format as /<verb>:<noun>
+# Structure: .claude/commands/<verb>/<noun>.md
 command_names_formatted=""
 if [ -d "$claude_dir/commands" ]; then
-    command_names_raw=$(find "$claude_dir/commands" -name "*.md" ! -name "*template*" -exec basename {} .md \; 2>/dev/null | tr '\n' ' ')
-    # Format Command names - all in white
-    for cmd in $command_names_raw; do
-        # Capitalize words and replace hyphens with spaces for display
-        formatted_name=$(echo "$cmd" | sed 's/-/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2));}1')
-        formatted="${MCP_NAMES_COLOR}${formatted_name}${RESET}"
+    while IFS= read -r cmd_path; do
+        # Extract verb (parent directory) and noun (filename without .md)
+        verb=$(basename "$(dirname "$cmd_path")")
+        noun=$(basename "$cmd_path" .md)
+        # Format as /<verb>:<noun>
+        formatted="${MCP_NAMES_COLOR}/${verb}:${noun}${RESET}"
 
         if [ -z "$command_names_formatted" ]; then
             command_names_formatted="$formatted"
         else
             command_names_formatted="$command_names_formatted${SEPARATOR_COLOR}, ${formatted}"
         fi
-    done
+    done < <(find "$claude_dir/commands" -name "*.md" ! -name "*template*" 2>/dev/null | sort)
 fi
 
 # Set to "None" if no commands found
@@ -257,15 +257,14 @@ if [ -z "$command_names_formatted" ]; then
     command_names_formatted="${SEPARATOR_COLOR}None${RESET}"
 fi
 
-# Get Skill names - all in white
+# Get Skill names - preserve lowercase with hyphens (no transformation)
 skill_names_formatted=""
 if [ -d "$claude_dir/skills" ]; then
-    skill_names_raw=$(find "$claude_dir/skills" -maxdepth 1 -type d ! -path "$claude_dir/skills" -exec basename {} \; 2>/dev/null | tr '\n' ' ')
-    # Format Skill names - all in white
+    skill_names_raw=$(find "$claude_dir/skills" -maxdepth 1 -type d ! -path "$claude_dir/skills" -exec basename {} \; 2>/dev/null | sort | tr '\n' ' ')
+    # Keep skill names as-is (lowercase with hyphens preserved)
     for skill in $skill_names_raw; do
-        # Capitalize words and replace hyphens with spaces for display
-        formatted_name=$(echo "$skill" | sed 's/-/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2));}1')
-        formatted="${MCP_NAMES_COLOR}${formatted_name}${RESET}"
+        # Use the skill name directly without transformation
+        formatted="${MCP_NAMES_COLOR}${skill}${RESET}"
 
         if [ -z "$skill_names_formatted" ]; then
             skill_names_formatted="$formatted"

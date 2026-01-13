@@ -106,10 +106,7 @@ def generate_routing_prompt(context: SemanticRoutingContext) -> str:
 
     return f"""## Semantic Routing Decision
 
-**User Query:**
-```
 {context.user_query}
-```
 
 {routes_text}
 {context_text}

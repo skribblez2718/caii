@@ -1,5 +1,5 @@
 ---
-description: Clean all orchestration state and memory files
+description: Clean all orchestration state files
 ---
 
 Delete all state files from the orchestration system to prevent buildup.

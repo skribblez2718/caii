@@ -32,7 +32,7 @@ This document summarizes official Claude Code documentation for custom slash com
 ```
 
 **Examples:**
-- `/clean:clean-state` - Invoke clean-state from clean category
+- `/clean:state` - Invoke state from clean category
 - `/git:squash 5` - Invoke squash with argument "5"
 
 **Known Bug:** The full namespace syntax `/project:category:command` doesn't work (GitHub #2422). Use `/category:command` instead.
@@ -94,7 +94,7 @@ git rebase -i HEAD~$1
 |-------|------|---------|-------------|
 | `allowed-tools` | array | all | Restrict which tools command can use |
 | `argument-hint` | string | none | Placeholder text for autocomplete |
-| `model` | string | default | Override model for this command |
+| `model` | string | session model | Override model (opus/sonnet/haiku) |
 | `disable-model-invocation` | boolean | false | Run bash only, skip LLM processing |
 | `hooks` | object | none | Pre/post execution hooks |
 | `version` | string | none | Command version for tracking |
@@ -116,9 +116,11 @@ allowed-tools:
 ```yaml
 ---
 description: Complex analysis task
-model: claude-opus-4-20250514
+model: opus
 ---
 ```
+
+**Note:** Model field is optional. Commands use the session's active model by default. Use short names: `opus`, `sonnet`, `haiku`.
 
 ## Token Limits
 
@@ -135,9 +137,11 @@ model: claude-opus-4-20250514
 ```
 .claude/commands/
 ├── clean/
-│   ├── clean-state.md
-│   ├── clean-plans.md
-│   └── clean-all.md
+│   ├── state.md
+│   ├── plans.md
+│   ├── research.md
+│   ├── memories.md
+│   └── all.md
 ├── git/
 │   ├── squash.md
 │   └── amend.md
@@ -148,9 +152,9 @@ model: claude-opus-4-20250514
 
 ### Naming Conventions
 
-- **Directory names:** lowercase, kebab-case (e.g., `clean`, `my-category`)
-- **File names:** lowercase, kebab-case with `.md` extension (e.g., `clean-state.md`)
-- **Command names:** Match filename without extension (e.g., `clean-state`)
+- **Directory names:** lowercase, verb form (e.g., `clean`, `build`, `git`)
+- **File names:** lowercase, noun form with `.md` extension (e.g., `state.md`, `plans.md`)
+- **Command names:** Match filename without extension (e.g., `state`, `plans`)
 
 ## Skills vs Commands vs CLAUDE.md
 

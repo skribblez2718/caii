@@ -18,9 +18,6 @@ Legacy aliases for backwards compatibility:
 - skill-orchestration → skill
 - dynamic-skill-sequencing → dynamic
 
-Trivial tasks (single file, ≤5 lines, mechanical) can use direct tools via
-the routing gate without a full protocol.
-
 Each protocol follows the same patterns as the reasoning protocol:
 - FSM enforces step order
 - Steps read markdown content and print directives
@@ -53,13 +50,6 @@ from core.fsm import (
     create_fsm,
     load_fsm,
 )
-from core.routing_gate import (
-    TrivialCriteria,
-    GateDecision,
-    RoutingGate,
-    RoutingGateWorkflow,
-    assess_task_triviality,
-)
 from steps.base import ExecutionBaseStep, BaseStep
 
 __all__ = [
@@ -79,12 +69,6 @@ __all__ = [
     "DynamicSkillSequencingState",
     "create_fsm",
     "load_fsm",
-    # Routing gate exports
-    "TrivialCriteria",
-    "GateDecision",
-    "RoutingGate",
-    "RoutingGateWorkflow",
-    "assess_task_triviality",
     # Step base exports
     "ExecutionBaseStep",
     "BaseStep",

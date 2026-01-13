@@ -31,6 +31,9 @@ class Step0JohariDiscovery(BaseStep):
 
     Systematically explores unknown unknowns before formal reasoning.
     Uses SHARE/ASK/ACKNOWLEDGE/EXPLORE framework to surface ambiguities.
+
+    The Johari findings from this step are used downstream when invoking agents.
+    The DA should extract and pass these findings to build_agent_prompt().
     """
     _step_num = 0
     _step_name = "JOHARI_DISCOVERY"
@@ -39,7 +42,32 @@ class Step0JohariDiscovery(BaseStep):
         """
         Step 0 is the first step, so provides context about the user query.
         """
-        return f"**User Query:** {self.state.user_query}\n"
+        return f"{self.state.user_query}\n"
+
+    def process_step(self) -> dict:
+        """
+        Return structured metadata for Johari findings.
+
+        The actual Johari analysis is performed by Claude following the
+        markdown instructions. This method documents the expected structure
+        that the DA should extract from Claude's analysis.
+
+        The DA uses these findings when invoking agents via build_agent_prompt()
+        to provide prior knowledge context.
+
+        Returns:
+            Dict with Johari structure metadata
+        """
+        return {
+            "johari_schema": {
+                "open": "Confirmed knowledge, verified facts, shared understanding",
+                "blind": "Identified gaps, missing context, unknown requirements",
+                "hidden": "Inferences, assumptions, non-obvious insights",
+                "unknown": "Edge cases, potential risks, areas for exploration",
+            },
+            "usage": "DA extracts Johari findings from Step 0 analysis and passes to agents",
+            "downstream": "build_agent_prompt() accepts johari_findings parameter",
+        }
 
 
 # Allow running as script

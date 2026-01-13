@@ -6,7 +6,7 @@
 
 ## Overview
 
-Execution protocols are automatically dispatched by the reasoning protocol after Step 8 routing is validated. The routing_gate.py module validates task triviality before allowing direct execution. The `dispatcher.py` script routes to the appropriate protocol's `entry.py`, which prints directives for the orchestrator to follow.
+Execution protocols are automatically dispatched by the reasoning protocol after Step 8 routing is validated. The `dispatcher.py` script routes to the appropriate protocol's `entry.py`, which prints directives for the orchestrator to follow.
 
 ---
 
@@ -17,27 +17,9 @@ Execution protocols are automatically dispatched by the reasoning protocol after
 | Skill Orchestration | 6 | Multi-phase cognitive workflows matching formal skill patterns |
 | Dynamic Skill Sequencing | 5 | Flexible cognitive workflows using orchestrate-* atomic skills |
 
-**Note:** Trivial tasks (single file, ≤5 lines, mechanical operations) are handled via direct tool usage after passing the routing gate validation. This is not a formal protocol but rather a bypass for simple operations.
-
 ---
 
 ## Architecture
-
-### Routing Gate Module
-
-**Path:** `${CAII_DIRECTORY}/.claude/orchestration/protocols/execution/routing_gate.py`
-
-The routing gate module provides triviality validation to determine if tasks can bypass formal protocols. It implements a self-assessment pattern where the orchestrator evaluates tasks against explicit criteria before routing decisions.
-
-**Core Components:**
-
-- **TrivialCriteria dataclass:** 5 boolean fields representing triviality criteria (single_file, five_lines_or_fewer, mechanical_operation, no_research_required, no_decisions_needed)
-- **GateDecision enum:** Routing outcomes (TRIVIAL_APPROVED, AGENT_REQUIRED, CLARIFICATION_NEEDED)
-- **RoutingGate class:** Generates self-assessment prompts and parses orchestrator responses to determine routing
-
-**Fail-Secure Design:**
-
-When ANY criterion fails or ambiguity exists, the gate defaults to skill orchestration or dynamic skill sequencing. Direct tool usage requires ALL 5 triviality criteria explicitly satisfied. This ensures cognitive oversight for non-trivial tasks.
 
 ### Directory Structure
 
@@ -53,7 +35,6 @@ ${CAII_DIRECTORY}/.claude/orchestration/protocols/execution/
 ├── core/                  # Core execution components
 │   ├── __init__.py
 │   ├── dispatcher.py      # Route dispatcher (reasoning → execution)
-│   ├── routing_gate.py    # Triviality gate for direct tool usage
 │   ├── state.py           # ExecutionState class
 │   └── fsm.py             # Finite state machines per protocol
 │
@@ -121,6 +102,21 @@ INVOKE_SKILLS → VERIFY_COMPLETION → COMPLETE → COMPLETED
 - The orchestrator dynamically determines which orchestrate-* atomic skills to invoke
 - More flexible for novel task patterns that don't match existing composite skills
 
+**Agent Prompt Template Requirement (Step 3 - INVOKE_SKILLS):**
+
+When Step 3 invokes atomic skills, the DA **MUST** structure Task tool prompts using the Agent Prompt Template format:
+
+| Section | Required | Source |
+|---------|----------|--------|
+| Task Context | Yes | task_id, skill, phase, domain, agent |
+| Role Extension | Yes | DA generates 3-5 task-specific focus areas |
+| Johari Context | If available | From reasoning protocol Step 0 |
+| Task Instructions | Yes | Specific cognitive work |
+| Related Research Terms | Yes | DA generates 7-10 keywords |
+| Output Requirements | Yes | Memory file path |
+
+Plain text prompts passed to agents will result in incomplete context transfer. See `${CAII_DIRECTORY}/.claude/orchestration/shared/templates/SKILL-TEMPLATE-REFERENCE.md` for the complete template.
+
 ---
 
 ## Execution Flow
@@ -148,7 +144,6 @@ complete.py (final aggregation, learning prompt)
 - `config/config.py` - ProtocolType enum, route mapping, step definitions
 - `core/fsm.py` - FSM classes with valid state transitions
 - `core/state.py` - ExecutionState class for session persistence
-- `core/routing_gate.py` - Triviality validation module
 - `core/dispatcher.py` - Route dispatch logic
 - `steps/base.py` - Abstract base class for all step scripts
 

@@ -201,9 +201,41 @@ With pruning:
 
 ---
 
+## Agent Prompt Template Integration
+
+Context loading patterns work in conjunction with the Agent Prompt Template system. When invoking agents via atomic skills, the orchestrator uses the template format to pass context.
+
+### Template Context Sections
+
+| Template Section | Context Source |
+|------------------|----------------|
+| Task Context | Generated at invocation time |
+| Role Extension | DA generates dynamically based on task |
+| Johari Context | From reasoning protocol Step 0 |
+| Task Instructions | From user query and skill requirements |
+| Related Research Terms | DA generates from domain keywords |
+| Output Requirements | Memory file path (context loading target) |
+
+### How Context Loading Uses Template Output
+
+1. **Agent invocation** - DA uses template to structure prompt
+2. **Agent execution** - Agent reads predecessor context via patterns
+3. **Memory file output** - Agent writes to specified path
+4. **Next agent loads** - Following agent uses context loading pattern to read memory file
+
+The template ensures agents know:
+- **Where to write** - Output Requirements specifies memory file path
+- **What to read** - Johari Context indicates knowledge state
+- **How to adapt** - Role Extension focuses the agent on specific task needs
+
+**Reference:** See `${CAII_DIRECTORY}/.claude/orchestration/shared/templates/SKILL-TEMPLATE-REFERENCE.md` for complete template documentation.
+
+---
+
 ## Related Documentation
 
 - `${CAII_DIRECTORY}/.claude/orchestration/shared-content/context-loading/` - Pattern execution files
 - `${CAII_DIRECTORY}/.claude/orchestration/shared-content/context-pruning/` - Pruning execution files
 - `${CAII_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/johari-format.md` - Output format
 - `${CAII_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/memory-protocol.md` - Memory requirements
+- `${CAII_DIRECTORY}/.claude/orchestration/shared/templates/` - Agent prompt templates

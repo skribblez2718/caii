@@ -19,6 +19,8 @@ Add to the `COMPOSITE_SKILLS` dictionary in config.py.
 ```python
 "{skill-name}": {
     "description": "{description}",
+    "semantic_trigger": "{semantic_trigger}",
+    "not_for": "{not_for}",
     "composition_depth": {depth},
     "phases": "{SKILL_NAME_UPPER}_PHASES",
 },
@@ -30,6 +32,8 @@ Add to the `COMPOSITE_SKILLS` dictionary in config.py.
 |-------------|-------------|---------|
 | `{skill-name}` | Hyphenated skill name | `my-new-skill` |
 | `{description}` | One-line description | `Process and validate user requests` |
+| `{semantic_trigger}` | Comma-separated trigger phrases (5-10 words) | `process requests, validate input, handle submissions` |
+| `{not_for}` | Comma-separated exclusions | `simple queries, read-only tasks, direct execution` |
 | `{depth}` | 0 (atomics only) or 1 (uses composites) | `0` |
 | `{SKILL_NAME_UPPER}` | Uppercase underscored name | `MY_NEW_SKILL` |
 
@@ -38,6 +42,8 @@ Add to the `COMPOSITE_SKILLS` dictionary in config.py.
 ```python
 "my-new-skill": {
     "description": "Process and validate user requests",
+    "semantic_trigger": "process requests, validate input, handle submissions",
+    "not_for": "simple queries, read-only tasks, direct execution",
     "composition_depth": 0,
     "phases": "MY_NEW_SKILL_PHASES",
 },
@@ -182,6 +188,8 @@ Full example for a 4-phase skill:
 # === Add to COMPOSITE_SKILLS dictionary ===
 "my-new-skill": {
     "description": "Process and validate user requests",
+    "semantic_trigger": "process requests, validate input, handle submissions",
+    "not_for": "simple queries, read-only tasks, direct execution",
     "composition_depth": 0,
     "phases": "MY_NEW_SKILL_PHASES",
 },
@@ -262,6 +270,8 @@ When manually inserting into config.py:
 After inserting registration code:
 
 - [ ] COMPOSITE_SKILLS entry has correct skill name (hyphenated)
+- [ ] semantic_trigger field has 5-10 word comma-separated phrases
+- [ ] not_for field explicitly excludes inappropriate use cases
 - [ ] composition_depth matches actual skill design
 - [ ] phases reference matches phase dict name
 - [ ] Phase dict has correct variable name (uppercase, underscored)

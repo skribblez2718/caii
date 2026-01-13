@@ -54,36 +54,50 @@ ATOMIC_SKILLS: Dict[str, Dict[str, Any]] = {
         "agent": "clarification",
         "cognitive_function": "CLARIFICATION",
         "description": "Transform vague inputs into actionable specifications",
+        "semantic_trigger": "ambiguity resolution, requirements refinement",
+        "not_for": "well-defined tasks with clear specifications",
     },
     "orchestrate-analysis": {
         "agent": "analysis",
         "cognitive_function": "ANALYSIS",
         "description": "Decompose complexity, assess risks, map dependencies",
+        "semantic_trigger": "complexity decomposition, risk assessment",
+        "not_for": "simple tasks without dependencies",
     },
     "orchestrate-research": {
         "agent": "research",
         "cognitive_function": "RESEARCH",
         "description": "Investigate options, gather domain knowledge",
+        "semantic_trigger": "knowledge gaps, options exploration",
+        "not_for": "tasks with complete information",
     },
     "orchestrate-synthesis": {
         "agent": "synthesis",
         "cognitive_function": "SYNTHESIS",
         "description": "Integrate findings into coherent designs",
+        "semantic_trigger": "integration of findings, design creation",
+        "not_for": "single-source tasks without integration",
     },
     "orchestrate-generation": {
         "agent": "generation",
         "cognitive_function": "GENERATION",
         "description": "Create artifacts using TDD methodology",
+        "semantic_trigger": "artifact creation, TDD implementation",
+        "not_for": "read-only or research tasks",
     },
     "orchestrate-validation": {
         "agent": "validation",
         "cognitive_function": "VALIDATION",
         "description": "Verify artifacts against quality criteria",
+        "semantic_trigger": "quality verification, acceptance testing",
+        "not_for": "tasks without deliverables to verify",
     },
     "orchestrate-memory": {
         "agent": "memory",
         "cognitive_function": "METACOGNITION",
         "description": "Metacognitive assessment of workflow state and progress",
+        "semantic_trigger": "progress tracking, impasse detection",
+        "not_for": "simple linear workflows",
     },
 }
 
@@ -95,17 +109,23 @@ ATOMIC_SKILLS: Dict[str, Dict[str, Any]] = {
 
 COMPOSITE_SKILLS: Dict[str, Dict[str, Any]] = {
     "develop-skill": {
-        "description": "Meta-skill for creating workflow skills",
+        "description": "Meta-skill for creating and modifying workflow skills",
+        "semantic_trigger": "create skill, modify skill, update workflow, new skill",
+        "not_for": "system modifications, direct code execution, architecture changes",
         "composition_depth": 0,
         "phases": "DEVELOP_SKILL_PHASES",  # Reference to phase config below
     },
     "develop-learnings": {
-        "description": "Transform workflow experiences into reusable learnings",
+        "description": "Transform workflow experiences into structured learnings",
+        "semantic_trigger": "capture learnings, document insights, preserve knowledge",
+        "not_for": "mid-workflow tasks, skill creation, active execution",
         "composition_depth": 0,
         "phases": "DEVELOP_LEARNINGS_PHASES",
     },
     "develop-command": {
         "description": "Create and manage Claude Code slash commands",
+        "semantic_trigger": "create command, slash command, modify command, utility command",
+        "not_for": "workflow skills, multi-phase operations, cognitive workflows",
         "composition_depth": 0,
         "phases": "DEVELOP_COMMAND_PHASES",
     },

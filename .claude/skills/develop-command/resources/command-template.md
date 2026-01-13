@@ -112,7 +112,7 @@ echo "Complete"
 ```markdown
 ---
 description: {Complex task requiring specific model}
-model: claude-opus-4-20250514
+model: opus
 ---
 
 {Explanation of why specific model is needed}
@@ -125,6 +125,8 @@ echo "Complete"
 ```
 ```
 
+**Note:** Model field is optional (defaults to session model). Use short names: `opus`, `sonnet`, `haiku`.
+
 ## Template Variables
 
 | Variable | Description | Example |
@@ -132,7 +134,7 @@ echo "Complete"
 | `{description}` | Brief description for /help | "Clean state files" |
 | `{path}` | Target path for operations | `.claude/orchestration` |
 | `{category}` | Command category/directory | `clean`, `git`, `build` |
-| `{command-name}` | Command file name | `clean-state` |
+| `{command-name}` | Command file name | `state` |
 | `$1`, `$2` | User-provided arguments | File path, count |
 | `$ARGUMENTS` | All arguments as string | "arg1 arg2 arg3" |
 

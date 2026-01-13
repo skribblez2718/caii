@@ -10,12 +10,13 @@ Composite skill for creating and managing Claude Code slash commands.
 | 1 | Command Generation | orchestrate-generation |
 | 2 | Command Validation | orchestrate-validation |
 
-## When Used
+## Routing
 
-- Creating new utility commands
-- Adding commands to existing categories
-- Building composite commands that call other commands
-- Updating existing commands
+**Semantic Trigger:** create command, slash command, modify command, utility command
+
+**NOT for:** workflow skills, multi-phase operations, cognitive workflows
+
+> This skill is for creating and modifying Claude Code slash commands. It is NOT for workflow skills (use develop-skill for those).
 
 ## Key Outputs
 

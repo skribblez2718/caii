@@ -315,20 +315,6 @@ When facing ANY ambiguity:
 ENFORCEMENT PROTOCOL
 ===================
 
-ROUTING GATE ENFORCEMENT
-The routing_gate.py module enforces triviality validation before allowing direct execution
-Self-assessment prompt guides the orchestrator through evaluation of 5 triviality criteria
-Response parsing identifies YES/NO answers to determine routing decision
-
-THREE DECISION OUTCOMES:
-- TRIVIAL_APPROVED: All 5 criteria answered YES (proceed with direct tools)
-- AGENT_REQUIRED: Any criterion answered NO (invoke appropriate cognitive agent)
-- CLARIFICATION_NEEDED: Cannot evaluate criteria (insufficient information for routing)
-
-INTEGRATION:
-Direct-execution protocol Step 2 integrates routing gate for self-assessment validation
-See direct-execution-protocol.md Step 2 for complete integration details
-
 VIOLATION DETECTION
 Monitor for:
 - Redundant definitions across files

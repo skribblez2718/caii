@@ -71,14 +71,15 @@ atomic/
 
 ## Atomic Skill Registry (from config.py)
 
-| Skill | Agent | Cognitive Function | Description |
-|-------|-------|-------------------|-------------|
-| orchestrate-clarification | clarification | CLARIFICATION | Transform vague inputs into actionable specifications |
-| orchestrate-research | research | RESEARCH | Investigate options, gather domain knowledge |
-| orchestrate-analysis | analysis | ANALYSIS | Decompose complexity, assess risks, map dependencies |
-| orchestrate-synthesis | synthesis | SYNTHESIS | Integrate findings into coherent designs |
-| orchestrate-generation | generation | GENERATION | Create artifacts using TDD methodology |
-| orchestrate-validation | validation | VALIDATION | Verify artifacts against quality criteria |
+| Skill | Cognitive Function | Semantic Trigger | NOT for |
+|-------|-------------------|------------------|---------|
+| orchestrate-clarification | CLARIFICATION | ambiguity resolution, requirements refinement | well-defined tasks with clear specifications |
+| orchestrate-research | RESEARCH | knowledge gaps, options exploration | tasks with complete information |
+| orchestrate-analysis | ANALYSIS | complexity decomposition, risk assessment | simple tasks without dependencies |
+| orchestrate-synthesis | SYNTHESIS | integration of findings, design creation | single-source tasks without integration |
+| orchestrate-generation | GENERATION | artifact creation, TDD implementation | read-only or research tasks |
+| orchestrate-validation | VALIDATION | quality verification, acceptance testing | tasks without deliverables to verify |
+| orchestrate-memory | METACOGNITION | progress tracking, impasse detection | simple linear workflows |
 
 ## Call Chain: Atomic Skill → Agent
 
@@ -151,6 +152,64 @@ research/entry.py
 # .claude/memory/abc123def456-research-memory.md
 # Contains structured research findings
 ```
+
+## Agent Prompt Template (CRITICAL)
+
+When atomic skills invoke agents via the Task tool, the DA **MUST** structure the prompt using the standardized Agent Prompt Template format.
+
+### Required Template Sections
+
+| Section | Required | Source |
+|---------|----------|--------|
+| Task Context | Yes | task_id, skill_name, phase_id, domain, agent_name |
+| Role Extension | Yes | DA generates dynamically (3-5 task-specific focus areas) |
+| Johari Context | If available | From reasoning protocol Step 0 |
+| Task Instructions | Yes | Specific cognitive work for this agent |
+| Related Research Terms | Yes | DA generates dynamically (7-10 keywords) |
+| Output Requirements | Yes | Memory file path and format |
+
+### Template Structure
+
+```markdown
+# Agent Invocation: {agent_name}
+
+## Task Context
+- **Task ID:** `{task_id}`
+- **Skill:** `{skill_name}`
+- **Phase:** `{phase_id}`
+- **Domain:** `{domain}`
+- **Agent:** `{agent_name}`
+
+## Role Extension
+[DA generates 3-5 task-specific focus areas]
+
+## Prior Knowledge (Johari Window)
+### Open (Confirmed)
+[From reasoning protocol]
+### Blind (Gaps)
+[Identified unknowns]
+### Hidden (Inferred)
+[Assumptions]
+### Unknown (To Explore)
+[Areas for investigation]
+
+## Task
+[Specific instructions for this cognitive function]
+
+## Related Research Terms
+[DA generates 7-10 keywords]
+
+## Output
+Write findings to: `.claude/memory/{task_id}-{agent_name}-memory.md`
+```
+
+### Why This Matters
+
+- **Consistency:** All agents receive context in the same structure
+- **Johari Transfer:** Reasoning discoveries flow to agents
+- **Task Specialization:** Role Extension adapts agents to specific tasks
+
+**Reference:** See each skill's SKILL.md "Agent Invocation Format" section or `${CAII_DIRECTORY}/.claude/orchestration/shared/templates/SKILL-TEMPLATE-REFERENCE.md`
 
 ## Atomic Skill Constraints
 

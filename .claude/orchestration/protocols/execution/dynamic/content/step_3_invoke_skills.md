@@ -1,37 +1,23 @@
 # Invoke Skills in Sequence
 
-Execute each orchestrate-* skill according to the planned sequence.
+Execute each orchestrate-* skill from your Step 2 sequence using the Skill tool.
 
-## Instructions
+## Action Required
 
-For each skill in the sequence, invoke it using the Skill tool.
+You must NOW invoke each skill in your planned sequence. This is not documentation - this is an action step.
 
-### Skill Invocation Protocol
+### Skill Invocation
 
-For each skill in sequence:
+For each skill in your Step 2 sequence:
 
-1. **Check Skip Condition**
-   - If skip condition is met, record skip and continue to next skill
-   - If not skipped, proceed with invocation
-
-2. **Invoke Skill**
-   - Use the Skill tool with the skill name
-   - Example: `Skill(skill="orchestrate-analysis")`
-   - The skill will internally use the Task tool with the appropriate agent
-
-3. **Record Output**
-   - Each skill writes its output to a memory file
-   - Verify the memory file was created
-   - Note any errors or issues
-
-4. **Continue Sequence**
-   - Pass context to next skill via the memory file
-   - Proceed to next skill in sequence
+```
+Skill(skill="orchestrate-{name}")
+```
 
 ### Skill to Agent Mapping
 
-| Skill | Agent (via Task tool) |
-|-------|----------------------|
+| Skill | Agent |
+|-------|-------|
 | orchestrate-clarification | clarification |
 | orchestrate-research | research |
 | orchestrate-analysis | analysis |
@@ -39,27 +25,17 @@ For each skill in sequence:
 | orchestrate-generation | generation |
 | orchestrate-validation | validation |
 
-### Error Handling
+### Execution Order
 
-If a skill fails:
-1. Record the error
-2. Determine if sequence can continue
-3. If critical failure, abort and report
-4. If recoverable, attempt retry (max 1)
+1. Invoke the first skill in your sequence
+2. Wait for it to complete (memory file will be created)
+3. Invoke the next skill
+4. Repeat until all skills are invoked
+5. Proceed to Step 4 to verify completion
 
-### Output Requirements
+### Output Tracking
 
-For each skill invoked, record:
-
-```
-SKILL: orchestrate-{name}
-STATUS: [INVOKED | SKIPPED | FAILED]
-REASON: {why invoked/skipped/failed}
-OUTPUT: {summary of output or error message}
-```
-
-## Important Notes
-
-- WAIT for each skill to complete before proceeding to next
-- Do NOT run skills in parallel unless explicitly designed for it
-- Each skill may take significant time - be patient
+After each skill invocation, note:
+- Which skill was invoked
+- Whether it completed successfully
+- Any errors encountered

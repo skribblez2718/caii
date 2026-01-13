@@ -177,10 +177,11 @@ Phase content files reference resources using the full path:
 
 ## Registered Composite Skills (from config.py)
 
-| Skill | Phases | Purpose | Key Phases |
-|-------|--------|---------|------------|
-| develop-learnings | 7 | Capture learnings | discovery → per-function authoring → integration → consolidation → validation → commit |
-| develop-skill | 6 | Meta-skill for workflow skills | clarification → analysis → research → synthesis → generation → validation |
+| Skill | Semantic Trigger | NOT for | Phases |
+|-------|------------------|---------|--------|
+| develop-skill | create/modify skills, update workflows, new skill | system mods, direct code, architecture | 9 |
+| develop-learnings | capture learnings, document insights, preserve knowledge | mid-workflow, skill creation, active execution | 7 |
+| develop-command | create/modify slash commands, utility commands | workflow skills, multi-phase operations | 3 |
 
 ## Call Chain: Skill Entry → Phases → Completion
 

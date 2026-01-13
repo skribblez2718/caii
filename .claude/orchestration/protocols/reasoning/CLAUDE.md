@@ -111,22 +111,11 @@ Note: Planning is handled by Claude Code's built-in EnterPlanMode tool.
 
 ## Session Management
 
-The protocol supports multi-turn clarification by resuming active sessions:
+Each user prompt creates a fresh reasoning session:
 
-1. **UserPromptSubmit Hook** checks for active sessions awaiting clarification:
-   - Sessions at `JOHARI_DISCOVERY` (Step 0) - pre-reasoning clarification
-   - Sessions at `KNOWLEDGE_TRANSFER` (Step 8) - post-reasoning clarification
-
-2. **Session Resume**: If a clarification-eligible session exists:
-   - Hook calls `entry.py --resume {session_id}` instead of creating new session
-   - `entry.py` checks if current step is completed and advances to next step
-   - User's response continues the existing reasoning chain
-
-3. **New Session**: If no clarification-eligible session exists:
-   - Hook calls `entry.py "{user_query}"` to create new session
-   - New session starts at Step 0 (Johari Discovery)
-
-4. **`find_active()` returns most recent** in-progress session by `query_timestamp`
+1. **UserPromptSubmit Hook** creates a new session for each prompt
+2. **New Session**: Hook calls `entry.py "{user_query}"` to create new session
+3. **Session starts at Step 0** (Johari Discovery) and progresses through all steps
 
 ## Call Chain: Query → Execution
 
@@ -140,12 +129,6 @@ entry.py "user query"
     ├→ print_protocol_preamble(state)        # Print "Query: ..."
     └→ print_step_directive(state, 0)        # Print MANDATORY command for Step 0
         └→ format_mandatory_directive(cmd)   # Wrap in enforcement language
-
-# 1b. Resume existing session
-entry.py --resume {session_id}
-    ├→ ProtocolState.load(session_id)       # Load existing state
-    ├→ Check if current_step is completed   # Via step_timestamps
-    └→ print_step_directive(state, next)    # Print command for NEXT step
 
 # 2. Each step script (inherits BaseStep)
 step_N_*.py --state {state_file}
@@ -340,9 +323,6 @@ cat protocols/reasoning/state/reasoning-*.json | jq '.fsm.history'
 
 # See routing decision
 cat protocols/reasoning/state/reasoning-*.json | jq '.routing_decision'
-
-# Resume a session
-python3 protocols/reasoning/entry.py --resume {session_id}
 ```
 
 ## Agent Mode

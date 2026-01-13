@@ -272,6 +272,5 @@ Even for direct execution, maintain quality:
 
 ## Related Documentation
 
-- `${CAII_DIRECTORY}/.claude/orchestration/protocols/execution/routing_gate.py` - Triviality validation for direct tool usage
 - `${CAII_DIRECTORY}/.claude/orchestration/shared-content/protocols/agent/memory-protocol.md` - Memory requirements when agents invoked
 - `${CAII_DIRECTORY}/.claude/docs/philosophy.md` - System design principles

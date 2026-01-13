@@ -16,11 +16,13 @@ Meta-skill for creating and updating workflow skills in the orchestration system
 | 4 | Skill Validation | orchestrate-validation |
 | 5 | DA Registration | orchestrate-generation |
 
-## When Used
+## Routing
 
-- Creating new workflow skills
-- Modifying existing skills
-- Any system modifications (skills, agents, protocols)
+**Semantic Trigger:** create skill, modify skill, update workflow, new skill
+
+**NOT for:** system modifications, direct code execution, architecture changes
+
+> This skill is exclusively for creating and modifying workflow skills. It is NOT used for general system work, agent modifications, or architecture changes.
 
 ## Key Outputs
 

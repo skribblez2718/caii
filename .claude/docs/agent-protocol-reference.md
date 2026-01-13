@@ -67,6 +67,28 @@ Before completing work, EVERY agent verifies:
 | Context files to read | `${CAII_DIRECTORY}/.claude/memory/task-xxx-clarification-memory.md` |
 | Previous agent dependencies | Predecessor: clarification |
 
+### Prompt Template Requirements (CRITICAL)
+
+When invoking agents via atomic skills, the DA **MUST** structure the Task tool prompt using the standardized Agent Prompt Template format. Plain text prompts are NOT acceptable.
+
+**Required Template Sections:**
+
+| Section | Required | Source |
+|---------|----------|--------|
+| Task Context | Yes | task_id, skill_name, phase_id, domain, agent_name |
+| Role Extension | Yes | DA generates 3-5 task-specific focus areas |
+| Johari Context | If available | From reasoning protocol Step 0 |
+| Task Instructions | Yes | Specific cognitive work for this agent |
+| Related Research Terms | Yes | DA generates 7-10 keywords |
+| Output Requirements | Yes | Memory file path |
+
+**Why This Matters:**
+- Ensures consistent context passing across all agents
+- Transfers Johari knowledge discoveries from reasoning to agents
+- Adapts agents to specific task requirements via Role Extension
+
+**Reference:** See `${CAII_DIRECTORY}/.claude/orchestration/shared/templates/SKILL-TEMPLATE-REFERENCE.md` or individual `SKILL.md` "Agent Invocation Format" sections.
+
 ### Agent Always Produces
 
 | Output | Format |

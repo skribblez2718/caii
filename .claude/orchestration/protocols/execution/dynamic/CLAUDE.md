@@ -213,8 +213,9 @@ complete.py --state {state_file}
 │        │                                                                    │
 │        ▼                                                                    │
 │  ┌───────────────────────────────────────────────────────────────────────┐ │
-│  │  3. Task tool invokes agent                                            │ │
+│  │  3. Task tool invokes agent (TEMPLATE FORMAT REQUIRED)                 │ │
 │  │     subagent_type: "{function}-agent"                                  │ │
+│  │     prompt: Must use Agent Prompt Template format                      │ │
 │  │     └→ protocols/agent/{agent}/entry.py                                │ │
 │  │     └→ Steps 0-N execute                                               │ │
 │  │     └→ complete.py writes memory file                                  │ │
@@ -231,6 +232,29 @@ complete.py --state {state_file}
 │        └──→ Next skill (loop) OR Step 4 (all skills done)                  │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
+
+## Agent Prompt Template Requirements (Step 3)
+
+When Step 3 directs the DA to invoke atomic skills, the Task tool prompt **MUST** use the standardized Agent Prompt Template format.
+
+### Required Sections
+
+| Section | Required | Description |
+|---------|----------|-------------|
+| Task Context | Yes | task_id, skill, phase, domain, agent |
+| Role Extension | Yes | DA generates 3-5 task-specific focus areas |
+| Johari Context | If available | Open/Blind/Hidden/Unknown from reasoning |
+| Task Instructions | Yes | Specific cognitive work |
+| Related Research Terms | Yes | DA generates 7-10 keywords |
+| Output Requirements | Yes | Memory file path |
+
+### Why This Matters
+
+- **Consistency:** All agents receive context in the same structure
+- **Johari Transfer:** Reasoning protocol discoveries flow to agents
+- **Task Specialization:** Role Extension adapts agents to specific tasks
+
+**Reference:** See DA.md "Agent Prompt Template Requirements" or skill's SKILL.md "Agent Invocation Format" section
 
 ## Data Contract: Step Outputs
 

@@ -130,13 +130,18 @@ Key features:
 
 | Agent | Cognitive Function | Steps | Color | Model |
 |-------|-------------------|-------|-------|-------|
-| clarification | CLARIFICATION | 7 | cyan | opus |
-| research | RESEARCH | 7 | blue | opus |
+| clarification | CLARIFICATION | 7 | cyan | sonnet |
+| research | RESEARCH | 7 | blue | sonnet |
 | analysis | ANALYSIS | 7 | green | opus |
 | synthesis | SYNTHESIS | 7 | magenta | opus |
-| generation | GENERATION | 7 | yellow | opus |
-| validation | VALIDATION | 6 | red | opus |
-| memory | METACOGNITION | 8 | purple | opus |
+| generation | GENERATION | 7 | yellow | sonnet |
+| validation | VALIDATION | 6 | red | sonnet |
+| memory | METACOGNITION | 8 | purple | haiku |
+
+**Model Selection Rationale:**
+- **Opus:** Analysis and Synthesis require maximum reasoning for mission-critical decisions
+- **Sonnet:** Balanced intelligence for interactive (clarification), research, coding (generation), and validation
+- **Haiku:** Memory runs frequently and has simple tasks - optimize for speed/cost
 
 ## Standard Step Sequence
 
@@ -196,6 +201,31 @@ step_{n}_{name}.py --state {state_file}
 ```
 
 ## Data Contracts
+
+### Expected Prompt Format (Agent Invocation)
+
+When agents are invoked via the Task tool, the DA **MUST** structure the prompt using the standardized Agent Prompt Template format. This ensures consistent context and Johari knowledge transfer.
+
+#### Required Sections in Agent Prompts
+
+| Section | Required | Description |
+|---------|----------|-------------|
+| **Task Context** | Yes | task_id, skill_name, phase_id, domain, agent_name |
+| **Role Extension** | Yes | 3-5 task-specific focus areas (DA generates dynamically) |
+| **Johari Context** | If available | Open/Blind/Hidden/Unknown from reasoning protocol Step 0 |
+| **Task Instructions** | Yes | Specific cognitive work for this agent |
+| **Related Research Terms** | Yes | 7-10 keywords (DA generates dynamically) |
+| **Output Requirements** | Yes | Memory file path and format |
+
+#### Why Agents Expect This Format
+
+1. **Task Context** - Identifies the workflow and phase, enables memory file path construction
+2. **Role Extension** - Specializes the generic agent for the specific task at hand
+3. **Johari Context** - Transfers reasoning protocol discoveries to inform agent work
+4. **Research Terms** - Aids knowledge discovery during agent execution
+5. **Output Requirements** - Ensures memory file is written to correct path
+
+**Reference:** See skill's SKILL.md "Agent Invocation Format" section or DA.md "Agent Prompt Template Requirements"
 
 ### Agent State File (JSON)
 

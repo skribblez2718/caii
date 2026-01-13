@@ -77,37 +77,7 @@ def main() -> int:
         print(f"ERROR: Could not load state from {args.state}", file=sys.stderr)
         return 1
 
-    # Print protocol introduction
-    print("""
-===============================================================================
-DYNAMIC SKILL SEQUENCING PROTOCOL
-===============================================================================
-
-This protocol handles tasks that require multiple cognitive functions but don't
-match an existing composite skill.
-
-KEY RULE: Agents are NEVER invoked directly. All cognitive work flows through
-orchestrate-* atomic skills.
-
-Available orchestrate-* skills:
-- orchestrate-clarification: Transform vague inputs into actionable specs
-- orchestrate-research: Investigate options and gather domain knowledge
-- orchestrate-analysis: Decompose complexity and identify risks
-- orchestrate-synthesis: Integrate findings into coherent designs
-- orchestrate-generation: Create artifacts using TDD methodology
-- orchestrate-validation: Verify artifacts against quality criteria
-
-5 Steps:
-1. Analyze Requirements - What cognitive functions does this task need?
-2. Plan Sequence - In what order should skills be invoked?
-3. Invoke Skills - Execute each skill, passing context via memory files
-4. Verify Completion - Did all skills complete successfully?
-5. Complete - Finalize and cleanup
-
-===============================================================================
-""")
-
-    # Direct to first step
+    # Direct to first step (no banner per DA.md Orchestration Script Output Rules)
     steps_dir = get_protocol_steps_dir(ProtocolType.DYNAMIC_SKILL_SEQUENCING)
     step1_script = steps_dir / "step_1_analyze_requirements.py"
 

@@ -14,7 +14,6 @@ Agent Mode (--agent-mode):
 
 Usage:
     python entry.py "user query here"
-    python entry.py --resume <session_id>
     python entry.py "agent task" --agent-mode
 
 The stdout from this script becomes part of Claude's context,
@@ -47,50 +46,8 @@ from reasoning.config.config import (
 from reasoning.core.state import ProtocolState
 
 
-# Step sequences for different modes
-# Step 0 (Johari Discovery) executes at START of every interaction
-FULL_STEP_SEQUENCE = [0, 1, 2, 3, 4, 5, 6, 7, 8]
-AGENT_STEP_SEQUENCE = [0, 1, 2, 3, 5, 6, 7, 8]  # Skips Step 4 (Task Routing)
-
-
-def get_step_sequence(is_agent_mode: bool) -> list[int]:
-    """
-    Get the step sequence for the given mode.
-
-    Args:
-        is_agent_mode: True for agent mode (skips Step 4)
-
-    Returns:
-        List of step numbers to execute
-    """
-    return AGENT_STEP_SEQUENCE if is_agent_mode else FULL_STEP_SEQUENCE
-
-
-def get_next_step(current_step: int, is_agent_mode: bool) -> int | None:
-    """
-    Get the next step in the sequence.
-
-    For agents, we skip Step 4 (Task Routing) since they're already routed.
-
-    Args:
-        current_step: The current step number
-        is_agent_mode: True if running in agent mode
-
-    Returns:
-        Next step number, or None if protocol complete
-    """
-    sequence = get_step_sequence(is_agent_mode)
-    try:
-        current_idx = sequence.index(current_step)
-        if current_idx + 1 < len(sequence):
-            return sequence[current_idx + 1]
-        return None  # Protocol complete
-    except ValueError:
-        # Step not in sequence - find nearest next step
-        for step in sequence:
-            if step > current_step:
-                return step
-        return None
+# Agent mode step sequence (skips Step 4 - Task Routing)
+AGENT_STEP_SEQUENCE = [0, 1, 2, 3, 5, 6, 7, 8]
 
 
 def print_protocol_preamble(state: ProtocolState, is_agent_mode: bool = False) -> None:
@@ -105,11 +62,11 @@ def print_protocol_preamble(state: ProtocolState, is_agent_mode: bool = False) -
         is_agent_mode: True if running in agent mode
     """
     if is_agent_mode:
-        print(f"Agent Task: {state.user_query}")
-        print("\n[AGENT REASONING MODE: Step 4 (Task Routing) will be skipped - agent already routed]")
+        print(f"Agent Task: {state.user_query}", flush=True)
+        print("\n[AGENT REASONING MODE: Step 4 (Task Routing) will be skipped - agent already routed]", flush=True)
     else:
         # Query context only - protocol rules are in step markdown files
-        print(f"Query: {state.user_query}")
+        print(f"Query: {state.user_query}", flush=True)
 
 
 def print_step_directive(state: ProtocolState, step_num: int = 1, is_agent_mode: bool = False) -> None:
@@ -148,7 +105,7 @@ def print_step_directive(state: ProtocolState, step_num: int = 1, is_agent_mode:
             f"python3 {script_path} --state {state_file}",
             step_context
         )
-    print(directive)
+    print(directive, flush=True)
 
 
 def init_protocol(user_query: str, is_agent_mode: bool = False) -> ProtocolState:
@@ -177,19 +134,6 @@ def init_protocol(user_query: str, is_agent_mode: bool = False) -> ProtocolState
     return state
 
 
-def resume_protocol(session_id: str) -> ProtocolState | None:
-    """
-    Resume an existing protocol session.
-
-    Args:
-        session_id: The session ID to resume
-
-    Returns:
-        Restored ProtocolState or None if not found
-    """
-    return ProtocolState.load(session_id)
-
-
 def main() -> int:
     """
     Main entry point for the protocol.
@@ -204,7 +148,6 @@ def main() -> int:
 Examples:
   # Main mode (full 8-step protocol)
   python entry.py "How do I implement authentication?"
-  python entry.py --resume abc123def456
 
   # Agent mode (skips Step 4 - task routing)
   python entry.py "Clarify OAuth2 requirements" --agent-mode
@@ -217,60 +160,12 @@ Examples:
         help="The user query to process through the protocol"
     )
     parser.add_argument(
-        "--resume",
-        metavar="SESSION_ID",
-        help="Resume an existing protocol session"
-    )
-    parser.add_argument(
         "--agent-mode",
         action="store_true",
         help="Run in agent mode (skips Step 4 - task routing). Use for cognitive agents."
     )
 
     args = parser.parse_args()
-
-    # Handle resume
-    if args.resume:
-        state = resume_protocol(args.resume)
-        if not state:
-            print(f"ERROR: Session {args.resume} not found", file=sys.stderr)
-            return 1
-
-        if state.fsm.is_final():
-            print(f"Session {args.resume} has already completed.", file=sys.stderr)
-            return 1
-
-        # Determine mode from state metadata or command line
-        is_agent_mode = args.agent_mode or state.metadata.get("is_agent_session", False)
-
-        # Resume from current or next step
-        current_step = state.current_step
-        if current_step is not None:
-            # Check if current step is already completed
-            step_key = str(int(current_step))
-            timestamps = state.step_timestamps.get(int(current_step)) or state.step_timestamps.get(step_key, {})
-            step_completed = timestamps.get("completed_at") is not None
-
-            if step_completed:
-                # Current step finished, move to next step
-                next_step = get_next_step(int(current_step), is_agent_mode)
-                if next_step is not None:
-                    print_step_directive(state, next_step, is_agent_mode=is_agent_mode)
-                else:
-                    # Protocol complete, nothing to do
-                    print("Protocol already completed.")
-            else:
-                # Step in progress, resume it
-                # If we're at step 4 in an agent session, skip to step 5
-                if current_step == 4 and is_agent_mode:
-                    current_step = 5
-                print_step_directive(state, int(current_step), is_agent_mode=is_agent_mode)
-        else:
-            # Protocol just initialized, start at step 0 (Johari Discovery)
-            print_protocol_preamble(state, is_agent_mode=is_agent_mode)
-            print_step_directive(state, 0, is_agent_mode=is_agent_mode)
-
-        return 0
 
     # Require query for new session
     if not args.query:
@@ -287,6 +182,7 @@ Examples:
     # Print preamble and first step directive (Step 0 - Johari Discovery)
     print_protocol_preamble(state, is_agent_mode=args.agent_mode)
     print_step_directive(state, 0, is_agent_mode=args.agent_mode)
+    sys.stdout.flush()  # Ensure all output is flushed before returning
 
     return 0
 

@@ -14,7 +14,7 @@ Load from Phase 0 memory:
 Load resources:
 - `${CAII_DIRECTORY}/.claude/skills/develop-command/resources/command-template.md` - Templates
 - `${CAII_DIRECTORY}/.claude/skills/develop-command/resources/best-practices.md` - Patterns
-- `${CAII_DIRECTORY}/.claude/commands/clean/clean-state.md` - Example implementation
+- `${CAII_DIRECTORY}/.claude/commands/clean/state.md` - Example implementation
 
 ## Generation Steps
 

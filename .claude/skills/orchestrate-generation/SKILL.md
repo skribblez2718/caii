@@ -1,6 +1,8 @@
 ---
 name: orchestrate-generation
 description: Atomic skill for generation using generation
+semantic_trigger: artifact creation, TDD implementation
+not_for: read-only or research tasks
 tags: atomic-skill, generation, code, tdd
 type: atomic
 ---
@@ -74,6 +76,96 @@ Each iteration follows full RED-GREEN-REFACTOR cycle.
 - [ ] Code refactored for maintainability
 - [ ] Memory file written in standard format
 - [ ] Artifacts documented in downstream_directives
+
+---
+
+## Agent Invocation Format
+
+**CRITICAL:** When invoking the generation agent via Task tool, you **MUST** structure the prompt using this template format.
+
+### Required Sections
+
+#### 1. Task Context (REQUIRED)
+
+```markdown
+## Task Context
+- **Task ID:** `{task_id}`
+- **Skill:** `orchestrate-generation`
+- **Phase:** `{phase_id}`
+- **Domain:** `{domain}`
+- **Agent:** `generation`
+```
+
+#### 2. Role Extension (REQUIRED - Generate dynamically)
+
+Generate 3-5 task-specific focus areas for generation:
+
+```markdown
+## Role Extension
+
+**Task-Specific Focus:**
+
+- [Focus area 1: What to generate]
+- [Focus area 2: What patterns to apply]
+- [Focus area 3: What quality standards to follow]
+- [Additional focus areas as needed]
+
+> This section dynamically extends your base cognitive function for this specific task.
+```
+
+#### 3. Johari Context (REQUIRED if available)
+
+```markdown
+## Prior Knowledge (Johari Window)
+
+### Open (Confirmed)
+[Known specifications from synthesis]
+
+### Blind (Gaps)
+[Implementation details to determine]
+
+### Hidden (Inferred)
+[Architectural assumptions]
+
+### Unknown (To Explore)
+[Edge cases to handle]
+```
+
+#### 4. Task Instructions (REQUIRED)
+
+```markdown
+## Task
+
+[Specific generation instructions: what to implement, TDD cycle requirements]
+
+Implementation scope: {from synthesis/design output}
+Iteration: {current TDD iteration}
+```
+
+#### 5. Related Research Terms (REQUIRED - Generate 7-10 items)
+
+```markdown
+## Related Research Terms
+
+- [Relevant implementation patterns]
+- [Testing frameworks]
+- [Code quality standards]
+```
+
+#### 6. Output Requirements (REQUIRED)
+
+```markdown
+## Output
+
+Write findings to: `.claude/memory/{task_id}-generation-memory.md`
+```
+
+### Template Reference
+
+For full template documentation, see:
+`${CAII_DIRECTORY}/.claude/orchestration/shared/templates/SKILL-TEMPLATE-REFERENCE.md`
+
+---
 
 ## References
 

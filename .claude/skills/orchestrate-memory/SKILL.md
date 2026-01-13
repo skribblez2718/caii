@@ -1,6 +1,8 @@
 ---
 name: orchestrate-memory
 description: Atomic skill for metacognitive assessment using memory agent
+semantic_trigger: progress tracking, impasse detection
+not_for: simple linear workflows
 tags: atomic-skill, metacognition, impasse-detection, remediation
 type: atomic
 ---
@@ -49,6 +51,97 @@ type: atomic
 - [ ] Impasse detection complete with confidence score
 - [ ] Remediation recommendation provided if impasse detected
 - [ ] Memory file written in standard format
+
+---
+
+## Agent Invocation Format
+
+**CRITICAL:** When invoking the memory agent via Task tool, you **MUST** structure the prompt using this template format.
+
+### Required Sections
+
+#### 1. Task Context (REQUIRED)
+
+```markdown
+## Task Context
+- **Task ID:** `{task_id}`
+- **Skill:** `orchestrate-memory`
+- **Phase:** `{phase_id}`
+- **Domain:** `{domain}`
+- **Agent:** `memory`
+```
+
+#### 2. Role Extension (REQUIRED - Generate dynamically)
+
+Generate 3-5 task-specific focus areas for metacognitive assessment:
+
+```markdown
+## Role Extension
+
+**Task-Specific Focus:**
+
+- [Focus area 1: What workflow state to assess]
+- [Focus area 2: What progress indicators to check]
+- [Focus area 3: What impasses to detect]
+- [Additional focus areas as needed]
+
+> This section dynamically extends your base cognitive function for this specific task.
+```
+
+#### 3. Johari Context (REQUIRED if available)
+
+```markdown
+## Prior Knowledge (Johari Window)
+
+### Open (Confirmed)
+[Known workflow state]
+
+### Blind (Gaps)
+[Areas of uncertainty in workflow]
+
+### Hidden (Inferred)
+[Progress assumptions]
+
+### Unknown (To Explore)
+[Potential impasse indicators]
+```
+
+#### 4. Task Instructions (REQUIRED)
+
+```markdown
+## Task
+
+[Specific metacognitive assessment instructions: what to assess, what triggers to check]
+
+Context: {additional context about what triggered the assessment}
+```
+
+#### 5. Related Research Terms (REQUIRED - Generate 7-10 items)
+
+```markdown
+## Related Research Terms
+
+- [Metacognition terminology]
+- [Impasse detection patterns]
+- [Remediation strategies]
+```
+
+#### 6. Output Requirements (REQUIRED)
+
+```markdown
+## Output
+
+Write findings to: `.claude/memory/{task_id}-memory-memory.md`
+
+**Note:** Maximum output 800 tokens (STRICT)
+```
+
+### Template Reference
+
+For full template documentation, see:
+`${CAII_DIRECTORY}/.claude/orchestration/shared/templates/SKILL-TEMPLATE-REFERENCE.md`
+
+---
 
 ## Token Constraints
 

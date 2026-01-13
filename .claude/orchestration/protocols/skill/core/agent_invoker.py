@@ -15,10 +15,23 @@ we return a dict that maps to Task tool parameters:
 Plan Integration:
   When an approved execution plan exists, agents receive relevant plan context
   to guide their execution and ensure alignment with the approved approach.
+
+Template-Based Prompts:
+  The DA can optionally use the template-based prompt builder for enhanced
+  context passing. This provides:
+  - Dynamic role extension (task-specific specialization)
+  - Johari window pass-through from reasoning protocol
+  - Related research terms for knowledge discovery
+
+  The DA is responsible for generating role_extension and research_terms
+  dynamically based on the task context. These are NOT hardcoded.
 """
 
-from typing import Optional, Any
+from typing import Optional, Any, Dict, List
 from pathlib import Path
+
+# Import agent registry to get configured models
+from agent.config.config import AGENT_REGISTRY, normalize_agent_name
 
 # Map agent names to canonical short names
 # All agents now use short names (no -agent suffix)
@@ -55,22 +68,34 @@ def build_agent_prompt(
     phase_id: str,
     agent_name: str,
     context_pattern: str = "IMMEDIATE_PREDECESSORS",
-    predecessors: Optional[list[str]] = None,
+    predecessors: Optional[List[str]] = None,
     phase_instructions: str = "",
     domain: str = "technical",
-    config: Optional[dict] = None,
-    plan: Optional[dict[str, Any]] = None,
+    config: Optional[Dict[str, Any]] = None,
+    plan: Optional[Dict[str, Any]] = None,
+    # New parameters for DA-generated content
+    role_extension: str = "",
+    research_terms: str = "",
+    johari_findings: Optional[Dict[str, Any]] = None,
+    user_request: str = "",
+    requirements_list: str = "",
+    constraints_list: str = "",
+    use_template: bool = False,
 ) -> str:
     """
     Build full prompt for agent invocation via Task tool.
 
     The prompt includes:
     1. Task context (task_id, skill, phase, domain)
-    2. Context loading instructions based on pattern
-    3. Approved plan context (if available)
-    4. Phase-specific instructions
-    5. Memory file output requirements
-    6. Completion signal instructions
+    2. Role extension (task-specific specialization - DA generates)
+    3. Johari window context (from reasoning protocol)
+    4. User request with requirements and constraints
+    5. Context loading instructions based on pattern
+    6. Approved plan context (if available)
+    7. Phase-specific instructions
+    8. Memory file output requirements
+    9. Related research terms (DA generates)
+    10. Completion signal instructions
 
     Args:
         task_id: Unique task identifier
@@ -83,12 +108,43 @@ def build_agent_prompt(
         domain: Task domain (technical, personal, creative, professional, recreational)
         config: Additional configuration parameters
         plan: Approved execution plan from reasoning protocol (if available)
+        role_extension: Task-specific role specialization (DA generates dynamically)
+        research_terms: Related research keywords (DA generates dynamically)
+        johari_findings: Johari findings from reasoning Step 0
+        user_request: Original user request
+        requirements_list: Task requirements (DA generates)
+        constraints_list: Task constraints (DA generates)
+        use_template: If True, use template-based builder (requires template file)
 
     Returns:
         Complete prompt string for Task tool invocation
     """
     predecessors = predecessors or []
     config = config or {}
+    johari_findings = johari_findings or {}
+
+    # If use_template is True, use the AgentPromptBuilder
+    if use_template:
+        from skill.core.prompt_builder import AgentPromptBuilder
+        builder = AgentPromptBuilder(
+            task_id=task_id,
+            skill_name=skill_name,
+            phase_id=phase_id,
+            agent_name=agent_name,
+            domain=domain,
+            context_pattern=context_pattern,
+            predecessors=predecessors,
+            phase_instructions=phase_instructions,
+            plan=plan,
+            johari_findings=johari_findings,
+            user_request=user_request,
+            role_extension=role_extension,
+            research_terms=research_terms,
+            requirements_list=requirements_list,
+            constraints_list=constraints_list,
+            config=config,
+        )
+        return builder.build()
 
     # Build context loading section
     context_section = _build_context_section(task_id, context_pattern, predecessors)
@@ -102,6 +158,51 @@ def build_agent_prompt(
     # Build completion signal instructions
     completion_section = _build_completion_section(task_id, phase_id, agent_name)
 
+    # Build role extension section (if provided by DA)
+    role_extension_section = ""
+    if role_extension:
+        role_extension_section = f"""
+## Role Extension (Task-Specific)
+
+{role_extension}
+
+"""
+
+    # Build Johari context section (if provided)
+    johari_section = ""
+    if johari_findings:
+        johari_section = _build_johari_section(johari_findings)
+
+    # Build user request section (if provided)
+    user_request_section = ""
+    if user_request:
+        user_request_section = f"""
+## User Request
+
+{user_request}
+
+"""
+        if requirements_list:
+            user_request_section += f"""### Requirements
+{requirements_list}
+
+"""
+        if constraints_list:
+            user_request_section += f"""### Constraints
+{constraints_list}
+
+"""
+
+    # Build research terms section (if provided by DA)
+    research_terms_section = ""
+    if research_terms:
+        research_terms_section = f"""
+## Related Research Terms
+
+{research_terms}
+
+"""
+
     prompt = f"""# Agent Invocation: {agent_name}
 
 ## Task Context
@@ -111,8 +212,7 @@ def build_agent_prompt(
 - **Phase:** `{phase_id}`
 - **Domain:** `{domain}`
 - **Agent:** `{agent_name}`
-
-{context_section}
+{role_extension_section}{johari_section}{user_request_section}{context_section}
 {plan_section}
 ## Phase Instructions
 
@@ -121,7 +221,7 @@ def build_agent_prompt(
 {memory_section}
 
 {completion_section}
-
+{research_terms_section}
 ## Execution Protocol
 
 1. Execute the agent entry script: `python3 .claude/orchestration/protocols/agent/{agent_name}/entry.py {task_id}`
@@ -141,6 +241,44 @@ The skill orchestration is tracking your progress and expects:
         prompt += f"\n## Additional Configuration\n\n{config_lines}\n"
 
     return prompt.strip()
+
+
+def _build_johari_section(johari_findings: Dict[str, Any]) -> str:
+    """Build Johari window context section from findings."""
+    if not johari_findings:
+        return ""
+
+    lines = [
+        "",
+        "## Prior Knowledge Context (Johari Window)",
+        "",
+    ]
+
+    quadrants = [
+        ("open", "Shared Understanding (Open)"),
+        ("blind", "Identified Gaps (Blind)"),
+        ("hidden", "Discovered Insights (Hidden)"),
+        ("unknown", "Areas for Exploration (Unknown)"),
+    ]
+
+    for key, title in quadrants:
+        value = johari_findings.get(key)
+        if value:
+            lines.append(f"### {title}")
+            if isinstance(value, dict):
+                for k, v in value.items():
+                    if isinstance(v, list):
+                        lines.append(f"- **{k}:** {', '.join(str(i) for i in v)}")
+                    else:
+                        lines.append(f"- **{k}:** {v}")
+            elif isinstance(value, list):
+                for item in value:
+                    lines.append(f"- {item}")
+            else:
+                lines.append(str(value))
+            lines.append("")
+
+    return "\n".join(lines)
 
 
 def _build_context_section(task_id: str, pattern: str, predecessors: list[str]) -> str:
@@ -431,8 +569,14 @@ def get_invocation_for_phase(
 
     description = f"Phase {phase_id}: {phase_name}"
 
+    # Look up agent's configured model from AGENT_REGISTRY
+    normalized_name = normalize_agent_name(agent_name)
+    agent_config = AGENT_REGISTRY.get(normalized_name, {})
+    agent_model = agent_config.get("model", "sonnet")
+
     return get_task_invocation(
         agent_name=agent_name,
         prompt=prompt,
         description=description,
+        model=agent_model,
     )

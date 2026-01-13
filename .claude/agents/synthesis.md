@@ -1,8 +1,8 @@
 ---
 name: synthesis
-description: Integrate disparate findings into coherent recommendations and unified designs. Resolves contradictions and creates actionable strategies.
+description: "Integrate disparate findings into coherent recommendations and unified designs. Resolves contradictions and creates actionable strategies."
 tools: Bash(python3:*), Glob, Grep, Read, Edit, Write, TodoWrite, Skill, SlashCommand
-model: sonnet
+model: opus
 color: orange
 ---
 

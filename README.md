@@ -6,12 +6,19 @@ This project is built upon the foundational work and inspiration from **Daniel M
 
 [danielmiessler/Personal_AI_Infrastructure](https://github.com/danielmiessler/Personal_AI_Infrastructure/)
 
-While CAII shares PAI's goal of providing a highly customizable system to augment humans with AI, it takes a fundamentally different approach. Grounded in research and experimentation, this implementation sometimes diverges from popular opinion and Claude Code documentation. Notable differences include:
+While CAII shares PAI's goal of providing a highly customizable system to augment humans with AI, it takes a fundamentally different approach. This implementation sometimes diverges from popular opinion and Claude Code documentation, though these divergences are based on my personal research and experimentation. Notable differences include:
 
-- **Cognitive-first agent design** - Rather than task or domain-specific agents, CAII uses agents organized by cognitive function (clarification, research, analysis, synthesis, generation, validation, memory). This idea is roughly rooted in ACr and Soar approaches that I discovered after coming up with the cognitive approach, but is the memory agent and learning systems became heavily influenced by them. 
-- **External skill protocols** - Skill orchestration logic lives in Python protocols rather than within SKILL.md files
-- **Mandatory Python orchestration** - A Python layer enforces protocol adherence through deterministic state machines, rather than relying on prompting alone. 
-- **Johari Window framework** - Systematic discovery using the SHARE/ASK/ACKNOWLEDGE/EXPLORE model to surface unknowns, ensure they are considered and hopefully answered at the end of task completion
+- **Cognitive-first agent design** - Rather than task or domain-specific agents, CAII uses agents organized by cognitive function (clarification, research, analysis, synthesis, generation, validation, memory). This approach draws inspiration from established cognitive architectures, particularly [ACT-R](https://act-r.psy.cmu.edu/about/) (Adaptive Control of Thought—Rational) developed by John Anderson at Carnegie Mellon University, and [Soar](https://soar.eecs.umich.edu/), created by Allen Newell, John Laird, and Paul Rosenbloom. ACT-R models cognition through the interaction of declarative memory (facts and knowledge) and procedural memory (production rules), while Soar uses universal subgoaling and chunking to automatically generate goal hierarchies and compile learned behaviors into efficient rules. CAII's memory agent and learning systems became heavily influenced by these architectures—particularly Soar's chunking mechanism, which converts complex reasoning into automatic/reactive processing over time. The decision to use cognitive-based agents versus task/domain-specific agents stemmed primarily from maintainability concerns. As the system grows, so would the number of task-specific agents, and so would the overhead in maintaining them. Claude Code also supports only a limited number of agents before "performance may degrade." With the cognitive approach, we should only ever need a small number of agents that receive context "on the spot," adapting to any domain without modification.
+
+- **External skill protocols** - Skill orchestration logic lives in Python protocols rather than within SKILL.md files. This is probably the biggest divergence from Claude Code documentation. In practice, I noticed that some steps in Markdown-based protocols would be skipped, resulting in errors or otherwise undesired behavior. This appeared to stem from using prompting (protocols in Markdown files) in conjunction with the non-deterministic nature of LLMs—main steps would be followed, but sub-steps were skipped at the LLM's discretion. "Pythonizing" the skill protocols was the solution: skill protocols are now managed from the relevant directory under `.claude/orchestration/protocols/skill/`, while basic information still resides in `SKILL.md` and relevant resources in `.claude/skills/{skill-name}/resources/`. This ties in with...
+
+- **Mandatory Python orchestration** - A Python layer enforces protocol adherence through deterministic state machines, rather than relying on prompting alone. This approach is rooted in the principles of [rule-based AI and expert systems](https://en.wikipedia.org/wiki/Symbolic_artificial_intelligence) (sometimes called "Good Old-Fashioned AI" or GOFAI), which dominated AI research in the 1970s-80s. Systems like MYCIN and DENDRAL demonstrated that deterministic IF-THEN production rules could achieve expert-level performance in specific domains. However, prompting alone cannot guarantee an LLM will take the same steps every time due to its inherent non-determinism. The goal here is to use Python to prompt the LLM one step at a time, strictly following a given protocol to obtain more consistent results. While the non-deterministic nature of AI will execute a given step slightly differently each time, by enforcing the same process we gain more consistency and transparency in how results are generated. 
+
+- **Johari Window framework** - Systematic discovery using the SHARE/ASK/ACKNOWLEDGE/EXPLORE model to surface unknowns, ensure they are considered, and hopefully answered by task completion. The [Johari Window](https://en.wikipedia.org/wiki/Johari_window) is a psychological framework originally developed by Joseph Luft and Harrington Ingham in 1955 to help people understand their relationship with themselves and others through four quadrants: Open (known to both), Hidden (known to self), Blind (known to others), and Unknown (known to neither). The idea for applying this to LLM prompting stemmed from finding an approach that would minimize ambiguity. Even well-written and well-structured prompts have ambiguity, which I believe stems from the fact "we don't know what we don't know." For example, you may begin a task thinking you've identified all critical aspects, but then realize something you initially missed. This is what I mean by "ambiguity" beyond the obvious definition. The Johari approach leverages what you know and what the LLM knows to help identify and clarify these ambiguities and missed aspects up front. Additionally, there are things that neither you nor the LLM will inherently know up front. The Johari protocol identifies these and ensures they are considered throughout task execution. As the task progresses and new information becomes available, these unknowns are updated. The aim is to reduce the chance the LLM goes off and does something you did not intend.
+
+- **Agent-First Approach** - CAII routes cognitive work through specialized agents rather than having the Directing Agent (DA) execute tasks directly. This is supported by two execution routes: the Skill route (for tasks matching defined skill patterns) and the Dynamic orchestration route (for tasks requiring ad-hoc agent sequencing). In Claude Code, agents get their own context windows, which enables this approach to achieve two primary goals:
+  - **Domain expertise** - Each cognitive agent (clarification, research, analysis, synthesis, generation, validation, memory) specializes in its function, ensuring the relevant portion of each task is handled by a "domain expert"
+  - **Context efficiency** - By delegating cognitive work to agents with their own context windows, the DA's context window remains as clean as possible, preserving capacity for coordination and user interaction
 
 This is an experimental approach that may not suit every use case, but it represents one possible direction for human-AI augmentation systems.
 
@@ -21,27 +28,23 @@ This is an experimental approach that may not suit every use case, but it repres
 
 ---
 
-> **Note:** This project is in active development and should be considered experimental. APIs, protocols, and behaviors may change as the system evolves. Contributions and feedback are welcome.
-
----
-
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [The Johari Window Approach](#the-johari-window-approach)
-3. [Core Philosophy](#core-philosophy)
-4. [Architecture Overview](#architecture-overview)
-5. [The Directing Agent (DA)](#the-directing-agent-da)
-6. [Reasoning Protocol](#reasoning-protocol)
-7. [Deterministic Orchestration + Non-Deterministic Execution](#deterministic-orchestration--non-deterministic-execution)
-8. [Execution Routes](#execution-routes)
-9. [Cognitive Domain Agents](#cognitive-domain-agents)
-10. [Skills Architecture](#skills-architecture)
-11. [Memory and Learnings System](#memory-and-learnings-system)
-12. [Extending the System](#extending-the-system)
-13. [Prompt Flags](#prompt-flags)
-14. [Directory Structure](#directory-structure)
-15. [Quick Start](#quick-start)
+2. [Quick Start](#quick-start)
+3. [Prompt Flags](#prompt-flags)
+4. [Extending the System](#extending-the-system)
+5. [Memory and Learnings System](#memory-and-learnings-system)
+6. [The Johari Window Approach](#the-johari-window-approach)
+7. [Core Philosophy](#core-philosophy)
+8. [Architecture Overview](#architecture-overview)
+9. [The Directing Agent (DA)](#the-directing-agent-da)
+10. [Reasoning Protocol](#reasoning-protocol)
+11. [Deterministic Orchestration + Non-Deterministic Execution](#deterministic-orchestration--non-deterministic-execution)
+12. [Execution Routes](#execution-routes)
+13. [Cognitive Domain Agents](#cognitive-domain-agents)
+14. [Skills Architecture](#skills-architecture)
+15. [Directory Structure](#directory-structure)
 
 ---
 
@@ -49,12 +52,12 @@ This is an experimental approach that may not suit every use case, but it repres
 
 CAII is a **cognitive orchestration framework** for Claude Code that transforms how AI assistants approach complex tasks. Instead of relying on ad-hoc prompting, CAII enforces systematic reasoning through Python-orchestrated protocols before any task execution.
 
-**Core value proposition:**
-- **Systematic reasoning** - Every query goes through a 9-step reasoning protocol automatically
+**Core Goals:**
+- **Systematic reasoning** - Every query goes through a 9-step reasoning protocol by default (bypass with `-b` flag)
 - **Domain-adaptive agents** - 7 cognitive agents that adapt to any domain without modification
 - **Progressive learning** - The system learns from each workflow, requiring less instruction over time
 
-**Key differentiator:** CAII combines Python-enforced deterministic orchestration (guaranteed step sequences) with LLM non-determinism (creative execution within each step). This ensures protocol adherence while preserving the flexibility that makes LLMs powerful.
+**Key differentiator:** CAII combines Python-enforced deterministic orchestration ("guaranteed" step sequences) with LLM non-determinism (creative execution within each step). This ensures protocol adherence while preserving the flexibility that makes LLMs powerful.
 
 ```
                               USER QUERY
@@ -63,7 +66,7 @@ CAII is a **cognitive orchestration framework** for Claude Code that transforms 
                     ┌──────────────────────────┐
                     │   REASONING PROTOCOL     │
                     │   (9 Steps: 0-8)         │
-                    │   Runs AUTOMATICALLY     │
+                    │   Default: ON (-b: OFF)  │
                     └──────────────────────────┘
                                   │
                     ┌─────────────┴─────────────┐
@@ -87,6 +90,314 @@ CAII is a **cognitive orchestration framework** for Claude Code that transforms 
                     │   MEMORY FILES           │
                     │   + LEARNINGS            │
                     └──────────────────────────┘
+```
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) installed
+- Python 3.8+ installed
+- Git installed
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/skribblez2718/caii.git
+   cd caii
+   ```
+
+2. **Configure settings**
+   ```bash
+   cp .claude/settings.example.json .claude/settings.json
+   ```
+
+3. **Set required environment variables**
+
+   Edit `.claude/settings.json` and populate the required values in the `env` section:
+
+   ```json
+   {
+     "env": {
+       "DA_NAME": "YourAssistantName",
+       "CAII_DIRECTORY": "/absolute/path/to/caii",
+       "PROJECT_ROOT": "/absolute/path/to/your/projects"
+     }
+   }
+   ```
+
+4. **Start Claude Code**
+   ```bash
+   claude
+   ```
+
+### Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DA_NAME` | Yes | Name of your Directing Agent (displayed in responses) |
+| `CAII_DIRECTORY` | Yes | Absolute path to the CAII installation directory |
+| `PROJECT_ROOT` | Yes | Path where all projects exist and new projects are created |
+| `VOICE_SERVER_PORT` | No | Port for text-to-speech voice server ([voice-server](https://github.com/skribblez2718/voice-server)) |
+| `OPENAI_BASE_URL` | No | OpenAI-compatible endpoint for external model enhancements |
+| `OPENAI_API_KEY` | No | API key for the OpenAI-compatible endpoint |
+| `OPENAI_SUMMARIZATION_MODEL` | No* | Model ID for summarization (used with voice server) |
+| `OPENAI_PROMPT_IMPROVER_MODEL` | No* | Model ID for the `-i` flag prompt improvement |
+
+*Requires `OPENAI_BASE_URL` and `OPENAI_API_KEY` to be set.
+
+The system can be extended by adding additional environment variables in `settings.json`.
+
+### Basic Usage
+
+1. **Start a conversation** - Any query triggers the reasoning protocol by default
+   ```
+   User: "Help me build an authentication system"
+   ```
+
+2. **Expect clarifying questions** - Step 0 may identify unknowns
+   ```
+   Claude: "Before proceeding, I need to understand:
+            1. What authentication methods? (OAuth, JWT, session-based)
+            2. What's the target platform?
+            ..."
+   ```
+
+3. **Observe structured execution** - Tasks route through cognitive agents systematically
+
+### Viewing Memory Files
+
+```bash
+ls .claude/memory/
+cat .claude/memory/{task_id}-{agent}-memory.md
+```
+
+### Key Points
+
+- **Reasoning runs by default** - Bypass with `-b` flag when not needed
+- **Clarification is expected** - The system asks before assuming
+- **Learnings accumulate** - The system improves over time
+
+---
+
+## Prompt Flags
+
+CAII supports prompt flags that modify how queries are processed. Flags can appear in any order at the end of a prompt.
+
+### Available Flags
+
+| Flag | Purpose |
+|------|---------|
+| `-i` | Improve prompt via external model before processing |
+| `-b` | Bypass reasoning protocol (direct execution mode) |
+
+### Examples
+
+```
+"fix the bug -b"         → Bypass reasoning, execute directly
+"add feature -i"         → Improve prompt, then run reasoning
+"refactor code -i -b"    → Improve prompt, then bypass reasoning
+"refactor code -b -i"    → Same as above (order doesn't matter)
+```
+
+### Prompt Improvement (-i flag)
+
+The `-i` flag sends your prompt to an external model for improvement before processing:
+
+```
+User: "build me a web app -i"
+    │
+    ▼
+Hook detects "-i" flag
+    │
+    ▼
+Sends to external model for improvement
+    │
+    ▼
+Returns improved prompt
+    │
+    ▼
+Normal reasoning protocol continues (unless -b also specified)
+```
+
+**Configuration** - Required environment variables:
+
+```bash
+OPENAI_BASE_URL="https://your-api-endpoint"
+OPENAI_API_KEY="your-key"
+OPENAI_PROMPT_IMPROVER_MODEL="model-name"
+```
+
+### Bypass Mode (-b flag)
+
+The `-b` flag skips the 9-step reasoning protocol entirely, allowing Claude to handle the prompt directly. Useful for:
+
+- Trivial tasks (typo fixes, simple renames)
+- Follow-up prompts where context is already established
+- Quick questions that don't require systematic reasoning
+
+**Note:** The `-b` flag bypasses all reasoning steps, so use it when you're confident the task doesn't benefit from structured analysis.
+**Note:** While the reasoning protocol is executed in Plan Mode as part of developing the plan (assuming no `-b` flag is passed), the reasoning protocol does not execute after exiting plan mode and executing the plan. This was initially unintentional, but I think the behavior makes sense.
+---
+
+## Extending the System
+
+CAII provides only the **minimum required skills** out of the box. The system is designed as a foundation for building domain-specific extensions.
+
+### Creating New Skills
+
+Use the **develop-skill** meta-skill:
+
+```
+User: "Create a code-review skill"
+    │
+    ▼
+develop-skill workflow (6 phases)
+    │
+    ▼
+1. Requirements Clarification
+2. Complexity Analysis
+3. Pattern Research
+4. Design Synthesis
+5. Skill Generation
+6. DA.md Registration
+    │
+    ▼
+New skill ready to use
+```
+
+### Skill Templates
+
+Located in `.claude/skills/develop-skill/resources/`:
+
+| Template | Use Case |
+|----------|----------|
+| simple-skill-template.md | 2-3 phases, straightforward workflow |
+| complex-skill-template.md | 4+ phases, conditional logic |
+| atomic-skill-template.md | Single agent wrapper |
+
+### What Gets Generated
+
+For a new composite skill:
+
+```
+.claude/skills/{skill-name}/
+├── SKILL.md                    # Skill definition
+└── resources/                  # Skill-specific resources
+
+.claude/orchestration/protocols/skill/composite/{skill_name}/
+├── entry.py                    # Entry point
+├── complete.py                 # Completion handler
+├── __init__.py                 # Module init
+└── content/                    # Prompts/instructions executed for each phase
+    ├── phase_0_*.md
+    ├── phase_1_*.md
+    └── ...
+```
+
+The `content/` directory contains the actual prompts and instructions that get executed for each skill phase. This is where manual editing of skill protocols should occur if needed. When adding or removing steps, it is recommended to have your DA handle this to ensure any related Python code is updated accordingly.
+
+Plus registration in:
+- `config/config.py` (phase definitions)
+- `DA.md` (semantic triggers)
+- `skill-catalog.md` (documentation)
+
+---
+
+## Memory and Learnings System
+
+### Goal: Progressive Autonomy
+
+The memory system's goal is to need to **tell the system less over time**. As learnings accumulate, the system in theory requires fewer explicit instructions and makes better decisions autonomously.
+
+**The Learnings Workflow:**
+
+1. **Learning Injection** - Before performing any tasks, agents have explicit instructions to check the learnings index (`.claude/learnings/`) for relevant learnings that apply to their cognitive function
+2. **Memory Creation** - Upon task completion, agents always create a memory file in the memory directory (`.claude/memory/`)
+3. **Learning Extraction** - The `develop-learnings` skill uses these memory files to extract insights and add structured learnings to the learnings directory
+
+This cycle ensures that valuable discoveries from each workflow are captured and made available for future tasks.
+
+### Memory File Contract
+
+Every agent MUST produce a memory file at:
+```
+.claude/memory/{task_id}-{agent}-memory.md
+```
+
+**Mandatory sections:**
+
+| Section | Content |
+|---------|---------|
+| Section 0: Context Loaded | JSON verification of what was loaded |
+| Section 1: Step Overview | What was accomplished, key decisions |
+| Section 2: Johari Summary | Open/Hidden/Blind/Unknown (1,200 tokens max) |
+| Section 3: Downstream Directives | Instructions for next agent/phase |
+
+**Critical:** Phase advancement **BLOCKS** until the memory file exists. There is no bypass mechanism.
+
+### Learnings Directory Structure
+
+```
+.claude/learnings/
+├── clarification/
+│   ├── heuristics.md
+│   ├── anti-patterns.md
+│   ├── checklists.md
+│   └── domain-snippets/
+├── research/
+├── analysis/
+├── synthesis/
+├── generation/
+└── validation/
+```
+
+### Learning Types
+
+| Type | Purpose |
+|------|---------|
+| **heuristics** | Rules of thumb that improve decisions |
+| **anti-patterns** | Mistakes to avoid |
+| **checklists** | Verification steps |
+| **domain-snippets** | Domain-specific knowledge |
+
+### Learning Injection (Step 0)
+
+Every agent's Step 0 loads relevant learnings before task work:
+
+```
+Step 0: Learning Injection
+    │
+    ▼
+Load .claude/learnings/{cognitive_function}/*.md
+    │
+    ▼
+Inject relevant learnings into agent context
+    │
+    ▼
+Step 1: Begin actual work
+```
+
+### Impasse Detection
+
+The memory agent monitors for four impasse types:
+
+| Impasse | Description | Remediation |
+|---------|-------------|-------------|
+| CONFLICT | Contradictory requirements | Invoke clarification |
+| MISSING-KNOWLEDGE | Required info absent | Invoke research |
+| TIE | Multiple valid options, no criteria | Invoke analysis |
+| NO-CHANGE | No meaningful progress | Re-invoke with enhanced context |
+
+### Creating Learnings
+
+Learnings are created via the **develop-learnings** skill after workflows complete:
+
+```
+Completed Workflow → develop-learnings skill → 7 phases → Learnings committed
 ```
 
 ---
@@ -244,20 +555,20 @@ The DA is a **coordination framework** defined in `DA.md` that:
 
 | Responsibility | Description |
 |---------------|-------------|
-| **Enforce Reasoning** | Every query goes through 9 steps (0-8) automatically |
+| **Enforce Reasoning** | Every query goes through 9 steps (0-8) by default (bypass with `-b`) |
 | **Route Tasks** | Direct to Skill Orchestration or Dynamic Skill Sequencing |
 | **Maintain Discovery** | Apply Johari Window principles to every interaction |
 | **Verify Outputs** | Apply confidence scoring and assumption declaration |
 
 ### Default Behavior
 
-**The reasoning protocol executes for EVERY user query.** This is automatic, not optional. The `user-prompt-submit` hook triggers the reasoning protocol before Claude sees any prompt.
+**The reasoning protocol executes for every user query by default.** The `user-prompt-submit` hook triggers the reasoning protocol before Claude sees any prompt. However, users can bypass this with the `-b` flag for trivial tasks or follow-up prompts where systematic reasoning is unnecessary.
 
 ---
 
 ## Reasoning Protocol
 
-The reasoning protocol is a **9-step sequence (Steps 0-8)** that runs automatically for every user query. This ensures systematic reasoning before any task execution.
+The reasoning protocol is a **9-step sequence (Steps 0-8)** that runs by default for every user query. This ensures systematic reasoning before any task execution. Users can bypass this protocol using the `-b` flag when systematic reasoning isn't needed.
 
 ```
 Step 0: Johari Window Discovery
@@ -419,20 +730,6 @@ protocols/execution/dynamic/entry.py
 5. Complete
 ```
 
-### Trivial Task Handling
-
-The **routing gate** evaluates 5 triviality criteria. ALL must be YES for direct execution:
-
-| Criterion | Question |
-|-----------|----------|
-| SINGLE_FILE | Does task affect only one file? |
-| FIVE_LINES_OR_LESS | Does task change 5 lines or fewer? |
-| MECHANICAL_OPERATION | Is it purely mechanical (no judgment)? |
-| NO_RESEARCH_NEEDED | No information gathering required? |
-| NO_DECISIONS_NEEDED | Zero judgment calls needed? |
-
-**Fail-Secure Design:** If ANY criterion is uncertain, default to AGENT_REQUIRED.
-
 ---
 
 ## Cognitive Domain Agents
@@ -532,217 +829,6 @@ Skills can invoke other skills, enabling complex workflows through composition r
 
 ---
 
-## Memory and Learnings System
-
-### Goal: Progressive Autonomy
-
-The memory system's purpose is to **tell the system less over time**. As learnings accumulate, the system requires fewer explicit instructions and makes better decisions autonomously.
-
-### Memory File Contract
-
-Every agent MUST produce a memory file at:
-```
-.claude/memory/{task_id}-{agent}-memory.md
-```
-
-**Mandatory sections:**
-
-| Section | Content |
-|---------|---------|
-| Section 0: Context Loaded | JSON verification of what was loaded |
-| Section 1: Step Overview | What was accomplished, key decisions |
-| Section 2: Johari Summary | Open/Hidden/Blind/Unknown (1,200 tokens max) |
-| Section 3: Downstream Directives | Instructions for next agent/phase |
-
-**Critical:** Phase advancement **BLOCKS** until the memory file exists. There is no bypass mechanism.
-
-### Learnings Directory Structure
-
-```
-.claude/learnings/
-├── clarification/
-│   ├── heuristics.md
-│   ├── anti-patterns.md
-│   ├── checklists.md
-│   └── domain-snippets/
-├── research/
-├── analysis/
-├── synthesis/
-├── generation/
-└── validation/
-```
-
-### Learning Types
-
-| Type | Purpose |
-|------|---------|
-| **heuristics** | Rules of thumb that improve decisions |
-| **anti-patterns** | Mistakes to avoid |
-| **checklists** | Verification steps |
-| **domain-snippets** | Domain-specific knowledge |
-
-### Learning Injection (Step 0)
-
-Every agent's Step 0 loads relevant learnings before task work:
-
-```
-Step 0: Learning Injection
-    │
-    ▼
-Load .claude/learnings/{cognitive_function}/*.md
-    │
-    ▼
-Inject relevant learnings into agent context
-    │
-    ▼
-Step 1: Begin actual work
-```
-
-### Impasse Detection
-
-The memory agent monitors for four impasse types:
-
-| Impasse | Description | Remediation |
-|---------|-------------|-------------|
-| CONFLICT | Contradictory requirements | Invoke clarification |
-| MISSING-KNOWLEDGE | Required info absent | Invoke research |
-| TIE | Multiple valid options, no criteria | Invoke analysis |
-| NO-CHANGE | No meaningful progress | Re-invoke with enhanced context |
-
-### Creating Learnings
-
-Learnings are created via the **develop-learnings** skill after workflows complete:
-
-```
-Completed Workflow → develop-learnings skill → 7 phases → Learnings committed
-```
-
----
-
-## Extending the System
-
-CAII provides only the **minimum required skills** out of the box. The system is designed as a foundation for building domain-specific extensions.
-
-### Creating New Skills
-
-Use the **develop-skill** meta-skill:
-
-```
-User: "Create a code-review skill"
-    │
-    ▼
-develop-skill workflow (6 phases)
-    │
-    ▼
-1. Requirements Clarification
-2. Complexity Analysis
-3. Pattern Research
-4. Design Synthesis
-5. Skill Generation
-6. DA.md Registration
-    │
-    ▼
-New skill ready to use
-```
-
-### Skill Templates
-
-Located in `.claude/skills/develop-skill/resources/`:
-
-| Template | Use Case |
-|----------|----------|
-| simple-skill-template.md | 2-3 phases, straightforward workflow |
-| complex-skill-template.md | 4+ phases, conditional logic |
-| atomic-skill-template.md | Single agent wrapper |
-
-### What Gets Generated
-
-For a new composite skill:
-
-```
-.claude/skills/{skill-name}/
-├── SKILL.md                    # Skill definition
-└── resources/                  # Skill-specific resources
-
-.claude/orchestration/protocols/skill/composite/{skill_name}/
-├── entry.py                    # Entry point
-├── complete.py                 # Completion handler
-├── __init__.py                 # Module init
-└── content/
-    ├── phase_0_*.md
-    ├── phase_1_*.md
-    └── ...
-```
-
-Plus registration in:
-- `config/config.py` (phase definitions)
-- `DA.md` (semantic triggers)
-- `skill-catalog.md` (documentation)
-
----
-
-## Prompt Flags
-
-CAII supports prompt flags that modify how queries are processed. Flags can appear in any order at the end of a prompt.
-
-### Available Flags
-
-| Flag | Purpose |
-|------|---------|
-| `-i` | Improve prompt via external model before processing |
-| `-b` | Bypass reasoning protocol (direct execution mode) |
-
-### Examples
-
-```
-"fix the bug -b"         → Bypass reasoning, execute directly
-"add feature -i"         → Improve prompt, then run reasoning
-"refactor code -i -b"    → Improve prompt, then bypass reasoning
-"refactor code -b -i"    → Same as above (order doesn't matter)
-```
-
-### Prompt Improvement (-i flag)
-
-The `-i` flag sends your prompt to an external model for improvement before processing:
-
-```
-User: "build me a web app -i"
-    │
-    ▼
-Hook detects "-i" flag
-    │
-    ▼
-Sends to external model for improvement
-    │
-    ▼
-Returns improved prompt
-    │
-    ▼
-Normal reasoning protocol continues (unless -b also specified)
-```
-
-**Configuration** - Required environment variables:
-
-```bash
-OPENAI_BASE_URL="https://your-api-endpoint"
-OPENAI_API_KEY="your-key"
-OPENAI_PROMPT_IMPROVER_MODEL="model-name"
-```
-
-The `-i` flag supports Johari Window discovery by making implicit requirements explicit and transforming unknown unknowns in the prompt itself.
-
-### Bypass Mode (-b flag)
-
-The `-b` flag skips the 9-step reasoning protocol entirely, allowing Claude to handle the prompt directly. Useful for:
-
-- Trivial tasks (typo fixes, simple renames)
-- Follow-up prompts where context is already established
-- Quick questions that don't require systematic reasoning
-
-**Note:** The `-b` flag bypasses all reasoning steps, so use it when you're confident the task doesn't benefit from structured analysis.
-
----
-
 ## Directory Structure
 
 ```
@@ -796,78 +882,16 @@ The `-b` flag skips the 9-step reasoning protocol entirely, allowing Claude to h
 
 ---
 
-## Quick Start
-
-### Prerequisites
-
-- Claude Code CLI installed
-- Project directory with `.claude/` structure from this repository
-
-### Basic Usage
-
-1. **Start a conversation** - Any query triggers the reasoning protocol automatically
-   ```
-   User: "Help me build an authentication system"
-   ```
-
-2. **Expect clarifying questions** - Step 0 may identify unknowns
-   ```
-   Claude: "Before proceeding, I need to understand:
-            1. What authentication methods? (OAuth, JWT, session-based)
-            2. What's the target platform?
-            ..."
-   ```
-
-3. **Provide answers** - System resumes from where it halted
-
-4. **Observe structured execution** - Tasks route through cognitive agents systematically
-
-### Using Prompt Improvement
-
-```
-User: "build me a thing -i"
-```
-
-### Viewing Memory Files
-
-```bash
-ls .claude/memory/
-cat .claude/memory/{task_id}-{agent}-memory.md
-```
-
-### Key Points
-
-- **Reasoning runs automatically** - You don't need to invoke it
-- **Clarification is expected** - The system asks before assuming
-- **State persists** - Workflows can be resumed
-- **Learnings accumulate** - The system improves over time
-
----
-
 ## TODO
-
-### Known Issues
-
-- **Inconsistent reasoning protocol triggers after plan mode exit** - The reasoning protocol sometimes fails to trigger consistently when exiting plan mode. Fix implemented (PostToolUse hook) but not yet verified.
-- **Skill orchestration invoked for direct execution work** - Determine why skill orchestration is sometimes triggered for tasks that should be handled via direct tool execution. Analyze routing gate logic and triviality evaluation.
-
-### Documentation
-
-- **Add setup/usage instructions to README** - Comprehensive setup guide including prerequisites, installation, configuration, and first-run instructions
-- **Document environment variables and their usage** - Create reference for all required and optional environment variables (CAII_DIRECTORY, DA_NAME, OPENAI_*, VOICE_SERVER_PORT, etc.)
-
-### UI/UX Improvements
-
-- **Remove banners from skill orchestration** - Clean up verbose banner output during skill orchestration protocol execution
 
 ### Voice Integration
 
 - **Create voice-server GitHub repo** - Publish the text-to-speech voice server that supports the stop hook notifications as a standalone repository
 - **Integrate speech-to-text** - Add speech-to-text capability to complement the existing text-to-speech functionality for full voice interaction
+- **System benchmarking** - Establish metrics and benchmarks to measure reasoning quality, task completion rates, and system performance
 
 ### Ongoing
 
-- **System benchmarking** - Establish metrics and benchmarks to measure reasoning quality, task completion rates, and system performance
 - Continuous improvement of agent prompts and learnings
 - Expansion of domain-specific learnings as the system is used
 - Performance optimization of orchestration layer

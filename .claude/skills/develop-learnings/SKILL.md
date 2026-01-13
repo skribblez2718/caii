@@ -1,6 +1,8 @@
 ---
 name: develop-learnings
 description: Transform completed workflow experiences into structured, reusable learnings organized by cognitive function
+semantic_trigger: capture learnings, document insights, preserve knowledge, post-workflow capture
+not_for: mid-workflow tasks, skill creation, active execution
 tags: learnings, reflection, continuous-improvement, knowledge-capture
 type: composite
 composition_depth: 0

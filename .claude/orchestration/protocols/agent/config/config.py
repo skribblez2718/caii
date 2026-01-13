@@ -29,7 +29,7 @@ AGENT_REGISTRY: Final[dict[str, dict]] = {
             "knowledge_synthesis",
         ],
         "color": "cyan",
-        "model": "opus",
+        "model": "sonnet",
     },
     "research": {
         "cognitive_function": "RESEARCH",
@@ -44,7 +44,7 @@ AGENT_REGISTRY: Final[dict[str, dict]] = {
             "synthesis_documentation",
         ],
         "color": "blue",
-        "model": "opus",
+        "model": "sonnet",
     },
     "analysis": {
         "cognitive_function": "ANALYSIS",
@@ -89,7 +89,7 @@ AGENT_REGISTRY: Final[dict[str, dict]] = {
             "output_preparation",
         ],
         "color": "yellow",
-        "model": "opus",
+        "model": "sonnet",
     },
     "validation": {
         "cognitive_function": "VALIDATION",
@@ -103,7 +103,7 @@ AGENT_REGISTRY: Final[dict[str, dict]] = {
             "gate_decision",
         ],
         "color": "red",
-        "model": "opus",
+        "model": "sonnet",
     },
     "memory": {
         "cognitive_function": "METACOGNITION",
@@ -119,7 +119,7 @@ AGENT_REGISTRY: Final[dict[str, dict]] = {
             "output_generation",
         ],
         "color": "purple",
-        "model": "opus",
+        "model": "haiku",
     },
 }
 

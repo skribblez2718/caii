@@ -23,35 +23,41 @@ Check `metadata.workflow_mode` from Phase 0:
 **Location:** `${CAII_DIRECTORY}/.claude/DA.md`
 
 **Actions:**
-1. Read DA.md and locate the "Execution Routing" section
-2. Find appropriate subsection:
-   - If `type: atomic` → "Atomic Skills" subsection
-   - If `type: composite` → "Composite Skills" subsection
-3. Add skill entry in alphabetical order
+1. Read DA.md and locate the "Skill Routing Table" section
+2. Find appropriate table:
+   - If `type: atomic` → "Atomic Skills" table
+   - If `type: composite` → "Composite Skills" table
+3. Add table row in alphabetical order
 
-**Entry Format for Composite Skills:**
-
-```markdown
-#### {skill-name}
-
-**Purpose:** {one-line description}
-
-**When to Use:** Invoke when **{primary trigger pattern}**:
-
-- **{Trigger 1}:** {Description} → "{Example user utterance}"
-- **{Trigger 2}:** {Description} → "{Example user utterance}"
-- **{Trigger 3}:** {Description} → "{Example user utterance}"
-- **{Trigger 4}:** {Description} → "{Example user utterance}"
-- **{Trigger 5}:** {Description} → "{Example user utterance}"
-```
-
-**Entry Format for Atomic Skills:**
+**Entry Format for Composite Skills Table:**
 
 ```markdown
-| {function} | orchestrate-{function} |
+| {skill-name} | {semantic_trigger} | {not_for} |
 ```
 
-**IMPORTANT:** Must include exactly 5 semantic trigger examples for composite skills.
+**Entry Format for Atomic Skills Table:**
+
+```markdown
+| {skill-name} | {COGNITIVE_FUNCTION} | {semantic_trigger} | {not_for} |
+```
+
+**Field Definitions:**
+- **semantic_trigger:** Comma-separated list of trigger phrases (5-10 words total). Captures the semantic essence of when to use this skill.
+- **not_for:** Comma-separated list of exclusion criteria. Explicitly states what this skill should NOT be used for.
+
+**Examples:**
+
+Composite skill:
+```markdown
+| my-new-skill | task creation, workflow automation, process design | simple edits, one-off tasks |
+```
+
+Atomic skill:
+```markdown
+| orchestrate-planning | PLANNING | plan creation, strategy design | execution tasks |
+```
+
+**IMPORTANT:** Both semantic_trigger and not_for fields are required. Keep triggers concise (5-10 words) while capturing semantic intent.
 
 ---
 
@@ -172,11 +178,11 @@ Before completing this phase, verify:
 ## Gate Exit Criteria
 
 ### CREATE Mode - All Required
-- [ ] DA.md updated with skill entry
-- [ ] DA.md entry includes 5 semantic triggers
+- [ ] DA.md Skill Routing Table updated with table row
+- [ ] DA.md entry includes semantic_trigger and not_for fields
 - [ ] skill-catalog.md updated with entry
 - [ ] composite/CLAUDE.md table updated (if composite)
-- [ ] config.py registration code presented for manual insertion
+- [ ] config.py registration code presented for manual insertion (includes semantic_trigger and not_for)
 - [ ] All formatting consistent with existing entries
 - [ ] Alphabetical ordering maintained
 

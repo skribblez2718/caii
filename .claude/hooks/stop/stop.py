@@ -330,6 +330,19 @@ def main():
         # Read JSON payload from stdin
         hook_data = json.load(sys.stdin)
 
+        # Clean orchestration state (first action, non-blocking)
+        cwd = hook_data.get('cwd', os.getcwd())
+        try:
+            subprocess.run(
+                ["find", ".claude/orchestration", "-path", "*/state/*.json", "-type", "f", "-delete"],
+                cwd=cwd,
+                capture_output=True,
+                timeout=5,
+                check=False
+            )
+        except Exception as e:
+            print(f"[stop-hook] State cleanup failed (continuing): {e}", file=sys.stderr)
+
         # Get current permission mode
         current_mode = hook_data.get('permission_mode', 'default')
 

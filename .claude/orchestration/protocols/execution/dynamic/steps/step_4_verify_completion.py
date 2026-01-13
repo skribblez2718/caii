@@ -28,7 +28,8 @@ class Step4VerifyCompletion(BaseStep):
     """
     Step 4: Verify Completion
 
-    Ensures all cognitive functions completed successfully.
+    Ensures all cognitive functions completed successfully by checking
+    that memory files were created for each invoked skill.
     """
     _step_num = 4
     _step_name = "VERIFY_COMPLETION"
@@ -38,12 +39,17 @@ class Step4VerifyCompletion(BaseStep):
         """
         Process the completion verification.
 
-        The actual verification is done by the orchestrator reviewing outputs.
-        This method provides structure for capturing the result.
+        Claude should verify that memory files were created for each
+        skill that was invoked in Step 3.
         """
         return {
-            "verification_pending": True,
-            "instruction": "Verify all skills completed successfully"
+            "verification_required": True,
+            "checks": [
+                "Each skill invoked in Step 3 created a memory file",
+                "Memory files contain non-empty output",
+                "No critical errors occurred during skill execution"
+            ],
+            "instruction": "Verify all skills completed by checking memory files exist"
         }
 
 

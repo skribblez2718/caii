@@ -892,6 +892,10 @@ Skills can invoke other skills, enabling complex workflows through composition r
 - **Integrate speech-to-text** - Add speech-to-text capability to complement the existing text-to-speech functionality for full voice interaction
 - **System benchmarking** - Establish metrics and benchmarks to measure reasoning quality, task completion rates, and system performance
 
+### Research
+
+- **Self-consistency paradox investigation** - Research the potential paradoxical nature of self-consistency as a prompting strategy within this system context. Specifically: does enforcing self-consistency cause hallucinations (by pressuring the model to fabricate coherent-but-false justifications) or prevent them (by catching inconsistencies that indicate confabulation)? Examine how the deterministic orchestration layer interacts with this non-deterministic verification step.
+
 ### Ongoing
 
 - Continuous improvement of agent prompts and learnings

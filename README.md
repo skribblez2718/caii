@@ -35,18 +35,20 @@ This is an experimental approach that may not suit every use case, but it repres
 1. [Overview](#overview)
 2. [Quick Start](#quick-start)
 3. [Prompt Flags](#prompt-flags)
-4. [Extending the System](#extending-the-system)
-5. [Memory and Learnings System](#memory-and-learnings-system)
-6. [The Johari Window Approach](#the-johari-window-approach)
-7. [Core Philosophy](#core-philosophy)
-8. [Architecture Overview](#architecture-overview)
-9. [The Directing Agent (DA)](#the-directing-agent-da)
-10. [Reasoning Protocol](#reasoning-protocol)
-11. [Deterministic Orchestration + Non-Deterministic Execution](#deterministic-orchestration--non-deterministic-execution)
-12. [Execution Routes](#execution-routes)
-13. [Cognitive Domain Agents](#cognitive-domain-agents)
-14. [Skills Architecture](#skills-architecture)
-15. [Directory Structure](#directory-structure)
+4. [Slash Commands](#slash-commands)
+5. [Hooks](#hooks)
+6. [Extending the System](#extending-the-system)
+7. [Memory and Learnings System](#memory-and-learnings-system)
+8. [The Johari Window Approach](#the-johari-window-approach)
+9. [Core Philosophy](#core-philosophy)
+10. [Architecture Overview](#architecture-overview)
+11. [The Directing Agent (DA)](#the-directing-agent-da)
+12. [Reasoning Protocol](#reasoning-protocol)
+13. [Deterministic Orchestration + Non-Deterministic Execution](#deterministic-orchestration--non-deterministic-execution)
+14. [Execution Routes](#execution-routes)
+15. [Cognitive Domain Agents](#cognitive-domain-agents)
+16. [Skills Architecture](#skills-architecture)
+17. [Directory Structure](#directory-structure)
 
 ---
 
@@ -243,6 +245,157 @@ The `-b` flag skips the 9-step reasoning protocol entirely, allowing Claude to h
 
 **Note:** The `-b` flag bypasses all reasoning steps, so use it when you're confident the task doesn't benefit from structured analysis.
 **Note:** While the reasoning protocol is executed in Plan Mode as part of developing the plan (assuming no `-b` flag is passed), the reasoning protocol does not execute after exiting plan mode and executing the plan. This was initially unintentional, but I think the behavior makes sense.
+
+---
+
+## Slash Commands
+
+CAII provides custom slash commands that can be invoked directly. These are distinct from prompt flags and provide access to skills and utility functions.
+
+### Syntax
+
+```
+/command-name [arguments]
+/category:command-name [arguments]
+```
+
+### Workflow Skills
+
+These slash commands invoke multi-phase cognitive workflows:
+
+| Command | Description |
+|---------|-------------|
+| `/develop-skill` | Meta-skill for creating and updating workflow skills with full Python orchestration integration |
+| `/develop-learnings` | Transform completed workflow experiences into structured, reusable learnings organized by cognitive function |
+| `/develop-command` | Create and manage Claude Code slash commands for utility operations |
+
+### Utility Commands
+
+These slash commands perform quick utility operations:
+
+| Command | Description |
+|---------|-------------|
+| `/clean:state` | Clean all orchestration state files |
+| `/clean:plans` | Clean all plan files |
+| `/clean:research` | Clean all research files |
+| `/clean:memories` | Clean all memory files |
+| `/clean:all` | Clean all state, research, plan, and memory files |
+
+### Atomic Skills
+
+These slash commands invoke single-agent cognitive functions. They are typically used by the system during workflow orchestration but can be invoked directly for targeted cognitive work:
+
+| Command | Cognitive Function | Description |
+|---------|-------------------|-------------|
+| `/orchestrate-clarification` | Clarification | Transform ambiguous inputs into actionable specifications |
+| `/orchestrate-research` | Research | Investigate options and gather domain knowledge |
+| `/orchestrate-analysis` | Analysis | Decompose problems and assess complexity |
+| `/orchestrate-synthesis` | Synthesis | Integrate findings into coherent recommendations |
+| `/orchestrate-generation` | Generation | Create artifacts using TDD methodology |
+| `/orchestrate-validation` | Validation | Verify artifacts against quality criteria |
+| `/orchestrate-memory` | Metacognition | Monitor progress and detect impasses |
+
+### Examples
+
+```
+User: "/develop-skill"                    → Start skill creation workflow
+User: "/clean:all"                        → Clean all state and memory files
+User: "/orchestrate-research"             → Direct invocation of research agent
+User: "/develop-learnings"                → Capture learnings from recent workflow
+```
+
+---
+
+## Hooks
+
+CAII uses [Claude Code hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) to intercept lifecycle events and enforce protocol execution. Hooks are Python scripts that execute at specific points during a session.
+
+### Hook Types
+
+| Hook | Trigger Event | Purpose |
+|------|--------------|---------|
+| **session-start** | Session begins | Load DA.md context, validate setup, send ready notification |
+| **user-prompt-submit** | User submits prompt | Enforce reasoning protocol, handle `-i` and `-b` flags |
+| **pre-tool-use** | Before Task tool | Send agent start notification via voice server |
+| **post-tool-use** | After ExitPlanMode | Trigger reasoning protocol on plan approval |
+| **stop** | Claude finishes response | Clean state files, send completion summary |
+| **subagent-stop** | Subagent completes | Send agent completion notification |
+| **permission-request** | Tool requests permission | Send permission request notification |
+
+### Session Lifecycle
+
+```
+SESSION START
+    │
+    ├─► load-core-context.py      (inject DA.md)
+    └─► initialize-pai-session.py (validate, notify ready)
+           │
+           ▼
+    USER PROMPT
+           │
+           └─► submit.py (reasoning protocol)
+                  │
+                  ▼
+           TOOL EXECUTION
+                  │
+    ┌─────────────┼─────────────┐
+    │             │             │
+    ▼             ▼             ▼
+pre-tool-use  post-tool-use  permission-request
+(Task start)  (ExitPlanMode) (tool permissions)
+    │             │             │
+    └─────────────┼─────────────┘
+                  │
+                  ▼
+           RESPONSE COMPLETE
+                  │
+    ┌─────────────┴─────────────┐
+    │                           │
+    ▼                           ▼
+stop.py                   subagent-stop.py
+(main session)            (agent sessions)
+```
+
+### Hook Behaviors
+
+#### session-start
+
+Two scripts execute when a session starts:
+
+1. **load-core-context.py** - Reads `DA.md` and emits it as a system reminder, providing Claude with the foundational coordination framework
+2. **initialize-pai-session.py** - Validates the stop hook is executable, sets the terminal tab title, and sends a "ready" notification to the voice server
+
+Both scripts skip execution for subagent sessions to avoid duplicate context injection.
+
+#### user-prompt-submit
+
+The `submit.py` hook is the primary enforcement mechanism for the reasoning protocol:
+
+- Parses prompt flags (`-i` for improvement, `-b` for bypass)
+- Handles prompt improvement via external LLM when `-i` flag is present
+- Triggers the 9-step reasoning protocol (unless `-b` flag bypasses it)
+- Detects main vs. subagent context and adjusts protocol accordingly
+
+#### pre-tool-use / post-tool-use
+
+- **pre-tool-use** (`agent-start.py`) - Fires when the Task tool is invoked, sending a voice notification that an agent is starting
+- **post-tool-use** (`exit-plan-mode.py`) - Fires after ExitPlanMode completes, injecting the approved plan into the reasoning protocol
+
+#### stop / subagent-stop
+
+- **stop** (`stop.py`) - Cleans orchestration state files and sends a completion summary via voice server
+- **subagent-stop** (`subagent-stop.py`) - Sends agent-specific completion notifications
+
+#### permission-request
+
+The `notification.py` hook sends voice notifications when tools request permission, helping users stay aware of pending approvals.
+
+### Voice Server Integration
+
+Several hooks integrate with an optional voice server for audio notifications. The voice server must be OpenAI TTS API compatible at `http://localhost:{VOICE_SERVER_PORT}/v1/audio/speech`. See [voice-server](https://github.com/skribblez2718/voice-server) for a compatible implementation.
+
+When the voice server is unavailable, hooks gracefully degrade without blocking execution.
+
 ---
 
 ## Extending the System

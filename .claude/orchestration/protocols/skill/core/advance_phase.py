@@ -79,7 +79,7 @@ def invoke_phase_goal_memory(
     phase_transition_id = f"phase-{completed_phase_id}-to-{next_phase_id}"
 
     # Phase-specific expected output file
-    expected_file = f".claude/memory/{state.task_id}-memory-{phase_transition_id}-memory.md"
+    expected_file = f".claude/memory/{state.task_id}-{phase_transition_id}-memory.md"
 
     # Minimal output - just the essential directive
     print(f"\nPhase transition: {completed_phase_id} → {next_phase_id}")
@@ -435,10 +435,10 @@ def advance_phase(skill_name: str, session_id: str) -> None:
 
         # Use phase-specific file path for this transition
         if transition_id:
-            goal_memory_filename = f"{state.task_id}-memory-{transition_id}-memory.md"
+            goal_memory_filename = f"{state.task_id}-{transition_id}-memory.md"
         else:
             # Fallback for legacy state files without transition_id
-            goal_memory_filename = f"{state.task_id}-memory-memory.md"
+            goal_memory_filename = f"{state.task_id}-memory.md"
 
         goal_memory_file = Path(".claude/memory") / goal_memory_filename
 

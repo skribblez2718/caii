@@ -1049,6 +1049,10 @@ Skills can invoke other skills, enabling complex workflows through composition r
 
 - **Self-consistency paradox investigation** - Research the potential paradoxical nature of self-consistency as a prompting strategy within this system context. Specifically: does enforcing self-consistency cause hallucinations (by pressuring the model to fabricate coherent-but-false justifications) or prevent them (by catching inconsistencies that indicate confabulation)? Examine how the deterministic orchestration layer interacts with this non-deterministic verification step.
 
+### Bug Prevention
+
+- **Audit Python function calls in MANDATORY directives** - Review all MANDATORY execution statements in orchestration scripts to verify function calls align with their actual function signatures. Random function errors have been observed that appear related to faulty invocations (incorrect argument order, missing parameters, wrong types).
+
 ### Ongoing
 
 - Continuous improvement of agent prompts and learnings

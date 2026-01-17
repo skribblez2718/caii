@@ -90,7 +90,7 @@ def ensure_directories() -> None:
 
 def format_mandatory_directive(command: str, context: str = "") -> str:
     """
-    Format a mandatory execution directive.
+    Format a mandatory execution directive for reasoning protocol.
 
     This wording is designed to be unambiguous about the requirement
     to execute before any other action. The strong language ensures
@@ -103,12 +103,15 @@ def format_mandatory_directive(command: str, context: str = "") -> str:
     Returns:
         Formatted directive string with mandatory enforcement language
     """
-    directive = f"""
-**MANDATORY - EXECUTE IMMEDIATELY BEFORE ANY OTHER ACTION:**
-`{command}`
+    # Import here to avoid circular imports during module loading
+    from protocols.shared.directives.base import _format_directive_core
 
-⚠️ CRITICAL: Execute this command NOW. Do NOT respond with text first.
-⚠️ The reasoning protocol MUST complete before ANY task work begins.
-⚠️ FAILURE to execute this directive breaks the system's reliability guarantee.
-{context}"""
-    return directive.strip()
+    return _format_directive_core(
+        command=command,
+        context=context,
+        warnings=[
+            "CRITICAL: Execute this command NOW. Do NOT respond with text first.",
+            "The reasoning protocol MUST complete before ANY task work begins.",
+            "FAILURE to execute this directive breaks the system's reliability guarantee.",
+        ]
+    )

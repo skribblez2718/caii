@@ -464,35 +464,3 @@ def get_agent_protocol_dir(agent_name: str) -> Path:
     return AGENT_PROTOCOLS_DIR / agent_name
 
 
-def format_skill_directive(
-    command: str,
-    skill_name: str,
-    phase_id: str,
-    context: str = "",
-) -> str:
-    """
-    Format a mandatory execution directive for skill phases.
-
-    This matches the format used in protocols/reasoning/config/config.py:format_mandatory_directive
-    to ensure Claude treats skill phase execution as non-negotiable.
-
-    Args:
-        command: The command to execute (without backticks)
-        skill_name: Name of the skill being executed
-        phase_id: Current phase ID (e.g., "0", "0.5", "1")
-        context: Optional context about what this phase accomplishes
-
-    Returns:
-        Formatted directive string with mandatory enforcement language
-    """
-    phases = get_skill_phases(skill_name)
-    total_phases = len(phases) if phases else 9
-
-    directive = f"""
-**MANDATORY - EXECUTE IMMEDIATELY BEFORE ANY OTHER ACTION:**
-`{command}`
-
-⚠️ This is Phase {phase_id} of {total_phases} in the {skill_name} workflow.
-{context}DO NOT proceed with any other action until this command is executed.
-"""
-    return directive.strip()

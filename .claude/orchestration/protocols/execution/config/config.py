@@ -229,7 +229,7 @@ def format_mandatory_directive(
     protocol_type: ProtocolType | None = None
 ) -> str:
     """
-    Format a mandatory execution directive.
+    Format a mandatory execution directive for execution protocol.
 
     This wording is designed to be unambiguous about the requirement
     to execute before any other action. The strong language ensures
@@ -243,17 +243,19 @@ def format_mandatory_directive(
     Returns:
         Formatted directive string with mandatory enforcement language
     """
+    # Import here to avoid circular imports during module loading
+    from protocols.shared.directives.base import _format_directive_core
+
     total_steps = ""
     if protocol_type:
         total = PROTOCOL_TOTAL_STEPS.get(protocol_type, 0)
         if total:
-            total_steps = f" ({total} steps) "
+            total_steps = f" ({total} steps)"
 
-    directive = f"""
-**MANDATORY - EXECUTE IMMEDIATELY BEFORE ANY OTHER ACTION:**
-`{command}`
-
-⚠️ The Execution Protocol{total_steps}MUST complete ALL steps before task work concludes.
-{context}DO NOT proceed with any other action until this command is executed.
-"""
-    return directive.strip()
+    return _format_directive_core(
+        command=command,
+        context=f"{context}DO NOT proceed with any other action until this command is executed.",
+        warnings=[
+            f"The Execution Protocol{total_steps} MUST complete ALL steps before task work concludes.",
+        ]
+    )

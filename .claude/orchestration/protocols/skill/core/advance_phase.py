@@ -120,9 +120,9 @@ def format_mandatory_agent_directive(agent_name: str, phase_name: str = "") -> s
     """
     Format a mandatory agent invocation directive.
 
-    ENFORCEMENT: This wording mirrors protocols/reasoning/config.py's
-    format_mandatory_directive() to ensure Claude treats agent invocations
-    as non-negotiable requirements, not optional suggestions.
+    ENFORCEMENT: This wording uses the centralized _format_directive_core() to
+    ensure Claude treats agent invocations as non-negotiable requirements,
+    not optional suggestions.
 
     Args:
         agent_name: The agent to invoke via Task tool
@@ -131,22 +131,27 @@ def format_mandatory_agent_directive(agent_name: str, phase_name: str = "") -> s
     Returns:
         Formatted directive string with mandatory enforcement language
     """
-    context = f" for phase: {phase_name}" if phase_name else ""
-    directive = f"""
-## MANDATORY: Invoke Agent{context}
+    # Import here to avoid circular imports during module loading
+    from protocols.shared.directives.base import _format_directive_core
 
-**MANDATORY - EXECUTE IMMEDIATELY BEFORE ANY OTHER ACTION:**
+    context = f" for phase: {phase_name}" if phase_name else ""
+
+    agent_section = f"""## MANDATORY: Invoke Agent{context}
 
 Use `Task` tool with:
 - `subagent_type`: `{agent_name}`
 
-⚠️ This agent invocation is REQUIRED for workflow completion.
-DO NOT proceed with any other action until this agent is invoked.
-DO NOT perform the agent's work directly - you MUST spawn the agent via Task tool.
+The agent will create a memory file upon completion. Only then can the workflow advance."""
 
-The agent will create a memory file upon completion. Only then can the workflow advance.
-"""
-    return directive.strip()
+    return _format_directive_core(
+        command=f'Task tool with subagent_type: "{agent_name}"',
+        context=agent_section,
+        warnings=[
+            "This agent invocation is REQUIRED for workflow completion.",
+            "DO NOT proceed with any other action until this agent is invoked.",
+            "DO NOT perform the agent's work directly - you MUST spawn the agent via Task tool.",
+        ]
+    )
 
 
 def print_agent_directive(phase_config: Dict[str, Any]) -> None:

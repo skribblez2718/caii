@@ -39,7 +39,6 @@ from skill.config.config import (
     get_phase_list,
     get_composite_skill_dir,
     get_agent_protocol_dir,
-    format_skill_directive,
 )
 
 __all__ = [
@@ -66,5 +65,4 @@ __all__ = [
     "get_phase_list",
     "get_composite_skill_dir",
     "get_agent_protocol_dir",
-    "format_skill_directive",
 ]

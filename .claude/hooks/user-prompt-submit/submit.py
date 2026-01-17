@@ -196,6 +196,7 @@ def improve_prompt(prompt: str) -> Optional[str]:
 
     request_payload = {
         "model": model,
+        "stream": True,  # Enable streaming for reasoning models
         "messages": [
             {
                 "role": "user",
@@ -229,59 +230,52 @@ def improve_prompt(prompt: str) -> Optional[str]:
             print(f"[prompt-improve] ERROR: Unexpected status code: {status_code}", file=sys.stderr)
             return None
 
-        # Read and decode response
-        try:
-            raw_response = response.read()
-        except Exception as e:
-            print(f"[prompt-improve] ERROR: Failed to read response body: {e}", file=sys.stderr)
-            return None
+        # Process streaming response - accumulate content from delta chunks
+        # Reasoning models stream reasoning tokens first, then content
+        # We only care about the 'content' field in delta objects
+        accumulated_content = ""
+        chunk_count = 0
 
-        try:
-            response_text = raw_response.decode('utf-8')
-        except UnicodeDecodeError as e:
-            print(f"[prompt-improve] ERROR: Failed to decode response as UTF-8: {e}", file=sys.stderr)
-            return None
+        for line in response:
+            # Decode line
+            try:
+                line_text = line.decode('utf-8').strip()
+            except UnicodeDecodeError:
+                continue  # Skip malformed lines
 
-        # Parse JSON response
-        try:
-            result = json.loads(response_text)
-        except json.JSONDecodeError as e:
-            print(f"[prompt-improve] ERROR: Failed to parse JSON response: {e}", file=sys.stderr)
-            print(f"[prompt-improve] Raw response (first 500 chars): {response_text[:500]}", file=sys.stderr)
-            return None
+            # Skip empty lines and SSE comments
+            if not line_text or line_text.startswith(':'):
+                continue
 
-        # Extract content from response
-        try:
-            choices = result.get('choices')
-            if not choices:
-                print(f"[prompt-improve] ERROR: Response missing 'choices' field", file=sys.stderr)
-                print(f"[prompt-improve] Response keys: {list(result.keys())}", file=sys.stderr)
-                return None
+            # Handle SSE data prefix
+            if line_text.startswith('data: '):
+                line_text = line_text[6:]
 
-            if not isinstance(choices, list) or len(choices) == 0:
-                print(f"[prompt-improve] ERROR: 'choices' is empty or not a list", file=sys.stderr)
-                return None
+            # Check for stream end
+            if line_text == '[DONE]':
+                break
 
-            first_choice = choices[0]
-            message = first_choice.get('message')
-            if not message:
-                print(f"[prompt-improve] ERROR: First choice missing 'message' field", file=sys.stderr)
-                print(f"[prompt-improve] First choice keys: {list(first_choice.keys())}", file=sys.stderr)
-                return None
+            # Parse JSON chunk
+            try:
+                chunk = json.loads(line_text)
+                chunk_count += 1
+                choices = chunk.get('choices', [])
+                if choices:
+                    delta = choices[0].get('delta', {})
+                    content = delta.get('content', '')
+                    if content:
+                        accumulated_content += content
+            except json.JSONDecodeError:
+                continue  # Skip malformed chunks
 
-            content = message.get('content')
-            if not content:
-                print(f"[prompt-improve] ERROR: Message missing 'content' field", file=sys.stderr)
-                print(f"[prompt-improve] Message keys: {list(message.keys())}", file=sys.stderr)
-                return None
-
-            improved = content.strip()
+        # Return accumulated content
+        print(f"[prompt-improve] Processed {chunk_count} chunks", file=sys.stderr)
+        if accumulated_content:
+            improved = accumulated_content.strip()
             print(f"[prompt-improve] SUCCESS: Improved prompt length: {len(improved)} chars", file=sys.stderr)
             return improved
-
-        except (KeyError, IndexError, AttributeError) as e:
-            print(f"[prompt-improve] ERROR: Failed to extract content from response: {e}", file=sys.stderr)
-            print(f"[prompt-improve] Response structure: {type(result)}", file=sys.stderr)
+        else:
+            print("[prompt-improve] ERROR: No content received from stream", file=sys.stderr)
             return None
 
     except urllib.error.HTTPError as e:

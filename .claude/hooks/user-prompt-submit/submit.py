@@ -262,7 +262,13 @@ def improve_prompt(prompt: str) -> Optional[str]:
                 choices = chunk.get('choices', [])
                 if choices:
                     delta = choices[0].get('delta', {})
-                    content = delta.get('content', '')
+                    # Reasoning models output 'reasoning_content' during thinking phase,
+                    # then 'content' for the final answer. We only want 'content'.
+                    reasoning = delta.get('reasoning_content')
+                    if reasoning:
+                        # Model is still thinking - skip reasoning chunks
+                        continue
+                    content = delta.get('content')
                     if content:
                         accumulated_content += content
             except json.JSONDecodeError:

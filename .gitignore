@@ -22,6 +22,9 @@
 # Ignore orchestration state directories (contain conversation/session data)
 .claude/orchestration/**/state/*
 
+# Ignore state management sessions (algorithm runtime state)
+.claude/orchestration/state/sessions/*
+
 # Ignore episode history data
 .claude/orchestration/skill_protocols/episodes/*
 
@@ -32,6 +35,7 @@
 !.claude/learnings/**/.gitkeep
 !.claude/usage/.gitkeep
 !.claude/orchestration/**/state/.gitkeep
+!.claude/orchestration/state/sessions/.gitkeep
 !.claude/orchestration/skill_protocols/episodes/.gitkeep
 
 # Node.js dependencies (if applicable)
@@ -45,6 +49,13 @@ env/
 .venv/
 *.pyc
 __pycache__/
+
+# Test coverage artifacts
+htmlcov/
+.coverage
+.pytest_cache/
+coverage.xml
+*.cover
 
 # IDE and editor files
 .vscode/

@@ -1,444 +1,286 @@
-# Orchestration System
+# Orchestration System Index
 
-Python-based orchestration for the system's cognitive workflows. Scripts output markdown directives that Claude must execute.
+Python-based orchestration implementing The Last Algorithm.
 
-## System Flow Diagram
+**USAGE:** Reference paths below WITHOUT `@` prefix. Use `Read` tool with `offset`/`limit` to load specific sections when needed.
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           USER QUERY ARRIVES                                 │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                   REASONING PROTOCOL (10 Steps: 0, 0.5, 1-8)                │
-│  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐          │
-│  │ Step 0  │→ │Step 0.5 │→ │ Step 1  │→ │ Step 2  │→ │ Step 3  │          │
-│  │ Johari  │  │ IDEAL   │  │Semantic │  │ Chain   │  │ Tree    │          │
-│  │Discovery│  │ STATE   │  │Underst. │  │of Thght │  │of Thght │          │
-│  └─────────┘  └─────────┘  └─────────┘  └─────────┘  └─────────┘          │
-│                                                            │                │
-│       ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐  │                │
-│       │Step 3b  │→ │ Step 4  │→ │ Step 5  │→ │ Step 6  │  │                │
-│       │ Skill   │  │ Task    │  │Self-Cons│  │Socratic │←─┘                │
-│       │ Detect  │  │ Routing │  └─────────┘  └─────────┘                   │
-│       └─────────┘  └─────────┘                    │                         │
-│            ↑            ┌─────────┐  ┌─────────┐  │                         │
-│            │            │ Step 7  │→ │ Step 8  │←─┘                         │
-│            │            │Constit. │  │Know.Xfer│                            │
-│            │            └─────────┘  └─────────┘ (verifies IDEAL STATE)     │
-│  Step 0: Johari Window Discovery - executes at START of every interaction  │
-│  Step 0.5: IDEAL STATE Capture - defines success criteria (0-5 cycles)     │
-│  Agent mode (subagents) skips Step 4 → goes from 3b to Step 5              │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    │
-                    ┌───────────────┴───────────────┐
-                    │                               │
-                    ▼                               ▼
-          ┌─────────────┐                 ┌─────────────┐
-          │   SKILL     │                 │  DYNAMIC    │
-          │ORCHESTRATION│                 │   SKILL     │
-          │             │                 │ SEQUENCING  │
-          └─────────────┘                 └─────────────┘
-                 │                               │
-                 ▼                               ▼
-          ┌─────────────────────────────────────────────┐
-          │              SKILL EXECUTION                 │
-          │  ┌─────────┐  ┌─────────┐  ┌─────────┐     │
-          │  │ Phase 0 │→ │ Phase 1 │→ │ Phase N │     │
-          │  │(Clarify)│  │(varies) │  │(varies) │     │
-          │  └─────────┘  └─────────┘  └─────────┘     │
-          └─────────────────────────────────────────────┘
-                              │
-                              ▼
-          ┌─────────────────────────────────────────────┐
-          │         AGENT INVOCATION (per phase)        │
-          │                                             │
-          │  protocols/skill/core/agent_invoker.py      │
-          │            │                                │
-          │            ▼                                │
-          │  Task tool with subagent_type: {agent}      │
-          │            │                                │
-          │            ▼                                │
-          │  protocols/agent/{agent}/entry.py           │
-          │            │                                │
-          │            ▼                                │
-          │  Steps 0→1→2→...→N (varies by agent)       │
-          │    Step 0: learning_injection (all)        │
-          │    Step 1: johari_discovery (all)          │
-          │    Step 2+: agent-specific work            │
-          │            │                                │
-          │            ▼                                │
-          │  .claude/memory/{task_id}-{agent}-memory.md │
-          └─────────────────────────────────────────────┘
-```
+---
 
-## Directory Structure
+## Quick Reference
+
+| Topic | File | Lines |
+|-------|------|-------|
+| **This Index** | `.claude/orchestration/CLAUDE.md` | 1-180 |
+| **DA Core** | `.claude/DA.md` | 1-503 |
+
+---
+
+## Architecture Overview
 
 ```
-orchestration/
-├── CLAUDE.md               # THIS FILE
-├── __init__.py             # Centralized path management and helpers
-├── paths.py                # Additional path helpers
-├── protocols/              # All protocol implementations
-│   ├── reasoning/          # 10-step pre-task reasoning (Step 0, 0.5, 1-8, ALWAYS RUNS FIRST)
-│   ├── execution/          # Post-reasoning execution routing
-│   ├── agent/              # 7 cognitive agents (spawned via Task tool)
-│   └── skill/              # Composite + atomic skill definitions
-└── shared/                 # Reusable markdown content snippets
-    └── templates/          # Agent prompt templates (CRITICAL)
+submit.py (hook)
+    │
+    ▼
+entry.py (5-category complexity analysis)
+    │
+    ├── trivial → DA direct execution (no state)
+    │
+    ├── simple/moderate → GATHER phase (The Last Algorithm)
+    │                          │
+    │                     OUTER LOOP (gather → ideal → verify)
+    │                          │
+    │                     INNER LOOP (observe → think → plan → build → execute → learn)
+    │
+    └── complex/very_complex → DECOMPOSE protocol
+                                    ↓
+                               subtasks re-analyzed
+                                    ↓
+                               <= moderate → GATHER
 ```
 
-## Agent Prompt Template System
+**Key Principle:** Python enforces sequence. LLM makes decisions.
 
-When invoking agents via atomic skills, the DA **MUST** use the standardized Agent Prompt Template format. This ensures consistent context passing and Johari knowledge transfer.
+### Complexity Categories (METR Scale)
 
-### Key Files
+| Category | Routing | State Created |
+|----------|---------|---------------|
+| **TRIVIAL** | DA Direct Execution | No |
+| **SIMPLE** | The Last Algorithm (GATHER) | Yes |
+| **MODERATE** | The Last Algorithm (GATHER) | Yes |
+| **COMPLEX** | DECOMPOSE Protocol | Yes |
+| **VERY COMPLEX** | DECOMPOSE Protocol | Yes |
+
+---
+
+## File Index
+
+### Agents (`.claude/agents/`)
+
+| Agent | File | Lines | Key Sections |
+|-------|------|-------|--------------|
+| **analysis** | `agents/analysis.md` | 299 | Identity: 9-32, Execution Protocol: 50-78, Output Format: 79-end |
+| **clarification** | `agents/clarification.md` | 304 | Identity: 9-44, Pre-Clarification: 46-end |
+| **generation** | `agents/generation.md` | 321 | Identity: 9-49, Execution Protocol: 50-78, Output Format: 79-end |
+| **memory** | `agents/memory.md` | 251 | Identity: 9-40, Impasse Types: 41-70, Execution Protocol: 71-end |
+| **research** | `agents/research.md` | 369 | Identity: 9-84, Execution Protocol: 85-113, Output Format: 114-end |
+| **synthesis** | `agents/synthesis.md` | 292 | Identity: 9-49, Execution Protocol: 50-78, Output Format: 79-end |
+| **validation** | `agents/validation.md` | 330 | Identity: 9-36, Context Adaptation: 34-end |
+
+### Documentation (`.claude/docs/`)
+
+| Document | File | Lines | Key Sections |
+|----------|------|-------|--------------|
+| **Agent Protocol** | `docs/agent-protocol-reference.md` | 175 | Validation Checklist: 13-43, Quick Reference: 57-112, Domain Standards: 113-156 |
+| **Agent Registry** | `docs/agent-registry.md` | 271 | Agents: 9-142, Cognitive Architecture: 143-end |
+| **Code Generation** | `docs/code-generation-reference.md` | 201 | Context by Domain: 17-55, Test Patterns: 68-107, Workflows: 108-end |
+| **Cognitive Taxonomy** | `docs/cognitive-function-taxonomy.md` | 438 | (Full file - taxonomy reference) |
+| **Context Management** | `docs/context-management.md` | 241 | Loading Patterns: 16-92, Pruning: 93-end |
+| **Domain Adaptation** | `docs/domain-adaptation-examples.md` | 413 | Technical: 21-100, Personal: 102-164, Creative: 165-210, Professional: 212-end |
+| **Execution Protocols** | `docs/execution-protocols.md` | 165 | Protocol Types: 13-21, FSM Definitions: 75-121 |
+| **Johari Reference** | `docs/johari-reference.md` | 474 | Format Matrix: 9-32, Token Limits: 33-55, Compression: 56-113, Types: 106-193 |
+| **Philosophy** | `docs/philosophy.md` | 367 | (Full file - system philosophy) |
+| **Skill Catalog** | `docs/skill-catalog.md` | 111 | Skill Types: 7-15, Composite: 16-43, Atomic: 44-80, Selection Guide: 81-end |
+| **Workflow Validation** | `docs/workflow-validation-guide.md` | 216 | Token Budget: 5-32, Python Requirements: 33-64, Phase Gates: 80-end |
+
+### Orchestration Loop Files
+
+#### Pre-Loop Protocols (`.claude/orchestration/decompose/`)
+
+| Protocol | CLAUDE.md | Content File | Purpose |
+|----------|-----------|--------------|---------|
+| **DECOMPOSE** | `decompose/CLAUDE.md` | `decompose/content/decompose_phase.md` | Task decomposition (STUB - not yet implemented) |
+
+#### Outer Loop (`.claude/orchestration/outer_loop/`)
+
+| Phase | CLAUDE.md | Content File | Purpose |
+|-------|-----------|--------------|---------|
+| **GATHER (Step 0)** | `outer_loop/gather/CLAUDE.md` (30 lines) | `outer_loop/gather/content/gather_phase.md` | Agentic information gathering |
+| **IDEAL (Step 0.5)** | `outer_loop/ideal_state/CLAUDE.md` (20 lines) | `outer_loop/ideal_state/content/ideal_state_capture.md` | Success criteria capture |
+| **VERIFY (Step 8)** | `outer_loop/verify/CLAUDE.md` (21 lines) | `outer_loop/verify/content/verification.md` | Validation against ideal state |
+
+#### Inner Loop (`.claude/orchestration/inner_loop/`)
+
+| Phase | CLAUDE.md | Content File | Purpose |
+|-------|-----------|--------------|---------|
+| **OBSERVE (Step 1)** | `inner_loop/observe/CLAUDE.md` (13 lines) | `inner_loop/observe/content/observe_phase.md` | State observation |
+| **THINK (Step 2)** | `inner_loop/think/CLAUDE.md` (13 lines) | `inner_loop/think/content/think_phase.md` | Analysis and reasoning |
+| **PLAN (Step 3)** | `inner_loop/plan/CLAUDE.md` (13 lines) | `inner_loop/plan/content/plan_phase.md` | Strategy formulation |
+| **BUILD (Step 4)** | `inner_loop/build/CLAUDE.md` (13 lines) | `inner_loop/build/content/build_phase.md` | Artifact creation |
+| **EXECUTE (Step 5)** | `inner_loop/execute/CLAUDE.md` (13 lines) | `inner_loop/execute/content/execute_phase.md` | Action execution |
+| **LEARN (Step 8b)** | `inner_loop/learn/CLAUDE.md` (13 lines) | `inner_loop/learn/content/learn_phase.md` | Knowledge extraction |
+
+#### Johari Protocol (`.claude/orchestration/johari/`)
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `johari/CLAUDE.md` | 27 | Protocol overview |
+| `johari/protocol.md` | - | Full Johari framework content |
+
+#### State Management (`.claude/orchestration/state/`)
 
 | File | Purpose |
 |------|---------|
-| `shared/templates/agent-system-prompt.md` | Full template with all placeholders |
-| `shared/templates/SKILL-TEMPLATE-REFERENCE.md` | Shared reference for SKILL.md files |
-| `shared/templates/CLAUDE.md` | Template system documentation |
-| Individual `SKILL.md` files | "Agent Invocation Format" section |
+| `state/CLAUDE.md` | State system documentation |
+| `state/config.py` | Paths, versions, session ID generation |
+| `state/base.py` | BaseFSM, BaseState (DRY foundation) |
+| `state/algorithm_fsm.py` | AlgorithmPhase enum, AlgorithmFSM |
+| `state/algorithm_state.py` | AlgorithmState implementation |
+| `state/sessions/` | Runtime state files (gitignored) |
 
-### Required Template Sections
+**Key Concepts:**
 
-| Section | Required | Source |
-|---------|----------|--------|
-| Task Context | Yes | task_id, skill_name, phase_id, domain, agent_name |
-| Role Extension | Yes | DA generates dynamically (3-5 focus areas) |
-| Johari Context | If available | From reasoning protocol Step 0 |
-| Task Instructions | Yes | Specific cognitive work |
-| Related Research Terms | Yes | DA generates dynamically (7-10 keywords) |
-| Output Requirements | Yes | Memory file path |
+- **Session ID:** 12-character UUID for tracking
+- **FSM:** Phase transitions with validation
+- **Critical Invariant:** Always save state BEFORE printing directive
+- **--state arg:** All phases receive session ID via `--state` argument
 
-See DA.md "Agent Prompt Template Requirements" section for full details.
+### Research Documents (`.claude/research/`)
 
-Note: Skill routing uses the orchestrator's semantic understanding (DA.md Skill Routing Table with semantic_trigger and not_for columns),
-not keyword-based pattern matching. When routing confidence is not HIGH, the system HALTs and asks for user clarification.
+| Document | Lines | Topic |
+|----------|-------|-------|
+| `research/caii-last-algorithm-definitive-guide.md` | 2434 | Complete Last Algorithm reference |
+| `research/caii-definitive-optimization-guide.md` | 1040 | Token/performance optimization |
+| `research/consistency-sampling.md` | 149 | Self-consistency techniques |
+| `research/cov.md` | 142 | Chain of Verification |
+| `research/critique.md` | 198 | Self-critique patterns |
 
-## Shared Path Management (orchestration/__init__.py)
+---
 
-The `orchestration/__init__.py` module provides centralized path constants and helpers:
+## Python Coding Standards
 
-```python
-from orchestration import (
-    ORCHESTRATION_ROOT, CLAUDE_ROOT, PROJECT_ROOT,
-    PROTOCOLS_DIR, AGENT_PROTOCOLS_DIR, SKILL_PROTOCOLS_DIR,
-    get_agent_dir, get_composite_skill_dir, get_memory_file_path,
-)
-```
+**Target Version:** Python 3.11+
 
-**Key paths:**
-- `ORCHESTRATION_ROOT` - This directory
-- `CLAUDE_ROOT` - Parent `.claude/` directory
-- `PROTOCOLS_DIR` - `orchestration/protocols/`
-- `AGENT_PROTOCOLS_DIR`, `SKILL_PROTOCOLS_DIR`, etc.
+### Import Rules (MANDATORY)
 
-**Helper functions:**
-- `get_agent_dir(agent_name)` - Get agent directory path
-- `get_composite_skill_dir(skill_name)` - Get skill orchestration directory
-- `get_memory_file_path(task_id, agent_name)` - Build memory file path
-- `get_skill_state_file(skill_name, session_id)` - Build state file path
-
-## Call Chain: Query → Execution
+**ABSOLUTE IMPORTS ONLY** - Never use relative imports.
 
 ```python
-# 1. Hook triggers reasoning protocol (starts at Step 0)
-UserPromptSubmit hook
-    └→ protocols/reasoning/entry.py "{user_query}"
-        └→ Print directive for Step 0 (Johari Window Discovery)
+# CORRECT
+from orchestration.outer_loop.gather import entry
 
-# 2. Step 0 (Johari Discovery) executes at START of every interaction
-step_0_johari_discovery.py --state {file}
-    └→ Transforms unknown unknowns into known knowns
-    └→ Uses SHARE/ASK/ACKNOWLEDGE/EXPLORE framework
-    └→ If ANY clarifying questions exist → HALT and ask before Step 0.5
-
-# 2.5. Step 0.5 (IDEAL STATE Capture) defines success criteria (NEW)
-step_0_5_ideal_state_capture.py --state {file}
-    └→ Captures SUCCESS CRITERIA, ANTI-CRITERIA, SUCCESS METRICS
-    └→ Iterates 0-5 cycles until >= 95% completeness
-    └→ Uses AskUserQuestion if critical gaps exist
-    └→ Proceeds to Step 1 when sufficient
-
-# 3. Each step loads state, prints content, outputs NEXT step command
-step_N.py (inherits BaseStep)
-    ├→ BaseStep.main()           # Entry point
-    │   ├→ ProtocolState.load()  # Load from protocols/reasoning/state/
-    │   └→ step.execute()        # Run the step
-    │       ├→ state.start_step()
-    │       ├→ print_content()   # Markdown from content/steps/step_N.md
-    │       ├→ process_step()    # Step-specific logic
-    │       ├→ state.complete_step()
-    │       ├→ state.save()
-    │       └→ print_next_directive()  # MANDATORY command for next step
-
-# 4. Step 4 determines route → triggers execution protocol
-step_4_task_routing.py
-    └→ outputs one of:
-        • skill-orchestration (skill matched)
-        • dynamic-skill-sequencing (no match, needs agents)
-
-# 5. Execution protocol triggers skill
-protocols/skill/composite/{skill}/entry.py {task_id}
-    ├→ common_skill_entry.skill_entry()
-    │   ├→ SkillExecutionState() created
-    │   ├→ Phase 0 content printed
-    │   └→ Agent invocation directive printed
-
-# 6. Each phase invokes an agent via Task tool
-Task tool with subagent_type: {agent-name}
-    └→ protocols/agent/{agent}/entry.py
-        └→ common_entry.agent_entry()
-            └→ step_0_learning_injection → step_1_johari_discovery → step_2+ → complete.py
-            └→ Step 1 (Johari) may HALT if clarifying questions exist
-
-# 7. After agent completes, advance to next phase
-protocols/skill/core/advance_phase.py {skill_name} {session_id}
-    ├→ Verify agent memory file exists (BLOCKING)
-    ├→ Invoke memory-agent (BLOCKING)
-    ├→ Transition FSM to next phase
-    └→ Print next phase content + agent directive
+# WRONG - FORBIDDEN
+from .outer_loop.gather import entry
 ```
 
-## Data Contracts
+### Entry Point Bootstrap Pattern
 
-### State Files (JSON) - Session Scoped
+Entry points run as standalone scripts (not modules), so they need to add `.claude/` to `sys.path` for `from orchestration.*` imports to work.
 
-| Location | Created By | Contains |
-|----------|------------|----------|
-| `protocols/reasoning/state/reasoning-{session}.json` | `entry.py` | FSM state, step outputs, user query |
-| `protocols/skill/state/{skill}-{session}.json` | `skill_entry()` | Phase outputs, metadata, FSM state |
-| `protocols/agent/state/{agent}-{task}.json` | `agent_entry()` | Step outputs, skill context |
-
-**Note:** FSM JSON serialization is now aligned across all protocols:
-- All protocols: `.fsm.state` (enum name string)
-- Skill protocol also has: `.fsm.current_phase_id` (phase ID)
-- Legacy `current_state` key is supported for backwards compatibility
-
-### Memory Files (Markdown) - Passed Between Agents
-
-| Location | Created By | Consumed By |
-|----------|------------|-------------|
-| `.claude/memory/{task}-{agent}-memory.md` | Agent's `complete.py` | Next phase's agent |
-| `.claude/memory/{task}-memory-phase-X-to-Y-memory.md` | memory-agent | advance_phase.py verification |
-
-## Critical Invariants
-
-```
-⚠️  INVARIANTS - VIOLATING THESE BREAKS THE SYSTEM
-
-1. Every step script MUST print a next command directive
-   └→ Uses format_mandatory_directive() from config.py
-
-2. State MUST be saved BEFORE printing the next directive
-   └→ If Claude crashes, state is recoverable
-
-3. Agents are NEVER called directly by scripts
-   └→ Always via Task tool with subagent_type parameter
-   └→ protocols/agent/entry.py is called BY the Task tool internals
-
-4. Phase advancement BLOCKS until memory file exists
-   └→ advance_phase.py checks for .claude/memory/{task}-{agent}-memory.md
-   └→ No bypass mechanism exists by design
-
-5. Phase 0 of every skill MUST be LINEAR (mandatory clarification)
-   └→ Enforced in common_skill_entry.py lines 90-103
-
-6. memory-agent MUST complete at every phase transition
-   └→ Creates phase-specific memory file for verification
-   └→ advance_phase.py blocks until file exists
-
-7. IDEAL STATE verification MUST complete before skill marked done
-   └→ Verification is cognitive (Claude explicitly confirms each criterion)
-   └→ Not automated - Claude must assess and state verification
-   └→ Failure halts completion and requires explanation
-   └→ Implemented in common_skill_complete.py via ideal_state_verifier.py
-```
-
-## Metacognitive Hook Bypass
-
-Controlled by constants in:
-- `protocols/agent/common/complete.py`: `SKILLS_BYPASSING_METACOGNITIVE_HOOKS`
-- `protocols/skill/core/advance_phase.py`: `SKILLS_BYPASSING_GOAL_MEMORY`
-- `protocols/skill/composite/common_skill_complete.py`: `SKILLS_BYPASSING_LEARNINGS`
-
-## Safe vs Dangerous Modifications
-
-### ✅ Safe Changes
-
-- Adding new steps/phases (update respective config.py)
-- Modifying markdown content in `content/` directories
-- Adding new metadata fields to state
-- Adding new helper functions that don't change call flow
-
-### ⚠️ Requires Careful Testing
-
-- Changing step/phase order (update FSM transitions)
-- Adding new agents (must register in config.py, create full directory structure)
-- Modifying state.py or fsm.py classes
-
-### ❌ Dangerous - Will Break System
-
-- Removing `format_mandatory_directive()` calls
-- Changing state file paths/naming without updating all references
-- Removing memory file verification in advance_phase.py
-- Making Phase 0 non-LINEAR (bypasses clarification)
-- Adding `--force` flags to bypass blocking checks
-- Calling agent entry.py directly instead of via Task tool
-
-## Key Files Summary
-
-| File | Purpose | Key Functions |
-|------|---------|---------------|
-| `protocols/reasoning/config/config.py` | Step names (0, 0.5, 1-8), paths, formatting | `format_mandatory_directive()`, `STEP_NAMES` |
-| `protocols/reasoning/core/state.py` | `ProtocolState` class | `load()`, `save()`, `start_step()`, `complete_step()`, `update_ideal_state()` |
-| `protocols/reasoning/steps/base.py` | Base class for reasoning steps | `execute()`, `print_next_directive()` |
-| `protocols/execution/steps/base.py` | Base class for execution steps | `ExecutionBaseStep`, `main()` |
-| `protocols/agent/steps/base.py` | Base class for agent steps | `BaseAgentStep`, `main()` |
-| `protocols/agent/steps/shared.py` | Shared step 0/1 implementations | `LearningInjectionStep`, `JohariDiscoveryStep` |
-| `protocols/skill/config/config.py` | **MASTER SKILL REGISTRY** | All `*_PHASES` dicts, `PhaseType` enum |
-| `protocols/skill/core/state.py` | `SkillExecutionState` class | Phase management, memory file paths |
-| `protocols/skill/core/advance_phase.py` | Phase transitions | `advance_phase()`, blocking verification |
-| `protocols/agent/config/config.py` | Agent registry | `AGENT_REGISTRY`, context budgets |
-| `protocols/agent/common/entry.py` | Agent initialization | `agent_entry()` |
-
-## Step Class Architecture (DRY Pattern)
-
-All step files follow a consistent DRY pattern using class-level attributes:
+**Standard Bootstrap (use in all entry.py files):**
 
 ```python
-#!/usr/bin/env python3
-"""Step N: Step Name"""
 import sys
 from pathlib import Path
 
-# Standard path setup pattern
-sys.path.insert(0, str(Path(__file__).parent.parent))
-sys.path.insert(0, str(Path(__file__).parent))
+# Bootstrap: Add .claude directory to path for orchestration imports
+_p = Path(__file__).resolve()
+while _p.name != "orchestration" and _p != _p.parent:
+    _p = _p.parent
+if _p.name == "orchestration" and str(_p.parent) not in sys.path:
+    sys.path.insert(0, str(_p.parent))
+del _p  # Clean up namespace
 
-from base_step import BaseStep  # or ExecutionBaseStep, BaseAgentStep
-
-class StepNStepName(BaseStep):
-    """Step N: Description"""
-    _step_num = N              # Class attribute (not property)
-    _step_name = "STEP_NAME"   # Class attribute (not property)
-    # _protocol_type = ProtocolType.X  # For execution steps only
-
-if __name__ == "__main__":
-    sys.exit(StepNStepName.main())  # Uses base class main()
+# Now absolute imports work
+from orchestration.state import AlgorithmState
+from orchestration.utils import load_content, substitute_placeholders
 ```
 
-**Key DRY Patterns:**
-- `_step_num` and `_step_name` as **class attributes**, not property methods
-- `main()` in base class handles argparse and state loading
-- No redundant `main()` boilerplate in individual step files
-- Shared steps 0-1 for agents in `protocols/agent/steps/shared.py`
+**Why this pattern?**
 
-**Base Class Hierarchy:**
+| Aspect | Explanation |
+|--------|-------------|
+| **Problem** | Scripts invoked as `python3 entry.py` only have their own directory in `sys.path` |
+| **Solution** | Walk up to find `orchestration/` directory, add its parent (`.claude/`) to path |
+| **Robust** | Works regardless of entry point depth (unlike hardcoded `.parent.parent.parent`) |
+| **Clean** | Deletes `_p` variable after use to avoid polluting module namespace |
+
+### Required Patterns
+
+| Pattern | Rule |
+|---------|------|
+| **Type Hints** | All functions MUST have type hints |
+| **DRY** | Shared utilities in `utils.py` |
+| **Content Separation** | Python in `.py`, prompts in `content/*.md` |
+| **stdout** | Print only: directives, errors, state transitions |
+
+### Content Loading Pattern
+
+```python
+from orchestration.utils import load_content, substitute_placeholders
+
+content = load_content(__file__, "phase_name.md")
+prompt = substitute_placeholders(content, user_query=query)
+print(prompt)
 ```
-protocols/reasoning/steps/base.py::BaseStep
-protocols/execution/steps/base.py::ExecutionBaseStep
-protocols/agent/steps/base.py::BaseAgentStep
+
+---
+
+## How to Use This Index
+
+1. **Find the topic** in tables above
+2. **Note the file path and line range** for relevant section
+3. **Use Read tool** with offset/limit:
+   ```
+   Read file_path offset=START limit=LENGTH
+   ```
+
+**Example:** To read agent protocol quick reference:
+```
+Read .claude/docs/agent-protocol-reference.md offset=57 limit=55
 ```
 
-Each base class provides:
-- `main()` - CLI entry point with argparse
-- `execute()` - Step execution orchestration
-- `step_number` / `step_name` properties (read from `_step_num` / `_step_name`)
+---
 
-## Johari Window Discovery Protocol
+---
 
-The Johari Discovery Protocol transforms unknown unknowns into known knowns. It is implemented in TWO places:
+## Test-Driven Development Requirements
 
-### 1. Main Reasoning Protocol (Step 0)
+**MANDATORY:** All code changes MUST use the TDD skill.
 
-Step 0 executes at the **START of every user interaction** before formal reasoning begins.
-
-**Files:**
-- `protocols/reasoning/steps/step_0_johari_discovery.py` - Python script
-- `protocols/reasoning/content/step_0_johari_discovery.md` - Markdown instructions
-
-### 2. All Cognitive Agents (Step 0-1)
-
-Steps 0-1 execute at the **START of every agent invocation**:
-- Step 0: Learning Injection - loads domain-specific learnings
-- Step 1: Johari Discovery - transforms unknown unknowns into known knowns
-
-**Files (Shared Implementation - DRY):**
-- `protocols/agent/steps/shared.py` - Shared Python implementations for ALL agents
-  - `LearningInjectionStep` (Step 0) - single implementation for all 7 agents
-  - `JohariDiscoveryStep` (Step 1) - single implementation for all 7 agents
-- `protocols/agent/{agent}/content/step_0_learning_injection.md` - Agent-specific markdown content
-- `protocols/agent/{agent}/content/step_1_johari_discovery.md` - Agent-specific markdown content
-- `shared/protocols/agent/johari-discovery-protocol.md` - Shared protocol content
-
-### The SHARE/ASK/ACKNOWLEDGE/EXPLORE Framework
-
-| Phase | Purpose |
-|-------|---------|
-| **SHARE** | What I can infer from the prompt (task type, complexity, pitfalls) |
-| **ASK** | What I need to know (max 5 questions, only if critical) |
-| **ACKNOWLEDGE** | Boundaries and assumptions (what remains uncertain) |
-| **EXPLORE** | Unknown unknowns to consider (edge cases, failure modes) |
-
-**Critical Rule:** If ANY clarifying questions exist, HALT and ask before proceeding to the next step.
-
-## IDEAL STATE Capture Protocol (NEW)
-
-Step 0.5 implements "The Last Algorithm" methodology by iteratively refining explicit success criteria. This ensures verifiable goals guide all downstream reasoning and execution.
-
-**Core Principle:** "Verifiability is the universal ladder" - goals and verification criteria must be identical.
-
-### IDEAL STATE Components
-
-| Component | Description |
-|-----------|-------------|
-| **Success Criteria** | What MUST be true (must-have, should-have, nice-to-have) |
-| **Anti-Criteria** | What MUST NOT happen (explicit failure conditions) |
-| **Success Metrics** | Quantifiable measures with target values |
-| **Exit Condition** | When the task is considered complete |
-
-### Iterative Clarification Cycles
-
-- **Fully dynamic:** 0-5 cycles based on need
-- **Exit immediately** when completeness >= 95%
-- **No mandatory cycles** - simple tasks may exit after cycle 1
-- **Max 5 cycles** as hard limit
-
-**Files:**
-- `protocols/reasoning/steps/step_0_5_ideal_state_capture.py` - Python script
-- `protocols/reasoning/content/step_0_5_ideal_state_capture.md` - Markdown instructions
-
-### Integration Points
-
-- **Step 1+:** Receives IDEAL STATE context for semantic interpretation
-- **Step 8:** Verifies routing decision against IDEAL STATE criteria
-- **Agent invocation:** IDEAL STATE passed to agents via Johari context
-
-## Debugging Tips
+### TDD Skill Invocation
 
 ```bash
-# Check reasoning state
-cat .claude/orchestration/protocols/reasoning/state/reasoning-*.json | jq .
-
-# Check reasoning FSM current state
-cat .claude/orchestration/protocols/reasoning/state/reasoning-*.json | jq '.fsm.state'
-
-# Check skill state
-cat .claude/orchestration/protocols/skill/state/*.json | jq .
-
-# Check skill FSM current phase (uses 'state' and 'current_phase_id')
-cat .claude/orchestration/protocols/skill/state/{skill}-{session}.json | jq '.fsm.state, .fsm.current_phase_id'
-
-# List memory files
-ls -la .claude/memory/
-
-# Find which agent hasn't completed
-ls .claude/memory/ | grep -v memory
-
-# Check memory file format
-head -50 .claude/memory/{task_id}-{agent}-memory.md
+python3 ${CAII_DIRECTORY}/.claude/orchestration/skills/tdd/entry.py --algorithm-state {session_id}
 ```
+
+### Quick Commands (after venv activation)
+
+```bash
+cd .claude/orchestration
+source .venv/bin/activate
+```
+
+| Gate | Command |
+|------|---------|
+| Run tests | `make test` |
+| Format | `make format` |
+| Lint | `make lint` |
+
+### TDD Cycle
+
+| Phase | Gate Requirement |
+|-------|------------------|
+| **RED** | Test exists AND fails |
+| **GREEN** | All tests pass |
+| **REFACTOR** | Tests pass + `make lint` = 10/10 |
+| **DOC** | Documentation updated |
+
+### Test File Locations
+
+| Source File | Test File |
+|-------------|-----------|
+| `state/config.py` | `tests/unit/orchestration/state/test_config.py` |
+| `state/base.py` | `tests/unit/orchestration/state/test_base.py` |
+| `state/algorithm_fsm.py` | `tests/unit/orchestration/state/test_algorithm_fsm.py` |
+| `state/algorithm_state.py` | `tests/unit/orchestration/state/test_algorithm_state.py` |
+| `skills/tdd/tdd_state.py` | `tests/unit/orchestration/skills/tdd/test_tdd_state.py` |
+| `utils.py` | `tests/unit/orchestration/test_utils.py` |
+
+### Reference
+
+- **TDD Skill:** `.claude/skills/tdd/SKILL.md`
+- **TDD Protocol:** `.claude/research/tdd-protocol.md`
+
+---
+
+*Last updated: 2026-01-27*

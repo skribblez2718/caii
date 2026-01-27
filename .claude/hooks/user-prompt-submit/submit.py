@@ -1,32 +1,17 @@
 """
-UserPromptSubmit Hook - Reasoning Protocol Enforcement
-=======================================================
+UserPromptSubmit Hook - Prompt Processing
+==========================================
 
-This hook executes the Mandatory Reasoning Protocol for EVERY prompt.
+This hook processes user prompts with optional enhancement.
 
 Supported prompt flags (can appear in any order at end of prompt):
     -i    Improve prompt via external model before processing
-    -b    Bypass reasoning protocol
 
 Examples:
-    "fix the bug -b"           → Bypass reasoning, execute directly
-    "add feature -i"           → Improve prompt, then run reasoning
-    "refactor code -i -b"      → Improve prompt, then bypass reasoning
-    "refactor code -b -i"      → Same as above (order doesn't matter)
+    "add feature -i"           → Improve prompt via external model
 
-For the main orchestrator:
-    - Uses entry.py with full 8-step protocol
-    - Always starts fresh session
-
-For Cognitive Agents (subagents):
-    - Uses entry.py --agent-mode which SKIPS Step 4 (Task Routing)
-    - Agents are already routed by skill orchestration
-
-For Bypass Mode (-b flag):
-    - Exits early, allowing Claude to handle the prompt directly
-    - Useful for trivial tasks and follow-up prompts
-
-This is the ENFORCEMENT mechanism that guarantees Python orchestration runs.
+NOTE: Reasoning protocol orchestration has been disabled.
+The hook now only handles prompt improvement (-i flag).
 """
 
 from __future__ import annotations
@@ -60,14 +45,12 @@ class ParsedPrompt(TypedDict):
 
     content: str    # The prompt text with flags stripped
     improve: bool   # -i flag: improve prompt via external model
-    bypass: bool    # -b flag: bypass reasoning protocol
 
 
 # Known prompt flags - add new flags here
 # Maps flag string to attribute name in ParsedPrompt
 PROMPT_FLAGS: dict[str, str] = {
     '-i': 'improve',    # Improve prompt via external model
-    '-b': 'bypass',     # Bypass reasoning protocol
 }
 
 
@@ -98,11 +81,8 @@ def parse_prompt_flags(prompt: str) -> ParsedPrompt:
     in the middle of text are treated as content.
 
     Examples:
-        "my prompt -b"      → content="my prompt", bypass=True
-        "my prompt -i -b"   → content="my prompt", improve=True, bypass=True
-        "my prompt -b -i"   → content="my prompt", improve=True, bypass=True
+        "my prompt -i"      → content="my prompt", improve=True
         "my prompt"         → content="my prompt", all flags False
-        "use -i flag -b"    → content="use -i flag", bypass=True
 
     Args:
         prompt: The raw user prompt potentially ending with flags
@@ -113,7 +93,6 @@ def parse_prompt_flags(prompt: str) -> ParsedPrompt:
     result: ParsedPrompt = {
         'content': prompt,
         'improve': False,
-        'bypass': False,
     }
 
     # Split prompt into words and scan from the end
@@ -451,11 +430,11 @@ def main() -> None:
         try:
             parsed = parse_prompt_flags(prompt)
             prompt = parsed['content']
-            print(f"[hook] Parsed flags - improve: {parsed['improve']}, bypass: {parsed['bypass']}", file=sys.stderr)
+            print(f"[hook] Parsed flags - improve: {parsed['improve']}", file=sys.stderr)
         except Exception as e:
             print(f"[hook] ERROR: Failed to parse prompt flags: {e}", file=sys.stderr)
             # Continue with original prompt if flag parsing fails
-            parsed = {'content': prompt, 'improve': False, 'bypass': False}
+            parsed = {'content': prompt, 'improve': False}
 
         # Handle -i flag: improve prompt via external model
         # The improved prompt will be shown via entry.py's "Query: ..." output
@@ -474,93 +453,25 @@ def main() -> None:
                 print(f"[hook] Traceback: {traceback.format_exc()}", file=sys.stderr)
                 # Continue with original prompt on failure
 
-        # Handle -b flag: bypass reasoning protocol entirely
-        # Exit silently - Claude sees just the clean prompt
-        if parsed['bypass']:
-            print("[hook] Bypass flag detected, skipping reasoning protocol", file=sys.stderr)
+        # Skip orchestration for subagent sessions
+        if is_subagent_session():
+            print("[hook] Subagent session - skipping orchestration", file=sys.stderr)
             sys.exit(0)
 
-        # Check for pending dispatch FIRST (ensures execution chain continues)
-        # Only check for main orchestrator context, not subagents
-        if not is_subagent_session():
-            try:
-                has_pending, dispatch_directive = check_pending_dispatch(pai_dir)
-                if has_pending:
-                    print("[hook] Found pending dispatch, injecting directive", file=sys.stderr)
-                    # Output the pending dispatch directive before normal reasoning
-                    print(dispatch_directive, flush=True)
-                    # Continue with normal reasoning protocol for the new prompt
-            except Exception as e:
-                print(f"[hook] WARNING: Failed to check pending dispatch: {e}", file=sys.stderr)
-                # Continue anyway - this is not critical
-
-        # Determine context type and set flags
-        is_agent = is_subagent_session()
-        context_type = "agent" if is_agent else "orchestrator"
-        print(f"[hook] Context type: {context_type}", file=sys.stderr)
-
-        # Both main orchestrator and Agent contexts use unified entry.py
-        entry_script = Path(pai_dir) / ".claude/orchestration/protocols/reasoning/entry.py"
-
-        if not entry_script.exists():
-            print(f"[hook] ERROR: entry.py not found at: {entry_script}", file=sys.stderr)
-            sys.exit(1)
-
-        # Build command arguments
-        # Use '--' separator to prevent prompts starting with '-' or '--'
-        # from being misinterpreted as command-line flags by argparse
-        cmd_args = ["python3", str(entry_script)]
-
-        # Add optional flags before positional args
-        if is_agent:
-            cmd_args.append("--agent-mode")
-
-        # Add the prompt after '--' separator
-        cmd_args.extend(["--", prompt])
-
-        print(f"[hook] Executing: {' '.join(cmd_args[:3])}...", file=sys.stderr)
-
-        # Execute entry point with the prompt
-        # Use PYTHONUNBUFFERED=1 to ensure stdout is flushed immediately
-        try:
-            result = subprocess.run(
-                cmd_args,
-                capture_output=True,
-                text=True,
-                cwd=pai_dir,
-                timeout=30,  # 30 second timeout
-                env={**os.environ, "PYTHONUNBUFFERED": "1"},
-            )
-        except subprocess.TimeoutExpired as e:
-            print(f"[hook] ERROR: entry.py timed out after 30 seconds", file=sys.stderr)
-            if e.stdout:
-                print(f"[hook] Partial stdout: {e.stdout[:500]}", file=sys.stderr)
-            if e.stderr:
-                print(f"[hook] Partial stderr: {e.stderr[:500]}", file=sys.stderr)
-            sys.exit(1)
-        except FileNotFoundError as e:
-            print(f"[hook] ERROR: python3 not found or entry.py missing: {e}", file=sys.stderr)
-            sys.exit(1)
-        except PermissionError as e:
-            print(f"[hook] ERROR: Permission denied executing entry.py: {e}", file=sys.stderr)
-            sys.exit(1)
-        except OSError as e:
-            print(f"[hook] ERROR: OS error running entry.py: {e}", file=sys.stderr)
-            sys.exit(1)
-
-        # Print stdout - this becomes Claude's context
-        if result.stdout:
-            print(result.stdout, flush=True)
-        else:
-            print("[hook] WARNING: entry.py produced no stdout", file=sys.stderr)
-
-        # Log stderr but don't fail the hook
-        if result.stderr:
-            print(f"[hook] {context_type} entry stderr: {result.stderr}", file=sys.stderr)
-
-        # Check return code
-        if result.returncode != 0:
-            print(f"[hook] WARNING: entry.py exited with code {result.returncode}", file=sys.stderr)
+        # # Call global orchestration entry point
+        # orchestration_entry = Path(pai_dir) / ".claude/orchestration/entry.py"
+        #
+        # if orchestration_entry.exists():
+        #     import subprocess
+        #     result = subprocess.run(
+        #         ["python3", str(orchestration_entry), prompt],
+        #         capture_output=True,
+        #         text=True
+        #     )
+        #     if result.stdout:
+        #         print(result.stdout)
+        #     if result.stderr:
+        #         print(result.stderr, file=sys.stderr)
 
         sys.exit(0)
 

@@ -67,15 +67,6 @@
             "command": "python3 ${CAII_DIRECTORY}/.claude/hooks/pre-tool-use/agent-start.py"
           }
         ]
-      },
-      {
-        "matcher": "Edit|Write|Bash|NotebookEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 ${CAII_DIRECTORY}/.claude/hooks/pre-tool-use/skill-enforcement.py"
-          }
-        ]
       }
     ],
     "PostToolUse": [
@@ -85,15 +76,6 @@
           {
             "type": "command",
             "command": "python3 ${CAII_DIRECTORY}/.claude/hooks/post-tool-use/exit-plan-mode.py"
-          }
-        ]
-      },
-      {
-        "matcher": "Edit|Write|Bash|NotebookEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 ${CAII_DIRECTORY}/.claude/hooks/post-tool-use/skill-bypass-detector.py"
           }
         ]
       }

@@ -6,33 +6,6 @@ model: sonnet
 color: cyan
 ---
 
-# ⚠️ MANDATORY Pre-Task Reasoning Protocol
-
-**BEFORE ANY TASK WORK**, you MUST execute the Agent Reasoning Protocol:
-
-```bash
-python3 ${CAII_DIRECTORY}/.claude/orchestration/protocols/reasoning/entry.py "{task_context}" --agent-mode
-```
-
-**What this does:**
-- Executes reasoning steps 1-3 and 5-8 (Step 4 routing is SKIPPED - you are already routed)
-- Ensures systematic thinking before task execution
-- Validates understanding and approach through self-consistency checks
-
-**Completion Signal:**
-After Step 8 completes, you will see the Knowledge Transfer Checkpoint output. At this point:
-- If HALT is indicated → Document questions in your memory file (Section 4: User Questions)
-- If PROCEED is indicated → Continue to your Execution Protocol
-
-**THEN execute your Execution Protocol:**
-```bash
-python3 ${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/clarification/entry.py {task_id}
-```
-
-**DO NOT** begin Step 0 (Learning Injection) until the reasoning protocol completes Step 8.
-
----
-
 # Identity
 
 **Role:** CLARIFICATION cognitive agent

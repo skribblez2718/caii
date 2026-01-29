@@ -116,6 +116,78 @@ entry.py (5-category complexity analysis)
 | `johari/CLAUDE.md` | 27 | Protocol overview |
 | `johari/protocol.md` | - | Full Johari framework content |
 
+#### Entry Point Infrastructure (`.claude/orchestration/`)
+
+| File | Purpose |
+|------|---------|
+| `entry_base.py` | Factory functions for phase entry points (PhaseConfig, run_phase_entry) |
+| `flow_invoker.py` | Shared utility for triggering agent flows (invoke_agent_flow) |
+
+**Flow Invocation Pattern:**
+
+`flow_invoker.py` provides THE single entry point for triggering any agent flow. All phase entry points and advance scripts should use this.
+
+```python
+from orchestration.flow_invoker import invoke_agent_flow
+from orchestration.skills.perform_tdd.flows import TDD_RED_FLOW
+
+directive = invoke_agent_flow(
+    flow=TDD_RED_FLOW,
+    task_id=state.session_id,
+    skill_name="perform-tdd",
+    phase_id="red",
+    skill_content_dir=CONTENT_DIR,
+    task_description="TDD RED phase",
+)
+print(directive)
+```
+
+#### Agent Chain System (`.claude/orchestration/agent_chain/`)
+
+Infrastructure for agent invocation and chaining. Agents pass context via memory files.
+
+| File | Purpose |
+|------|---------|
+| `agent_chain/CLAUDE.md` | Full documentation for agent chain system |
+| `agent_chain/flow.py` | FlowStep, AgentFlow, ContextPattern dataclasses |
+| `agent_chain/state.py` | ChainState for tracking execution |
+| `agent_chain/memory.py` | MemoryFile class, load_predecessor_context() |
+| `agent_chain/invoker.py` | build_agent_invocation_directive() |
+| `agent_chain/orchestrator.py` | ChainOrchestrator class |
+| `agent_chain/dynamic.py` | create_dynamic_flow() for DA |
+
+**Key Concepts:**
+
+- **FlowStep**: Single step in agent chain (agent_name, context_pattern, predecessors)
+- **AgentFlow**: Complete sequence of FlowSteps
+- **ChainOrchestrator**: Manages flow execution, generates directives
+- **Memory Files**: `.claude/memory/{task_id}-{agent}-memory.md`
+
+**Learnings Injection:**
+
+- First invocation of each agent includes MANDATORY learnings directive
+- Tracked via `ChainState.learnings_injected_for`
+- Applies to all skills and protocols using `invoke_agent_flow()`
+- See `agent_chain/CLAUDE.md` for full documentation
+
+#### Agent Execution Infrastructure (`.claude/orchestration/agents/`)
+
+| File | Purpose |
+|------|---------|
+| `agents/config.py` | AGENT_REGISTRY with all 7 agents |
+| `agents/base.py` | AgentExecutionState dataclass |
+| `agents/entry.py` | agent_entry() for agent initialization |
+| `agents/complete.py` | agent_complete() with chain continuation |
+
+#### Learnings System (`.claude/learnings/`)
+
+| Directory | Purpose |
+|-----------|---------|
+| `learnings/{agent}/` | Agent-specific learnings |
+| `learnings/{agent}/heuristics.md` | Decision heuristics |
+| `learnings/{agent}/anti-patterns.md` | What to avoid |
+| `learnings/{agent}/checklists.md` | Verification checklists |
+
 #### State Management (`.claude/orchestration/state/`)
 
 | File | Purpose |
@@ -162,13 +234,19 @@ from orchestration.outer_loop.gather import entry
 from .outer_loop.gather import entry
 ```
 
-### Entry Point Bootstrap Pattern
+### Entry Point Factory Pattern
 
-Entry points run as standalone scripts (not modules), so they need to add `.claude/` to `sys.path` for `from orchestration.*` imports to work.
+Phase entry points use the factory pattern via `entry_base.py` to eliminate duplication.
 
-**Standard Bootstrap (use in all entry.py files):**
+**Standard Phase Entry Point (use for all phases):**
 
 ```python
+"""
+PHASE Phase Entry Point (Step N)
+
+Description of what the phase does.
+"""
+
 import sys
 from pathlib import Path
 
@@ -180,12 +258,52 @@ if _p.name == "orchestration" and str(_p.parent) not in sys.path:
     sys.path.insert(0, str(_p.parent))
 del _p  # Clean up namespace
 
-# Now absolute imports work
-from orchestration.state import AlgorithmState
-from orchestration.utils import load_content, substitute_placeholders
+from orchestration.entry_base import PhaseConfig, run_phase_entry
+
+# Step number for this phase (preserved for backward compatibility)
+STEP_NUM = 1
+
+if __name__ == "__main__":
+    run_phase_entry(
+        __file__,
+        PhaseConfig(
+            step_num=1,
+            phase_name="OBSERVE",
+            content_file="observe_phase.md",
+            description="OBSERVE Phase (Step 1)",
+        ),
+    )
 ```
 
-**Why this pattern?**
+**PhaseConfig Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `step_num` | float | FSM step number (0, 0.5, 1, 2, etc.) |
+| `phase_name` | str | Human-readable name (e.g., "OBSERVE") |
+| `content_file` | str | Markdown file in content/ directory (legacy mode) |
+| `description` | str | Argparse description string |
+| `extra_placeholders` | Optional[Callable] | Function(state) -> Dict for additional substitutions |
+| `agent_flow` | Optional[AgentFlow] | AgentFlow for phases using agent orchestration |
+| `skill_name` | Optional[str] | Skill name for agent flow mode |
+| `skill_content_dir` | Optional[Path] | Path to skill's content directory for agent flow |
+
+**Two Modes:**
+1. **Legacy mode** (no agent_flow): Loads static content from `content_file`
+2. **Agent flow mode** (with agent_flow): Invokes agent chain via `flow_invoker.py`
+
+**Factory Functions in entry_base.py:**
+
+| Function | Purpose |
+|----------|---------|
+| `load_state_or_exit(session_id)` | Load state or exit with error |
+| `start_phase_or_exit(state, step_num, phase_name)` | Transition phase or exit with error |
+| `create_phase_parser(description)` | Create standard argparser with --state |
+| `run_phase_entry(caller_file, config, argv)` | Complete phase lifecycle orchestration |
+
+### Bootstrap Pattern (Why Required)
+
+Entry points run as standalone scripts (not modules), so they need to add `.claude/` to `sys.path` for `from orchestration.*` imports to work.
 
 | Aspect | Explanation |
 |--------|-------------|
@@ -202,6 +320,14 @@ from orchestration.utils import load_content, substitute_placeholders
 | **DRY** | Shared utilities in `utils.py` |
 | **Content Separation** | Python in `.py`, prompts in `content/*.md` |
 | **stdout** | Print only: directives, errors, state transitions |
+
+### Script Output Rules
+
+Scripts print to stdout which becomes Claude's context. Minimize output.
+
+**PRINT:** MANDATORY directives, errors (stderr preferred), state transitions, actionable instructions
+
+**DO NOT PRINT:** Decorative banners, redundant info, step summaries, tutorial text, option lists
 
 ### Content Loading Pattern
 
@@ -235,12 +361,12 @@ Read .claude/docs/agent-protocol-reference.md offset=57 limit=55
 
 ## Test-Driven Development Requirements
 
-**MANDATORY:** All code changes MUST use the TDD skill.
+**MANDATORY:** All code changes MUST use the perform-tdd skill.
 
-### TDD Skill Invocation
+### perform-tdd Skill Invocation
 
 ```bash
-python3 ${CAII_DIRECTORY}/.claude/orchestration/skills/tdd/entry.py --algorithm-state {session_id}
+python3 ${CAII_DIRECTORY}/.claude/orchestration/skills/perform_tdd/entry.py --algorithm-state {session_id}
 ```
 
 ### Quick Commands (after venv activation)
@@ -269,18 +395,24 @@ source .venv/bin/activate
 
 | Source File | Test File |
 |-------------|-----------|
+| `entry_base.py` | `tests/unit/orchestration/test_entry_base.py` |
+| `flow_invoker.py` | `tests/unit/orchestration/test_flow_invoker.py` |
 | `state/config.py` | `tests/unit/orchestration/state/test_config.py` |
 | `state/base.py` | `tests/unit/orchestration/state/test_base.py` |
 | `state/algorithm_fsm.py` | `tests/unit/orchestration/state/test_algorithm_fsm.py` |
 | `state/algorithm_state.py` | `tests/unit/orchestration/state/test_algorithm_state.py` |
-| `skills/tdd/tdd_state.py` | `tests/unit/orchestration/skills/tdd/test_tdd_state.py` |
+| `skills/perform_tdd/tdd_state.py` | `tests/unit/orchestration/skills/perform_tdd/test_tdd_state.py` |
 | `utils.py` | `tests/unit/orchestration/test_utils.py` |
+| `agent_chain/flow.py` | `tests/unit/orchestration/agent_chain/test_flow.py` |
+| `agent_chain/state.py` | `tests/unit/orchestration/agent_chain/test_state.py` |
+| `agent_chain/memory.py` | `tests/unit/orchestration/agent_chain/test_memory.py` |
+| `agents/config.py` | `tests/unit/orchestration/agents/test_config.py` |
 
 ### Reference
 
-- **TDD Skill:** `.claude/skills/tdd/SKILL.md`
+- **perform-tdd Skill:** `.claude/skills/perform-tdd/SKILL.md`
 - **TDD Protocol:** `.claude/research/tdd-protocol.md`
 
 ---
 
-*Last updated: 2026-01-27*
+*Last updated: 2026-01-28*

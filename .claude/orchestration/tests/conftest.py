@@ -409,10 +409,13 @@ def mock_sessions_dir(monkeypatch, temp_state_dir: Path):
     Monkeypatch SESSIONS_DIR to use temporary directory.
 
     Use this when you need to test with isolated state files.
+    Patches both config module and algorithm_state module where SESSIONS_DIR is imported.
     """
     from orchestration.state import config as state_config
+    from orchestration.state import algorithm_state
 
     monkeypatch.setattr(state_config, "SESSIONS_DIR", temp_state_dir)
+    monkeypatch.setattr(algorithm_state, "SESSIONS_DIR", temp_state_dir)
     return temp_state_dir
 
 

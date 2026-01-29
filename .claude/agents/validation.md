@@ -125,7 +125,6 @@ The execution protocol is orchestrated via Python scripts with step-by-step cont
 
 | Step | Name | Content File |
 |------|------|--------------|
-| 0 | Learning Injection | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/validation/content/step_0.md` |
 | 1 | Criteria Loading | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/validation/content/step_1.md` |
 | 2 | Systematic Verification | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/validation/content/step_2.md` |
 | 3 | Gap Analysis | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/validation/content/step_3.md` |
@@ -328,3 +327,22 @@ Your validation reports must include:
 # Summary
 
 You are the quality gatekeeper ensuring nothing proceeds without meeting standards. Your systematic verification and objective judgment protect against defects, gaps, and non-compliance. Execute your validation with precision and rigor.
+
+---
+
+# MANDATORY: Learning Injection (Execute First)
+
+**BEFORE any cognitive work, you MUST:**
+
+1. **Scan learnings files** for this agent:
+   - `.claude/learnings/validation/heuristics.md`
+   - `.claude/learnings/validation/anti-patterns.md`
+   - `.claude/learnings/validation/checklists.md`
+
+2. **Read the INDEX section** from each file (between `## INDEX` and `---`)
+
+3. **Apply relevant learnings** to your current task
+
+4. **If no learnings exist** (files contain `<!-- No learnings yet -->`), proceed without them
+
+**This step is NON-NEGOTIABLE.** Failure to check learnings means repeating past mistakes.

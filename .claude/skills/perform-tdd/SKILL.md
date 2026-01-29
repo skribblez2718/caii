@@ -1,11 +1,11 @@
 ---
-name: tdd
+name: perform-tdd
 description: "Execute Test-Driven Development cycle with enforced RED-GREEN-REFACTOR-DOC phases. Use for implementing features, fixing bugs, writing code, or refactoring. General-purpose for all coding tasks requiring quality assurance."
 disable-model-invocation: false
 allowed-tools: Bash(pytest:*, make:*, python3:*), Glob, Grep, Read, Edit, Write, Task
 ---
 
-# TDD Skill
+# perform-tdd Skill
 
 Test-Driven Development workflow enforcing the RED-GREEN-REFACTOR-DOC cycle through sequential phase execution.
 
@@ -33,13 +33,13 @@ Test-Driven Development workflow enforcing the RED-GREEN-REFACTOR-DOC cycle thro
 Execute immediately to start or resume a TDD session:
 
 ```bash
-python3 ${CAII_DIRECTORY}/.claude/orchestration/skills/tdd/entry.py --algorithm-state {session_id}
+python3 ${CAII_DIRECTORY}/.claude/orchestration/skills/perform_tdd/entry.py --algorithm-state {session_id}
 ```
 
 ### With File Targets
 
 ```bash
-python3 ${CAII_DIRECTORY}/.claude/orchestration/skills/tdd/entry.py \
+python3 ${CAII_DIRECTORY}/.claude/orchestration/skills/perform_tdd/entry.py \
   --algorithm-state {session_id} \
   --target src/module.py \
   --test tests/test_module.py
@@ -48,9 +48,9 @@ python3 ${CAII_DIRECTORY}/.claude/orchestration/skills/tdd/entry.py \
 ### Resume Existing Session
 
 ```bash
-python3 ${CAII_DIRECTORY}/.claude/orchestration/skills/tdd/entry.py \
+python3 ${CAII_DIRECTORY}/.claude/orchestration/skills/perform_tdd/entry.py \
   --algorithm-state {session_id} \
-  --tdd-state {tdd_session_id}
+  --perform-tdd-state {tdd_session_id}
 ```
 
 ---
@@ -73,7 +73,7 @@ python3 ${CAII_DIRECTORY}/.claude/orchestration/skills/tdd/entry.py \
 After completing current phase requirements:
 
 ```bash
-python3 ${CAII_DIRECTORY}/.claude/orchestration/skills/tdd/advance.py --tdd-state {session_id}
+python3 ${CAII_DIRECTORY}/.claude/orchestration/skills/perform_tdd/advance.py --perform-tdd-state {session_id}
 ```
 
 ### Complete Session
@@ -81,7 +81,7 @@ python3 ${CAII_DIRECTORY}/.claude/orchestration/skills/tdd/advance.py --tdd-stat
 After DOC phase, to mark TDD cycle complete:
 
 ```bash
-python3 ${CAII_DIRECTORY}/.claude/orchestration/skills/tdd/complete.py --tdd-state {session_id}
+python3 ${CAII_DIRECTORY}/.claude/orchestration/skills/perform_tdd/complete.py --perform-tdd-state {session_id}
 ```
 
 ### Loop Back for Next Feature
@@ -89,7 +89,7 @@ python3 ${CAII_DIRECTORY}/.claude/orchestration/skills/tdd/complete.py --tdd-sta
 After DOC phase, to start new RED-GREEN-REFACTOR-DOC cycle:
 
 ```bash
-python3 ${CAII_DIRECTORY}/.claude/orchestration/skills/tdd/complete.py --tdd-state {session_id} --loop-back
+python3 ${CAII_DIRECTORY}/.claude/orchestration/skills/perform_tdd/complete.py --perform-tdd-state {session_id} --loop-back
 ```
 
 ---
@@ -152,16 +152,16 @@ Tests will fail with `ModuleNotFoundError` without activated venv.
 
 ## Resources
 
-- `.claude/skills/tdd/resources/tdd-workflow.md` - TDD cycle reference
-- `.claude/skills/tdd/resources/test-patterns.md` - Testing patterns by language
-- `.claude/skills/tdd/resources/refactoring-catalog.md` - Refactoring techniques
+- `.claude/skills/perform-tdd/resources/tdd-workflow.md` - TDD cycle reference
+- `.claude/skills/perform-tdd/resources/test-patterns.md` - Testing patterns by language
+- `.claude/skills/perform-tdd/resources/refactoring-catalog.md` - Refactoring techniques
 
 ---
 
 ## State Management
 
 TDD sessions are tracked in:
-- State files: `.claude/orchestration/skills/tdd/state/tdd-{session_id}.json`
+- State files: `.claude/orchestration/skills/perform_tdd/state/perform-tdd-{session_id}.json`
 - Linked to parent algorithm via `parent_algorithm_id`
 
 Session state includes:

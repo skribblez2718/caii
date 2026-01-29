@@ -19,18 +19,18 @@ Composite skills orchestrate multiple cognitive agents through defined phase seq
 
 | Skill | Semantic Trigger | NOT for | Location |
 |-------|------------------|---------|----------|
-| tdd | implement feature, fix bug, write code, refactor | research-only, config changes, documentation-only | `.claude/skills/tdd/` |
+| perform-tdd | implement feature, fix bug, write code, refactor | research-only, config changes, documentation-only | `.claude/skills/perform-tdd/` |
 | develop-skill | create/modify skills, update workflows, new skill | system mods, direct code, architecture changes | `.claude/skills/develop-skill/` |
 | develop-learnings | capture learnings, document insights, preserve knowledge | mid-workflow tasks, skill creation, active execution | `.claude/skills/develop-learnings/` |
 | develop-command | create/modify slash commands, utility commands | workflow skills, multi-phase operations | `.claude/skills/develop-command/` |
 
-### tdd
+### perform-tdd
 
 **Purpose:** Execute Test-Driven Development cycle with enforced RED-GREEN-REFACTOR-DOC phases. General-purpose for all coding tasks requiring quality assurance.
 
 **Invocation:**
 ```bash
-python3 ${CAII_DIRECTORY}/.claude/orchestration/skills/tdd/entry.py --algorithm-state {session_id}
+python3 ${CAII_DIRECTORY}/.claude/orchestration/skills/perform_tdd/entry.py --algorithm-state {session_id}
 ```
 
 ---
@@ -106,9 +106,9 @@ Does task match a composite skill pattern?
 
 | Query Intent | Matches Semantic Trigger | Skill |
 |--------------|-------------------------|-------|
-| "Implement feature X" | implement, write code, fix bug | tdd |
-| "Fix the authentication bug" | fix bug, implement | tdd |
-| "Refactor the API layer" | refactor, improve code | tdd |
+| "Implement feature X" | implement, write code, fix bug | perform-tdd |
+| "Fix the authentication bug" | fix bug, implement | perform-tdd |
+| "Refactor the API layer" | refactor, improve code | perform-tdd |
 | "Create a new skill for Z" | create skill, new skill | develop-skill |
 | "Modify the validation workflow" | modify skill, update workflow | develop-skill |
 | "Capture what we learned" | capture learnings, document insights | develop-learnings |

@@ -101,7 +101,6 @@ The execution protocol is orchestrated via Python scripts with step-by-step cont
 
 | Step | Name | Content File |
 |------|------|--------------|
-| 0 | Learning Injection | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/analysis/content/step_0.md` |
 | 1 | Context Loading | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/analysis/content/step_1.md` |
 | 2 | Framework Selection | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/analysis/content/step_2.md` |
 | 3 | Analytical Process | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/analysis/content/step_3.md` |
@@ -297,3 +296,22 @@ Depending on context, generate:
 # Summary
 
 You are the lens through which complexity becomes clarity. Apply your cognitive function with consistency, adapt your criteria with flexibility, and deliver insights that genuinely inform what happens next.
+
+---
+
+# MANDATORY: Learning Injection (Execute First)
+
+**BEFORE any cognitive work, you MUST:**
+
+1. **Scan learnings files** for this agent:
+   - `.claude/learnings/analysis/heuristics.md`
+   - `.claude/learnings/analysis/anti-patterns.md`
+   - `.claude/learnings/analysis/checklists.md`
+
+2. **Read the INDEX section** from each file (between `## INDEX` and `---`)
+
+3. **Apply relevant learnings** to your current task
+
+4. **If no learnings exist** (files contain `<!-- No learnings yet -->`), proceed without them
+
+**This step is NON-NEGOTIABLE.** Failure to check learnings means repeating past mistakes.

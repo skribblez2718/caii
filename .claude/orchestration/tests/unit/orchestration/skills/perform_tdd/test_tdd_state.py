@@ -21,7 +21,7 @@ class TestTDDPhase:
 
     def test_phase_values_exist(self):
         """TDDPhase should have all required phases."""
-        from orchestration.skills.tdd.tdd_state import TDDPhase
+        from orchestration.skills.perform_tdd.tdd_state import TDDPhase
 
         assert hasattr(TDDPhase, "INITIALIZED")
         assert hasattr(TDDPhase, "RED")
@@ -32,7 +32,7 @@ class TestTDDPhase:
 
     def test_phase_ordering(self):
         """Phases should be in expected order."""
-        from orchestration.skills.tdd.tdd_state import TDDPhase
+        from orchestration.skills.perform_tdd.tdd_state import TDDPhase
 
         phases = list(TDDPhase)
         phase_names = [p.name for p in phases]
@@ -56,7 +56,7 @@ class TestTDDFSM:
 
     def test_initial_state_is_initialized(self):
         """FSM should start in INITIALIZED state."""
-        from orchestration.skills.tdd.tdd_state import TDDFSM, TDDPhase
+        from orchestration.skills.perform_tdd.tdd_state import TDDFSM, TDDPhase
 
         fsm = TDDFSM()
 
@@ -64,7 +64,7 @@ class TestTDDFSM:
 
     def test_valid_transition_initialized_to_red(self):
         """FSM should allow INITIALIZED -> RED transition."""
-        from orchestration.skills.tdd.tdd_state import TDDFSM, TDDPhase
+        from orchestration.skills.perform_tdd.tdd_state import TDDFSM, TDDPhase
 
         fsm = TDDFSM()
 
@@ -73,7 +73,7 @@ class TestTDDFSM:
 
     def test_valid_forward_transitions(self):
         """FSM should allow full forward path."""
-        from orchestration.skills.tdd.tdd_state import TDDFSM, TDDPhase
+        from orchestration.skills.perform_tdd.tdd_state import TDDFSM, TDDPhase
 
         fsm = TDDFSM()
 
@@ -86,7 +86,7 @@ class TestTDDFSM:
 
     def test_invalid_transition_skip_green(self):
         """FSM should reject skipping GREEN phase."""
-        from orchestration.skills.tdd.tdd_state import TDDFSM, TDDPhase
+        from orchestration.skills.perform_tdd.tdd_state import TDDFSM, TDDPhase
 
         fsm = TDDFSM()
         fsm.transition(TDDPhase.RED)
@@ -96,7 +96,7 @@ class TestTDDFSM:
 
     def test_invalid_transition_skip_to_doc(self):
         """FSM should reject skipping to DOC from RED."""
-        from orchestration.skills.tdd.tdd_state import TDDFSM, TDDPhase
+        from orchestration.skills.perform_tdd.tdd_state import TDDFSM, TDDPhase
 
         fsm = TDDFSM()
         fsm.transition(TDDPhase.RED)
@@ -106,7 +106,7 @@ class TestTDDFSM:
 
     def test_loopback_from_doc_to_red(self):
         """FSM should allow DOC -> RED for next feature cycle."""
-        from orchestration.skills.tdd.tdd_state import TDDFSM, TDDPhase
+        from orchestration.skills.perform_tdd.tdd_state import TDDFSM, TDDPhase
 
         fsm = TDDFSM()
         fsm.transition(TDDPhase.RED)
@@ -119,7 +119,7 @@ class TestTDDFSM:
 
     def test_loopback_increments_cycle_count(self):
         """Loop-back should increment cycle counter."""
-        from orchestration.skills.tdd.tdd_state import TDDFSM, TDDPhase
+        from orchestration.skills.perform_tdd.tdd_state import TDDFSM, TDDPhase
 
         fsm = TDDFSM()
         assert fsm.cycle_count == 0
@@ -134,7 +134,7 @@ class TestTDDFSM:
 
     def test_loopback_only_from_doc(self):
         """Loop-back should only work from DOC phase."""
-        from orchestration.skills.tdd.tdd_state import TDDFSM, TDDPhase
+        from orchestration.skills.perform_tdd.tdd_state import TDDFSM, TDDPhase
 
         fsm = TDDFSM()
         fsm.transition(TDDPhase.RED)
@@ -145,7 +145,7 @@ class TestTDDFSM:
 
     def test_history_tracking(self):
         """FSM should track state history."""
-        from orchestration.skills.tdd.tdd_state import TDDFSM, TDDPhase
+        from orchestration.skills.perform_tdd.tdd_state import TDDFSM, TDDPhase
 
         fsm = TDDFSM()
         fsm.transition(TDDPhase.RED)
@@ -155,7 +155,7 @@ class TestTDDFSM:
 
     def test_serialization_round_trip(self):
         """FSM should serialize and deserialize correctly."""
-        from orchestration.skills.tdd.tdd_state import TDDFSM, TDDPhase
+        from orchestration.skills.perform_tdd.tdd_state import TDDFSM, TDDPhase
 
         fsm = TDDFSM()
         fsm.transition(TDDPhase.RED)
@@ -170,7 +170,7 @@ class TestTDDFSM:
 
     def test_completed_is_terminal(self):
         """COMPLETED should be a terminal state."""
-        from orchestration.skills.tdd.tdd_state import TDDFSM, TDDPhase
+        from orchestration.skills.perform_tdd.tdd_state import TDDFSM, TDDPhase
 
         fsm = TDDFSM()
         fsm.transition(TDDPhase.RED)
@@ -195,7 +195,7 @@ class TestTDDStateForAlgorithm:
 
     def test_for_algorithm_creates_state_with_parent_id(self):
         """for_algorithm should create state linked to parent algorithm."""
-        from orchestration.skills.tdd.tdd_state import TDDState
+        from orchestration.skills.perform_tdd.tdd_state import TDDState
 
         state = TDDState.for_algorithm("parent123456")
 
@@ -203,7 +203,7 @@ class TestTDDStateForAlgorithm:
 
     def test_for_algorithm_accepts_target_file(self):
         """for_algorithm should accept target_file parameter."""
-        from orchestration.skills.tdd.tdd_state import TDDState
+        from orchestration.skills.perform_tdd.tdd_state import TDDState
 
         state = TDDState.for_algorithm("parent", target_file="src/module.py")
 
@@ -211,7 +211,7 @@ class TestTDDStateForAlgorithm:
 
     def test_for_algorithm_accepts_test_file(self):
         """for_algorithm should accept test_file parameter."""
-        from orchestration.skills.tdd.tdd_state import TDDState
+        from orchestration.skills.perform_tdd.tdd_state import TDDState
 
         state = TDDState.for_algorithm("parent", test_file="tests/test_module.py")
 
@@ -219,7 +219,7 @@ class TestTDDStateForAlgorithm:
 
     def test_for_algorithm_defaults_files_to_none(self):
         """for_algorithm should default files to None."""
-        from orchestration.skills.tdd.tdd_state import TDDState
+        from orchestration.skills.perform_tdd.tdd_state import TDDState
 
         state = TDDState.for_algorithm("parent")
 
@@ -228,7 +228,7 @@ class TestTDDStateForAlgorithm:
 
     def test_for_algorithm_creates_fsm_at_initialized(self):
         """for_algorithm should create FSM at INITIALIZED phase."""
-        from orchestration.skills.tdd.tdd_state import TDDPhase, TDDState
+        from orchestration.skills.perform_tdd.tdd_state import TDDPhase, TDDState
 
         state = TDDState.for_algorithm("parent")
 
@@ -236,7 +236,7 @@ class TestTDDStateForAlgorithm:
 
     def test_for_algorithm_creates_valid_session_id(self):
         """for_algorithm should create valid 12-char session_id."""
-        from orchestration.skills.tdd.tdd_state import TDDState
+        from orchestration.skills.perform_tdd.tdd_state import TDDState
 
         state = TDDState.for_algorithm("parent")
 
@@ -244,11 +244,11 @@ class TestTDDStateForAlgorithm:
 
     def test_for_algorithm_can_save_and_load(self, temp_state_dir, monkeypatch):
         """State created with for_algorithm should save and load correctly."""
-        from orchestration.skills.tdd import tdd_state as tdd_module
+        from orchestration.skills.perform_tdd import tdd_state as tdd_module
 
         monkeypatch.setattr(tdd_module, "TDD_SESSIONS_DIR", temp_state_dir)
 
-        from orchestration.skills.tdd.tdd_state import TDDState
+        from orchestration.skills.perform_tdd.tdd_state import TDDState
 
         original = TDDState.for_algorithm(
             "parent123", target_file="src/foo.py", test_file="tests/test_foo.py"
@@ -274,7 +274,7 @@ class TestTDDState:
 
     def test_state_creation_generates_session_id(self):
         """State should auto-generate session ID."""
-        from orchestration.skills.tdd.tdd_state import TDDState
+        from orchestration.skills.perform_tdd.tdd_state import TDDState
 
         state = TDDState()
 
@@ -283,7 +283,7 @@ class TestTDDState:
 
     def test_state_creation_with_explicit_session_id(self):
         """State should accept explicit session ID."""
-        from orchestration.skills.tdd.tdd_state import TDDState
+        from orchestration.skills.perform_tdd.tdd_state import TDDState
 
         state = TDDState(session_id="test12345678")
 
@@ -291,7 +291,7 @@ class TestTDDState:
 
     def test_state_creation_with_parent_algorithm_id(self):
         """State should link to parent algorithm state."""
-        from orchestration.skills.tdd.tdd_state import TDDState
+        from orchestration.skills.perform_tdd.tdd_state import TDDState
 
         state = TDDState(parent_algorithm_id="parent123456")
 
@@ -299,7 +299,7 @@ class TestTDDState:
 
     def test_state_tracks_target_file(self):
         """State should track target implementation file."""
-        from orchestration.skills.tdd.tdd_state import TDDState
+        from orchestration.skills.perform_tdd.tdd_state import TDDState
 
         state = TDDState(target_file="src/module.py")
 
@@ -307,7 +307,7 @@ class TestTDDState:
 
     def test_state_tracks_test_file(self):
         """State should track test file."""
-        from orchestration.skills.tdd.tdd_state import TDDState
+        from orchestration.skills.perform_tdd.tdd_state import TDDState
 
         state = TDDState(test_file="tests/test_module.py")
 
@@ -315,7 +315,7 @@ class TestTDDState:
 
     def test_current_phase_property(self):
         """State should expose current phase via property."""
-        from orchestration.skills.tdd.tdd_state import TDDPhase, TDDState
+        from orchestration.skills.perform_tdd.tdd_state import TDDPhase, TDDState
 
         state = TDDState()
 
@@ -323,7 +323,7 @@ class TestTDDState:
 
     def test_advance_to_phase(self):
         """State should advance FSM via advance_to_phase."""
-        from orchestration.skills.tdd.tdd_state import TDDPhase, TDDState
+        from orchestration.skills.perform_tdd.tdd_state import TDDPhase, TDDState
 
         state = TDDState()
         result = state.advance_to_phase(TDDPhase.RED)
@@ -333,7 +333,7 @@ class TestTDDState:
 
     def test_phase_outputs_storage(self):
         """State should store phase outputs."""
-        from orchestration.skills.tdd.tdd_state import TDDPhase, TDDState
+        from orchestration.skills.perform_tdd.tdd_state import TDDPhase, TDDState
 
         state = TDDState()
         state.advance_to_phase(TDDPhase.RED)
@@ -343,11 +343,11 @@ class TestTDDState:
 
     def test_serialization_round_trip(self, temp_state_dir, monkeypatch):
         """State should serialize and deserialize correctly."""
-        from orchestration.skills.tdd import tdd_state as tdd_module
+        from orchestration.skills.perform_tdd import tdd_state as tdd_module
 
         monkeypatch.setattr(tdd_module, "TDD_SESSIONS_DIR", temp_state_dir)
 
-        from orchestration.skills.tdd.tdd_state import TDDPhase, TDDState
+        from orchestration.skills.perform_tdd.tdd_state import TDDPhase, TDDState
 
         original = TDDState(
             target_file="src/foo.py",
@@ -370,7 +370,7 @@ class TestTDDState:
 
     def test_cycle_count_property(self):
         """State should expose cycle count from FSM."""
-        from orchestration.skills.tdd.tdd_state import TDDPhase, TDDState
+        from orchestration.skills.perform_tdd.tdd_state import TDDPhase, TDDState
 
         state = TDDState()
         state.advance_to_phase(TDDPhase.RED)
@@ -383,7 +383,7 @@ class TestTDDState:
 
     def test_loop_back_method(self):
         """State should have loop_back_to_red helper."""
-        from orchestration.skills.tdd.tdd_state import TDDPhase, TDDState
+        from orchestration.skills.perform_tdd.tdd_state import TDDPhase, TDDState
 
         state = TDDState()
         state.advance_to_phase(TDDPhase.RED)
@@ -397,17 +397,17 @@ class TestTDDState:
         assert state.current_phase == TDDPhase.RED
 
     def test_file_prefix_for_tdd_sessions(self, temp_state_dir, monkeypatch):
-        """TDD state files should use tdd- prefix."""
-        from orchestration.skills.tdd import tdd_state as tdd_module
+        """TDD state files should use perform-tdd- prefix."""
+        from orchestration.skills.perform_tdd import tdd_state as tdd_module
 
         monkeypatch.setattr(tdd_module, "TDD_SESSIONS_DIR", temp_state_dir)
 
-        from orchestration.skills.tdd.tdd_state import TDDState
+        from orchestration.skills.perform_tdd.tdd_state import TDDState
 
         state = TDDState()
         state.save()
 
-        expected_file = temp_state_dir / f"tdd-{state.session_id}.json"
+        expected_file = temp_state_dir / f"perform-tdd-{state.session_id}.json"
         assert expected_file.exists()
 
 
@@ -422,11 +422,11 @@ class TestTDDStateCycleFlow:
 
     def test_complete_single_cycle(self, temp_state_dir, monkeypatch):
         """State should support complete single TDD cycle."""
-        from orchestration.skills.tdd import tdd_state as tdd_module
+        from orchestration.skills.perform_tdd import tdd_state as tdd_module
 
         monkeypatch.setattr(tdd_module, "TDD_SESSIONS_DIR", temp_state_dir)
 
-        from orchestration.skills.tdd.tdd_state import TDDPhase, TDDState
+        from orchestration.skills.perform_tdd.tdd_state import TDDPhase, TDDState
 
         state = TDDState(target_file="src/foo.py", test_file="tests/test_foo.py")
 
@@ -459,11 +459,11 @@ class TestTDDStateCycleFlow:
 
     def test_multiple_cycles(self, temp_state_dir, monkeypatch):
         """State should support multiple RED-GREEN-REFACTOR-DOC cycles."""
-        from orchestration.skills.tdd import tdd_state as tdd_module
+        from orchestration.skills.perform_tdd import tdd_state as tdd_module
 
         monkeypatch.setattr(tdd_module, "TDD_SESSIONS_DIR", temp_state_dir)
 
-        from orchestration.skills.tdd.tdd_state import TDDPhase, TDDState
+        from orchestration.skills.perform_tdd.tdd_state import TDDPhase, TDDState
 
         state = TDDState()
 

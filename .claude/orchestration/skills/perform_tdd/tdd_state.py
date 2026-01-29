@@ -5,10 +5,9 @@ State tracking for Test-Driven Development skill.
 Implements TDDPhase enum, TDDFSM, and TDDState classes.
 """
 
-import json
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Type, TypeVar
+from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar
 
 from orchestration.state.base import BaseFSM, BaseState
 
@@ -172,6 +171,16 @@ class TDDState(BaseState):
             test_file=test_file,
         )
 
+    @classmethod
+    def get_persistence_config(cls) -> Tuple[Path, str, str]:
+        """
+        Return TDD state persistence configuration.
+
+        Returns:
+            Tuple of (sessions_directory, file_prefix, schema_version)
+        """
+        return (TDD_SESSIONS_DIR, "perform-tdd", "1.0")
+
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     def __init__(
         self,
@@ -210,11 +219,6 @@ class TDDState(BaseState):
         self.test_file = test_file
         self._fsm = fsm or TDDFSM()
         self.phase_outputs: Dict[str, Any] = phase_outputs or {}
-
-    @property
-    def state_file_path(self) -> Path:
-        """Path to the TDD session state file."""
-        return TDD_SESSIONS_DIR / f"tdd-{self.session_id}.json"
 
     @property
     def current_phase(self) -> TDDPhase:
@@ -296,37 +300,3 @@ class TDDState(BaseState):
             fsm=fsm,
             phase_outputs=data.get("phase_outputs", {}),
         )
-
-    def save(self) -> None:
-        """
-        Save TDD state to JSON file.
-
-        CRITICAL: Always call save() BEFORE printing any directive.
-        """
-        TDD_SESSIONS_DIR.mkdir(parents=True, exist_ok=True)
-        self._touch_updated()
-        data = self.to_dict()
-        data["schema_version"] = "1.0"
-
-        with open(self.state_file_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2)
-
-    @classmethod
-    def load(cls: Type[T], session_id: str) -> Optional[T]:
-        """
-        Load TDD state from JSON file.
-
-        Args:
-            session_id: The session identifier to load
-
-        Returns:
-            Loaded TDDState instance, or None if not found
-        """
-        file_path = TDD_SESSIONS_DIR / f"tdd-{session_id}.json"
-        if not file_path.exists():
-            return None
-
-        with open(file_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-
-        return cls.from_dict(data)

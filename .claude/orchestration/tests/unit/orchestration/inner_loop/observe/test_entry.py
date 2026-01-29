@@ -2,6 +2,7 @@
 Unit tests for inner_loop/observe/entry.py
 
 Tests the OBSERVE phase (Step 1) entry point.
+Updated to work with refactored run_phase_entry() pattern.
 """
 
 import sys
@@ -11,29 +12,44 @@ import pytest
 
 
 class TestObserveEntryMain:
-    """Tests for main() function in observe/entry.py"""
+    """Tests for OBSERVE entry point using run_phase_entry."""
 
     @pytest.mark.unit
     def test_exits_without_state_arg(self, monkeypatch, capsys):
         """Should exit with error when --state not provided."""
-        from orchestration.inner_loop.observe import entry
+        from orchestration.entry_base import run_phase_entry, PhaseConfig
 
         monkeypatch.setattr(sys, "argv", ["entry.py"])
 
         with pytest.raises(SystemExit) as exc_info:
-            entry.main()
+            run_phase_entry(
+                "dummy.py",
+                PhaseConfig(
+                    step_num=1,
+                    phase_name="OBSERVE",
+                    content_file="observe_phase.md",
+                    description="OBSERVE Phase (Step 1)",
+                ),
+            )
 
         assert exc_info.value.code != 0
 
     @pytest.mark.unit
     def test_exits_for_missing_session(self, mock_sessions_dir, monkeypatch, capsys):
         """Should exit with error when session doesn't exist."""
-        from orchestration.inner_loop.observe import entry
-
-        monkeypatch.setattr(sys, "argv", ["entry.py", "--state", "nonexistent12"])
+        from orchestration.entry_base import run_phase_entry, PhaseConfig
 
         with pytest.raises(SystemExit) as exc_info:
-            entry.main()
+            run_phase_entry(
+                "dummy.py",
+                PhaseConfig(
+                    step_num=1,
+                    phase_name="OBSERVE",
+                    content_file="observe_phase.md",
+                    description="OBSERVE Phase (Step 1)",
+                ),
+                argv=["--state", "nonexistent12"],
+            )
 
         assert exc_info.value.code == 1
 
@@ -43,7 +59,7 @@ class TestObserveEntryMain:
         """Should transition state to OBSERVE phase (step 1)."""
         from orchestration.state.algorithm_state import AlgorithmState
         from orchestration.state.algorithm_fsm import AlgorithmPhase
-        from orchestration.inner_loop.observe import entry
+        from orchestration.entry_base import run_phase_entry, PhaseConfig
 
         # Create state at IDEAL_STATE phase
         state = AlgorithmState(user_query="Build API", session_id="observ123456")
@@ -51,10 +67,17 @@ class TestObserveEntryMain:
         state.start_phase(0.5)  # IDEAL_STATE
         state.save()
 
-        monkeypatch.setattr(entry, "load_content", lambda *args: "Test content")
-        monkeypatch.setattr(sys, "argv", ["entry.py", "--state", "observ123456"])
-
-        entry.main()
+        with patch("orchestration.utils.load_content", return_value="Test content"):
+            run_phase_entry(
+                "dummy.py",
+                PhaseConfig(
+                    step_num=1,
+                    phase_name="OBSERVE",
+                    content_file="observe_phase.md",
+                    description="OBSERVE Phase (Step 1)",
+                ),
+                argv=["--state", "observ123456"],
+            )
 
         loaded = AlgorithmState.load("observ123456")
         assert loaded.current_phase == AlgorithmPhase.OBSERVE
@@ -65,7 +88,7 @@ class TestObserveEntryMain:
         """Should save state BEFORE printing prompt."""
         from orchestration.state.algorithm_state import AlgorithmState
         from orchestration.state.algorithm_fsm import AlgorithmPhase
-        from orchestration.inner_loop.observe import entry
+        from orchestration.entry_base import run_phase_entry, PhaseConfig
 
         state = AlgorithmState(user_query="Test", session_id="saveobserv12")
         state.fsm._state = AlgorithmPhase.IDEAL_STATE
@@ -79,11 +102,18 @@ class TestObserveEntryMain:
             save_called.append(True)
             return original_save(self)
 
-        monkeypatch.setattr(entry, "load_content", lambda *args: "Content")
-        monkeypatch.setattr(sys, "argv", ["entry.py", "--state", "saveobserv12"])
-
-        with patch.object(AlgorithmState, "save", tracking_save):
-            entry.main()
+        with patch("orchestration.utils.load_content", return_value="Content"):
+            with patch.object(AlgorithmState, "save", tracking_save):
+                run_phase_entry(
+                    "dummy.py",
+                    PhaseConfig(
+                        step_num=1,
+                        phase_name="OBSERVE",
+                        content_file="observe_phase.md",
+                        description="OBSERVE Phase (Step 1)",
+                    ),
+                    argv=["--state", "saveobserv12"],
+                )
 
         assert len(save_called) > 0
 

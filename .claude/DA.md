@@ -274,22 +274,6 @@ Write findings to: `.claude/memory/{task_id}-{agent_name}-memory.md`
 
 ---
 
-# Utility Commands
-
-Commands are standalone utilities invoked using slash syntax: `/category:command-name [args]`
-
-## Clean Commands
-
-| Command | Description |
-|---------|-------------|
-| `/clean:state` | Clean all orchestration state files |
-| `/clean:plans` | Clean all plan files |
-| `/clean:research` | Clean all research files |
-| `/clean:memories` | Clean all memory files |
-| `/clean:all` | Clean all state, research, plan, and memory files |
-
----
-
 # Verification Requirements
 
 Apply to ALL outputs regardless of execution path:
@@ -378,33 +362,6 @@ Use this format **ONLY** when delivering completed results to end user:
 - **TRANSPARENT**: Show reasoning when relevant to understanding
 - **COMPLETE**: All critical details included, no ambiguity
 
-## Orchestration Script Output Rules
-
-Python orchestration scripts output to stdout, which becomes part of Claude's context. Wasteful output burns tokens and degrades performance.
-
-### PRINT (Valuable Output)
-
-Orchestration scripts MUST ONLY print:
-- **MANDATORY directives** - Commands Claude must execute
-- **Error messages** - Critical failures that require attention (to stderr preferred)
-- **State transitions** - Brief single-line indicators (e.g., "Step 1 → Step 2")
-- **Actionable instructions** - What Claude needs to do next
-
-### DO NOT PRINT (Wasteful Output)
-
-Orchestration scripts MUST NOT print:
-- **Decorative banners** - ASCII art, `====` separators, box drawings
-- **Redundant information** - Content already in CLAUDE.md or DA.md
-- **Step summaries** - Lists of what a protocol "will do" (Claude knows from context)
-- **Tutorial text** - Explanations of how the protocol works
-- **Available options lists** - Skill/agent inventories (already in DA.md)
-
-### Decision Framework
-
-Before printing, ask: **"Does this output directly advance task completion?"**
-- YES → Print it
-- NO → Omit it
-
 ---
 
 # Critical Success Factors
@@ -456,23 +413,28 @@ Convert unknown unknowns to known knowns:
 | **Embedded validation** | Agents self-validate during execution rather than separate validation phases |
 | **Phase collapse** | Combine closely related cognitive functions when appropriate |
 | **Progressive context compression** | Summarize and compress context as workflows progress to manage token efficiency |
-| **Learning injection** | Load relevant learnings at Step 0 of each agent to inform processing |
 
 ---
 
-# System Hooks (Awareness)
+# MANDATORY Directive Compliance
 
-This system uses Claude Code hooks to enforce protocol execution. Understanding hook behavior helps you work with the system:
+## Execute Directives (NON-NEGOTIABLE)
 
-## When Hooks Inject Directives
+When you see `**MANDATORY - EXECUTE IMMEDIATELY BEFORE ANY OTHER ACTION:**` followed by a command:
+1. Execute it **BEFORE** any other response
+2. It is **NOT** optional
+3. The output guides your next steps
 
-If you see `**MANDATORY - EXECUTE IMMEDIATELY BEFORE ANY OTHER ACTION:**` followed by a Python command:
-1. This was injected by a hook
-2. It is NOT optional
-3. Execute it BEFORE any other response
-4. The command output will guide your next steps
+## Agent Invocation Directives (NON-NEGOTIABLE)
 
-**CRITICAL:** Never ignore MANDATORY directives. They are the enforcement mechanism for protocol compliance.
+When you see `**MANDATORY - INVOKE TASK TOOL NOW**` with a `<task_tool_invocation>` block:
+
+1. **DO NOT** perform the work yourself - delegate to the agent
+2. Parse: `subagent_type`, `description`, `model`, `prompt`
+3. Invoke Task tool with those exact parameters
+4. **WAIT** for completion before proceeding
+
+**NEVER** bypass agent invocation. Doing work directly instead of delegating breaks the system.
 
 ---
 
@@ -495,7 +457,6 @@ If you see `**MANDATORY - EXECUTE IMMEDIATELY BEFORE ANY OTHER ACTION:**` follow
 - Socratic questioning
 - Multi-agent orchestration
 - State machine protocols
-- Learning injection systems
 
 ---
 

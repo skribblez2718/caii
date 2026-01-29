@@ -14,7 +14,7 @@ class TestTDDFSMTransitions:
 
     def test_transitions_from_initialized(self):
         """INITIALIZED should only allow RED transition."""
-        from orchestration.skills.tdd.tdd_state import TDDFSM, TDDPhase
+        from orchestration.skills.perform_tdd.tdd_state import TDDFSM, TDDPhase
 
         fsm = TDDFSM()
 
@@ -29,7 +29,7 @@ class TestTDDFSMTransitions:
 
     def test_transitions_from_red(self):
         """RED should only allow GREEN transition."""
-        from orchestration.skills.tdd.tdd_state import TDDFSM, TDDPhase
+        from orchestration.skills.perform_tdd.tdd_state import TDDFSM, TDDPhase
 
         fsm = TDDFSM()
         fsm.transition(TDDPhase.RED)
@@ -45,7 +45,7 @@ class TestTDDFSMTransitions:
 
     def test_transitions_from_green(self):
         """GREEN should only allow REFACTOR transition."""
-        from orchestration.skills.tdd.tdd_state import TDDFSM, TDDPhase
+        from orchestration.skills.perform_tdd.tdd_state import TDDFSM, TDDPhase
 
         fsm = TDDFSM()
         fsm.transition(TDDPhase.RED)
@@ -62,7 +62,7 @@ class TestTDDFSMTransitions:
 
     def test_transitions_from_refactor(self):
         """REFACTOR should only allow DOC transition."""
-        from orchestration.skills.tdd.tdd_state import TDDFSM, TDDPhase
+        from orchestration.skills.perform_tdd.tdd_state import TDDFSM, TDDPhase
 
         fsm = TDDFSM()
         fsm.transition(TDDPhase.RED)
@@ -80,7 +80,7 @@ class TestTDDFSMTransitions:
 
     def test_transitions_from_doc(self):
         """DOC should allow COMPLETED or RED (loop-back)."""
-        from orchestration.skills.tdd.tdd_state import TDDFSM, TDDPhase
+        from orchestration.skills.perform_tdd.tdd_state import TDDFSM, TDDPhase
 
         fsm = TDDFSM()
         fsm.transition(TDDPhase.RED)
@@ -99,7 +99,7 @@ class TestTDDFSMTransitions:
 
     def test_transitions_from_completed(self):
         """COMPLETED should be terminal (no transitions)."""
-        from orchestration.skills.tdd.tdd_state import TDDFSM, TDDPhase
+        from orchestration.skills.perform_tdd.tdd_state import TDDFSM, TDDPhase
 
         fsm = TDDFSM()
         fsm.transition(TDDPhase.RED)
@@ -120,7 +120,7 @@ class TestTDDFSMLoopBack:
 
     def test_loop_back_only_valid_from_doc(self):
         """loop_back should only work from DOC phase."""
-        from orchestration.skills.tdd.tdd_state import TDDFSM, TDDPhase
+        from orchestration.skills.perform_tdd.tdd_state import TDDFSM, TDDPhase
 
         phases_to_try = [
             TDDPhase.INITIALIZED,
@@ -138,7 +138,7 @@ class TestTDDFSMLoopBack:
 
     def test_loop_back_from_doc_succeeds(self):
         """loop_back from DOC to RED should succeed."""
-        from orchestration.skills.tdd.tdd_state import TDDFSM, TDDPhase
+        from orchestration.skills.perform_tdd.tdd_state import TDDFSM, TDDPhase
 
         fsm = TDDFSM(initial_state=TDDPhase.DOC)
 
@@ -149,7 +149,7 @@ class TestTDDFSMLoopBack:
 
     def test_loop_back_increments_on_each_cycle(self):
         """Each loop-back should increment cycle count."""
-        from orchestration.skills.tdd.tdd_state import TDDFSM, TDDPhase
+        from orchestration.skills.perform_tdd.tdd_state import TDDFSM, TDDPhase
 
         fsm = TDDFSM()
         assert fsm.cycle_count == 0
@@ -178,7 +178,7 @@ class TestTDDFSMLoopBack:
 
     def test_loop_back_records_in_history(self):
         """Loop-back should be recorded in history."""
-        from orchestration.skills.tdd.tdd_state import TDDFSM, TDDPhase
+        from orchestration.skills.perform_tdd.tdd_state import TDDFSM, TDDPhase
 
         fsm = TDDFSM()
         fsm.transition(TDDPhase.RED)

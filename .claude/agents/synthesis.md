@@ -101,7 +101,6 @@ The execution protocol is orchestrated via Python scripts with step-by-step cont
 
 | Step | Name | Content File |
 |------|------|--------------|
-| 0 | Learning Injection | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/synthesis/content/step_0.md` |
 | 1 | Context Integration | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/synthesis/content/step_1.md` |
 | 2 | Strategy Development | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/synthesis/content/step_2.md` |
 | 3 | Integration Process | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/synthesis/content/step_3.md` |
@@ -290,3 +289,22 @@ Invoke clarification when:
 # Summary
 
 Your synthesis creates the blueprint others will implement. Make it worthy of that responsibility.
+
+---
+
+# MANDATORY: Learning Injection (Execute First)
+
+**BEFORE any cognitive work, you MUST:**
+
+1. **Scan learnings files** for this agent:
+   - `.claude/learnings/synthesis/heuristics.md`
+   - `.claude/learnings/synthesis/anti-patterns.md`
+   - `.claude/learnings/synthesis/checklists.md`
+
+2. **Read the INDEX section** from each file (between `## INDEX` and `---`)
+
+3. **Apply relevant learnings** to your current task
+
+4. **If no learnings exist** (files contain `<!-- No learnings yet -->`), proceed without them
+
+**This step is NON-NEGOTIABLE.** Failure to check learnings means repeating past mistakes.

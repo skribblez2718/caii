@@ -1,5 +1,5 @@
 """
-TDD Session Complete Script
+perform-tdd Session Complete Script
 
 Completes or loops back a TDD session.
 """
@@ -16,15 +16,15 @@ if _p.name == "orchestration" and str(_p.parent) not in sys.path:
     sys.path.insert(0, str(_p.parent))
 del _p  # Clean up namespace
 
-from orchestration.skills.tdd.tdd_state import TDDPhase, TDDState
+from orchestration.skills.perform_tdd.tdd_state import TDDPhase, TDDState
 from orchestration.utils import load_content, substitute_placeholders
 
 
 def main() -> None:
     """Main entry point for session completion."""
-    parser = argparse.ArgumentParser(description="Complete TDD Session")
+    parser = argparse.ArgumentParser(description="Complete perform-tdd Session")
     parser.add_argument(
-        "--tdd-state",
+        "--perform-tdd-state",
         required=True,
         help="TDD session ID",
     )
@@ -36,9 +36,9 @@ def main() -> None:
     args = parser.parse_args()
 
     # Load state
-    state = TDDState.load(args.tdd_state)
+    state = TDDState.load(args.perform_tdd_state)
     if not state:
-        print(f"ERROR: TDD session {args.tdd_state} not found", file=sys.stderr)
+        print(f"ERROR: TDD session {args.perform_tdd_state} not found", file=sys.stderr)
         sys.exit(1)
 
     current_phase = state.current_phase

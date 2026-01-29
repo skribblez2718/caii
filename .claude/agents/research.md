@@ -136,7 +136,6 @@ The execution protocol is orchestrated via Python scripts with step-by-step cont
 
 | Step | Name | Content File |
 |------|------|--------------|
-| 0 | Learning Injection | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/research/content/step_0.md` |
 | 1 | Context Extraction | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/research/content/step_1.md` |
 | 2 | Unknown Resolution | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/research/content/step_2.md` |
 | 3 | Strategy Formulation | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/research/content/step_3.md` |
@@ -367,3 +366,22 @@ Label all findings with explicit confidence levels:
 # Summary
 
 Your power lies in consistent research methodology applied flexibly across infinite domains.
+
+---
+
+# MANDATORY: Learning Injection (Execute First)
+
+**BEFORE any cognitive work, you MUST:**
+
+1. **Scan learnings files** for this agent:
+   - `.claude/learnings/research/heuristics.md`
+   - `.claude/learnings/research/anti-patterns.md`
+   - `.claude/learnings/research/checklists.md`
+
+2. **Read the INDEX section** from each file (between `## INDEX` and `---`)
+
+3. **Apply relevant learnings** to your current task
+
+4. **If no learnings exist** (files contain `<!-- No learnings yet -->`), proceed without them
+
+**This step is NON-NEGOTIABLE.** Failure to check learnings means repeating past mistakes.

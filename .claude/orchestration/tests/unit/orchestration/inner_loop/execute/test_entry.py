@@ -2,6 +2,7 @@
 Unit tests for inner_loop/execute/entry.py
 
 Tests the EXECUTE phase (Step 5) entry point.
+Updated to work with refactored run_phase_entry() pattern.
 """
 
 import sys
@@ -11,29 +12,44 @@ import pytest
 
 
 class TestExecuteEntryMain:
-    """Tests for main() function in execute/entry.py"""
+    """Tests for EXECUTE entry point using run_phase_entry."""
 
     @pytest.mark.unit
     def test_exits_without_state_arg(self, monkeypatch, capsys):
         """Should exit with error when --state not provided."""
-        from orchestration.inner_loop.execute import entry
+        from orchestration.entry_base import run_phase_entry, PhaseConfig
 
         monkeypatch.setattr(sys, "argv", ["entry.py"])
 
         with pytest.raises(SystemExit) as exc_info:
-            entry.main()
+            run_phase_entry(
+                "dummy.py",
+                PhaseConfig(
+                    step_num=5,
+                    phase_name="EXECUTE",
+                    content_file="execute_phase.md",
+                    description="EXECUTE Phase (Step 5)",
+                ),
+            )
 
         assert exc_info.value.code != 0
 
     @pytest.mark.unit
     def test_exits_for_missing_session(self, mock_sessions_dir, monkeypatch, capsys):
         """Should exit with error when session doesn't exist."""
-        from orchestration.inner_loop.execute import entry
-
-        monkeypatch.setattr(sys, "argv", ["entry.py", "--state", "nonexistent12"])
+        from orchestration.entry_base import run_phase_entry, PhaseConfig
 
         with pytest.raises(SystemExit) as exc_info:
-            entry.main()
+            run_phase_entry(
+                "dummy.py",
+                PhaseConfig(
+                    step_num=5,
+                    phase_name="EXECUTE",
+                    content_file="execute_phase.md",
+                    description="EXECUTE Phase (Step 5)",
+                ),
+                argv=["--state", "nonexistent12"],
+            )
 
         assert exc_info.value.code == 1
 
@@ -43,7 +59,7 @@ class TestExecuteEntryMain:
         """Should transition state to EXECUTE phase (step 5)."""
         from orchestration.state.algorithm_state import AlgorithmState
         from orchestration.state.algorithm_fsm import AlgorithmPhase
-        from orchestration.inner_loop.execute import entry
+        from orchestration.entry_base import run_phase_entry, PhaseConfig
 
         # Create state at BUILD phase
         state = AlgorithmState(user_query="Build API", session_id="exec12345678")
@@ -51,10 +67,17 @@ class TestExecuteEntryMain:
         state.fsm._history.append("BUILD")
         state.save()
 
-        monkeypatch.setattr(entry, "load_content", lambda *args: "Test content")
-        monkeypatch.setattr(sys, "argv", ["entry.py", "--state", "exec12345678"])
-
-        entry.main()
+        with patch("orchestration.utils.load_content", return_value="Test content"):
+            run_phase_entry(
+                "dummy.py",
+                PhaseConfig(
+                    step_num=5,
+                    phase_name="EXECUTE",
+                    content_file="execute_phase.md",
+                    description="EXECUTE Phase (Step 5)",
+                ),
+                argv=["--state", "exec12345678"],
+            )
 
         loaded = AlgorithmState.load("exec12345678")
         assert loaded.current_phase == AlgorithmPhase.EXECUTE
@@ -65,7 +88,7 @@ class TestExecuteEntryMain:
         """Should save state BEFORE printing prompt."""
         from orchestration.state.algorithm_state import AlgorithmState
         from orchestration.state.algorithm_fsm import AlgorithmPhase
-        from orchestration.inner_loop.execute import entry
+        from orchestration.entry_base import run_phase_entry, PhaseConfig
 
         state = AlgorithmState(user_query="Test", session_id="saveexec1234")
         state.fsm._state = AlgorithmPhase.BUILD
@@ -79,11 +102,18 @@ class TestExecuteEntryMain:
             save_called.append(True)
             return original_save(self)
 
-        monkeypatch.setattr(entry, "load_content", lambda *args: "Content")
-        monkeypatch.setattr(sys, "argv", ["entry.py", "--state", "saveexec1234"])
-
-        with patch.object(AlgorithmState, "save", tracking_save):
-            entry.main()
+        with patch("orchestration.utils.load_content", return_value="Content"):
+            with patch.object(AlgorithmState, "save", tracking_save):
+                run_phase_entry(
+                    "dummy.py",
+                    PhaseConfig(
+                        step_num=5,
+                        phase_name="EXECUTE",
+                        content_file="execute_phase.md",
+                        description="EXECUTE Phase (Step 5)",
+                    ),
+                    argv=["--state", "saveexec1234"],
+                )
 
         assert len(save_called) > 0
 

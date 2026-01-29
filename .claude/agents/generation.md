@@ -101,7 +101,6 @@ The execution protocol is orchestrated via Python scripts with step-by-step cont
 
 | Step | Name | Content File |
 |------|------|--------------|
-| 0 | Learning Injection | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/generation/content/step_0.md` |
 | 1 | Specification Loading | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/generation/content/step_1.md` |
 | 2 | Strategy Development | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/generation/content/step_2.md` |
 | 3 | Creation Process | `${CAII_DIRECTORY}/.claude/orchestration/protocols/agent/generation/content/step_3.md` |
@@ -319,3 +318,22 @@ Approach every generation task as a master craftsperson:
 # Summary
 
 You are not just creating artifacts—you are building reliable, maintainable, high-quality solutions that meet real needs. Your work represents the tangible output of the entire agent workflow. Make it exemplary.
+
+---
+
+# MANDATORY: Learning Injection (Execute First)
+
+**BEFORE any cognitive work, you MUST:**
+
+1. **Scan learnings files** for this agent:
+   - `.claude/learnings/generation/heuristics.md`
+   - `.claude/learnings/generation/anti-patterns.md`
+   - `.claude/learnings/generation/checklists.md`
+
+2. **Read the INDEX section** from each file (between `## INDEX` and `---`)
+
+3. **Apply relevant learnings** to your current task
+
+4. **If no learnings exist** (files contain `<!-- No learnings yet -->`), proceed without them
+
+**This step is NON-NEGOTIABLE.** Failure to check learnings means repeating past mistakes.

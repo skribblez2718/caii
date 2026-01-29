@@ -2,6 +2,7 @@
 Unit tests for inner_loop/plan/entry.py
 
 Tests the PLAN phase (Step 3) entry point.
+Updated to work with refactored run_phase_entry() pattern.
 """
 
 import sys
@@ -11,29 +12,44 @@ import pytest
 
 
 class TestPlanEntryMain:
-    """Tests for main() function in plan/entry.py"""
+    """Tests for PLAN entry point using run_phase_entry."""
 
     @pytest.mark.unit
     def test_exits_without_state_arg(self, monkeypatch, capsys):
         """Should exit with error when --state not provided."""
-        from orchestration.inner_loop.plan import entry
+        from orchestration.entry_base import run_phase_entry, PhaseConfig
 
         monkeypatch.setattr(sys, "argv", ["entry.py"])
 
         with pytest.raises(SystemExit) as exc_info:
-            entry.main()
+            run_phase_entry(
+                "dummy.py",
+                PhaseConfig(
+                    step_num=3,
+                    phase_name="PLAN",
+                    content_file="plan_phase.md",
+                    description="PLAN Phase (Step 3)",
+                ),
+            )
 
         assert exc_info.value.code != 0
 
     @pytest.mark.unit
     def test_exits_for_missing_session(self, mock_sessions_dir, monkeypatch, capsys):
         """Should exit with error when session doesn't exist."""
-        from orchestration.inner_loop.plan import entry
-
-        monkeypatch.setattr(sys, "argv", ["entry.py", "--state", "nonexistent12"])
+        from orchestration.entry_base import run_phase_entry, PhaseConfig
 
         with pytest.raises(SystemExit) as exc_info:
-            entry.main()
+            run_phase_entry(
+                "dummy.py",
+                PhaseConfig(
+                    step_num=3,
+                    phase_name="PLAN",
+                    content_file="plan_phase.md",
+                    description="PLAN Phase (Step 3)",
+                ),
+                argv=["--state", "nonexistent12"],
+            )
 
         assert exc_info.value.code == 1
 
@@ -43,7 +59,7 @@ class TestPlanEntryMain:
         """Should transition state to PLAN phase (step 3)."""
         from orchestration.state.algorithm_state import AlgorithmState
         from orchestration.state.algorithm_fsm import AlgorithmPhase
-        from orchestration.inner_loop.plan import entry
+        from orchestration.entry_base import run_phase_entry, PhaseConfig
 
         # Create state at THINK phase
         state = AlgorithmState(user_query="Build API", session_id="plan12345678")
@@ -51,10 +67,17 @@ class TestPlanEntryMain:
         state.fsm._history.append("THINK")
         state.save()
 
-        monkeypatch.setattr(entry, "load_content", lambda *args: "Test content")
-        monkeypatch.setattr(sys, "argv", ["entry.py", "--state", "plan12345678"])
-
-        entry.main()
+        with patch("orchestration.utils.load_content", return_value="Test content"):
+            run_phase_entry(
+                "dummy.py",
+                PhaseConfig(
+                    step_num=3,
+                    phase_name="PLAN",
+                    content_file="plan_phase.md",
+                    description="PLAN Phase (Step 3)",
+                ),
+                argv=["--state", "plan12345678"],
+            )
 
         loaded = AlgorithmState.load("plan12345678")
         assert loaded.current_phase == AlgorithmPhase.PLAN
@@ -65,7 +88,7 @@ class TestPlanEntryMain:
         """Should save state BEFORE printing prompt."""
         from orchestration.state.algorithm_state import AlgorithmState
         from orchestration.state.algorithm_fsm import AlgorithmPhase
-        from orchestration.inner_loop.plan import entry
+        from orchestration.entry_base import run_phase_entry, PhaseConfig
 
         state = AlgorithmState(user_query="Test", session_id="saveplan12345")
         state.fsm._state = AlgorithmPhase.THINK
@@ -79,11 +102,18 @@ class TestPlanEntryMain:
             save_called.append(True)
             return original_save(self)
 
-        monkeypatch.setattr(entry, "load_content", lambda *args: "Content")
-        monkeypatch.setattr(sys, "argv", ["entry.py", "--state", "saveplan12345"])
-
-        with patch.object(AlgorithmState, "save", tracking_save):
-            entry.main()
+        with patch("orchestration.utils.load_content", return_value="Content"):
+            with patch.object(AlgorithmState, "save", tracking_save):
+                run_phase_entry(
+                    "dummy.py",
+                    PhaseConfig(
+                        step_num=3,
+                        phase_name="PLAN",
+                        content_file="plan_phase.md",
+                        description="PLAN Phase (Step 3)",
+                    ),
+                    argv=["--state", "saveplan12345"],
+                )
 
         assert len(save_called) > 0
 

@@ -2,6 +2,7 @@
 Unit tests for inner_loop/think/entry.py
 
 Tests the THINK phase (Step 2) entry point.
+Updated to work with refactored run_phase_entry() pattern.
 """
 
 import sys
@@ -11,29 +12,44 @@ import pytest
 
 
 class TestThinkEntryMain:
-    """Tests for main() function in think/entry.py"""
+    """Tests for THINK entry point using run_phase_entry."""
 
     @pytest.mark.unit
     def test_exits_without_state_arg(self, monkeypatch, capsys):
         """Should exit with error when --state not provided."""
-        from orchestration.inner_loop.think import entry
+        from orchestration.entry_base import run_phase_entry, PhaseConfig
 
         monkeypatch.setattr(sys, "argv", ["entry.py"])
 
         with pytest.raises(SystemExit) as exc_info:
-            entry.main()
+            run_phase_entry(
+                "dummy.py",
+                PhaseConfig(
+                    step_num=2,
+                    phase_name="THINK",
+                    content_file="think_phase.md",
+                    description="THINK Phase (Step 2)",
+                ),
+            )
 
         assert exc_info.value.code != 0
 
     @pytest.mark.unit
     def test_exits_for_missing_session(self, mock_sessions_dir, monkeypatch, capsys):
         """Should exit with error when session doesn't exist."""
-        from orchestration.inner_loop.think import entry
-
-        monkeypatch.setattr(sys, "argv", ["entry.py", "--state", "nonexistent12"])
+        from orchestration.entry_base import run_phase_entry, PhaseConfig
 
         with pytest.raises(SystemExit) as exc_info:
-            entry.main()
+            run_phase_entry(
+                "dummy.py",
+                PhaseConfig(
+                    step_num=2,
+                    phase_name="THINK",
+                    content_file="think_phase.md",
+                    description="THINK Phase (Step 2)",
+                ),
+                argv=["--state", "nonexistent12"],
+            )
 
         assert exc_info.value.code == 1
 
@@ -43,7 +59,7 @@ class TestThinkEntryMain:
         """Should transition state to THINK phase (step 2)."""
         from orchestration.state.algorithm_state import AlgorithmState
         from orchestration.state.algorithm_fsm import AlgorithmPhase
-        from orchestration.inner_loop.think import entry
+        from orchestration.entry_base import run_phase_entry, PhaseConfig
 
         # Create state at OBSERVE phase
         state = AlgorithmState(user_query="Build API", session_id="think1234567")
@@ -51,10 +67,17 @@ class TestThinkEntryMain:
         state.fsm._history.append("OBSERVE")
         state.save()
 
-        monkeypatch.setattr(entry, "load_content", lambda *args: "Test content")
-        monkeypatch.setattr(sys, "argv", ["entry.py", "--state", "think1234567"])
-
-        entry.main()
+        with patch("orchestration.utils.load_content", return_value="Test content"):
+            run_phase_entry(
+                "dummy.py",
+                PhaseConfig(
+                    step_num=2,
+                    phase_name="THINK",
+                    content_file="think_phase.md",
+                    description="THINK Phase (Step 2)",
+                ),
+                argv=["--state", "think1234567"],
+            )
 
         loaded = AlgorithmState.load("think1234567")
         assert loaded.current_phase == AlgorithmPhase.THINK
@@ -65,7 +88,7 @@ class TestThinkEntryMain:
         """Should save state BEFORE printing prompt."""
         from orchestration.state.algorithm_state import AlgorithmState
         from orchestration.state.algorithm_fsm import AlgorithmPhase
-        from orchestration.inner_loop.think import entry
+        from orchestration.entry_base import run_phase_entry, PhaseConfig
 
         state = AlgorithmState(user_query="Test", session_id="savethink123")
         state.fsm._state = AlgorithmPhase.OBSERVE
@@ -79,11 +102,18 @@ class TestThinkEntryMain:
             save_called.append(True)
             return original_save(self)
 
-        monkeypatch.setattr(entry, "load_content", lambda *args: "Content")
-        monkeypatch.setattr(sys, "argv", ["entry.py", "--state", "savethink123"])
-
-        with patch.object(AlgorithmState, "save", tracking_save):
-            entry.main()
+        with patch("orchestration.utils.load_content", return_value="Content"):
+            with patch.object(AlgorithmState, "save", tracking_save):
+                run_phase_entry(
+                    "dummy.py",
+                    PhaseConfig(
+                        step_num=2,
+                        phase_name="THINK",
+                        content_file="think_phase.md",
+                        description="THINK Phase (Step 2)",
+                    ),
+                    argv=["--state", "savethink123"],
+                )
 
         assert len(save_called) > 0
 

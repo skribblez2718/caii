@@ -4,7 +4,6 @@ PLAN Phase Entry Point (Step 3)
 Tree of thought planning.
 """
 
-import argparse
 import sys
 from pathlib import Path
 
@@ -16,43 +15,18 @@ if _p.name == "orchestration" and str(_p.parent) not in sys.path:
     sys.path.insert(0, str(_p.parent))
 del _p  # Clean up namespace
 
-from orchestration.state import AlgorithmState
-from orchestration.utils import load_content, substitute_placeholders
+from orchestration.entry_base import PhaseConfig, run_phase_entry
 
-# Step number for this phase
+# Step number for this phase (preserved for backward compatibility)
 STEP_NUM = 3
 
-
-def main() -> None:
-    parser = argparse.ArgumentParser(description="PLAN Phase (Step 3)")
-    parser.add_argument("--state", required=True, help="Session ID for state tracking")
-    parser.add_argument("user_query", nargs="?", default="", help="User query (legacy)")
-    args = parser.parse_args()
-
-    # Load state
-    state = AlgorithmState.load(args.state)
-    if not state:
-        print(f"ERROR: Session {args.state} not found", file=sys.stderr)
-        sys.exit(1)
-
-    # Start this phase
-    if not state.start_phase(STEP_NUM):
-        print("ERROR: Cannot transition to PLAN phase", file=sys.stderr)
-        print(f"Current phase: {state.current_phase.name}", file=sys.stderr)
-        sys.exit(1)
-
-    # CRITICAL: Save state BEFORE printing directive
-    state.save()
-
-    # Load and print phase content
-    content = load_content(__file__, "plan_phase.md")
-    prompt = substitute_placeholders(
-        content,
-        user_query=state.user_query,
-        session_id=state.session_id,
-    )
-    print(prompt)
-
-
 if __name__ == "__main__":
-    main()
+    run_phase_entry(
+        __file__,
+        PhaseConfig(
+            step_num=3,
+            phase_name="PLAN",
+            content_file="plan_phase.md",
+            description="PLAN Phase (Step 3)",
+        ),
+    )

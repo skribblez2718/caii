@@ -1,0 +1,49 @@
+# {{ project_name }}
+
+{{ project_description }}
+
+## Quick Reference
+
+| Command | Purpose |
+|---------|---------|
+{% for cmd in commands %}
+| `{{ cmd.command }}` | {{ cmd.description }} |
+{% endfor %}
+
+## Documentation
+
+{% if has_rules %}
+Context-specific documentation auto-loads from `.claude/rules/`:
+
+| Rule File | Applies To |
+|-----------|------------|
+| `rules/general.md` | All work (always loaded) |
+{% for rule in rules %}
+| `rules/{{ rule.file }}` | `{{ rule.pattern }}` |
+{% endfor %}
+{% else %}
+General guidelines are in `.claude/rules/general.md` (always loaded).
+{% endif %}
+
+## Critical Constraints
+
+{% for constraint in constraints %}
+- {{ constraint }}
+{% endfor %}
+
+## Project Structure
+
+```
+{{ directory_tree }}
+```
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+{% for file in key_files %}
+| `{{ file.path }}` | {{ file.description }} |
+{% endfor %}
+
+---
+*Last updated: {{ date }}*

@@ -20,7 +20,9 @@ Setup
 1. Set environment variables in ``settings.json``:
 
    - ``DA_NAME``: Your AI's name (e.g., ``"Assistant"``, ``"Kai"``, ``"Jarvis"``)
+   - ``VOICE_SERVER_HOST``: Host for the voice server (defaults to ``127.0.0.1``)
    - ``VOICE_SERVER_PORT``: Port for the voice server (defaults to ``8001``)
+   - ``VOICE_SERVER_API_KEY``: API key for voice server authentication
    - ``CAII_DIRECTORY``: Path to your PAI directory (defaults to ``$HOME/.claude``)
 
 2. Ensure ``load-core-context.ts`` exists in the ``hooks/`` directory.
@@ -29,132 +31,16 @@ Setup
 
 from __future__ import annotations
 
-import json
 import os
 import stat as statmod
 import sys
-import tempfile
-import subprocess
 from pathlib import Path
-from typing import Final
 
-import urllib.error
-import urllib.request
+# Add hooks directory to path for utils import
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from utils.tts import send_tts_request
 
-#########################[ start play_audio ]################################
-def play_audio(audio_file: str) -> bool:
-    """
-    Play audio file using available Linux audio players.
-
-    :param audio_file: Path to the audio file
-    :type audio_file: str
-    :returns: True if successful, False otherwise
-    :rtype: bool
-    """
-    audio_players = ['mpg123', 'mpv', 'ffplay', 'paplay']
-
-    for player in audio_players:
-        try:
-            if player == 'paplay':
-                # Convert to wav for pulseaudio
-                wav_file = audio_file.replace('.mp3', '.wav')
-                subprocess.run(['ffmpeg', '-y', '-i', audio_file, wav_file],
-                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
-                result = subprocess.run([player, wav_file],
-                                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                try:
-                    os.unlink(wav_file)
-                except:
-                    pass
-                if result.returncode == 0:
-                    return True
-            else:
-                result = subprocess.run([player, audio_file],
-                                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                if result.returncode == 0:
-                    return True
-        except:
-            continue
-
-    return False
-
-
-#########################[ end play_audio ]##################################
-
-#########################[ start send_notification ]#########################
-def send_notification(title: str, message: str, priority: str = "normal") -> None:
-    """
-    Send a local notification to a voice/notification server (if available).
-
-    :param title: Notification title to display/say.
-    :param message: Notification message/body.
-    :param priority: Notification priority (for example, ``"low"``, ``"normal"``,
-                     ``"high"``). Defaults to ``"normal"``.
-    :type priority: str
-    :returns: ``None``
-
-    .. note::
-       Uses the OpenAI-compatible TTS endpoint at /v1/audio/speech.
-       Network errors are intentionally suppressed so session startup is
-       never blocked if the server is not running.
-    """
-    port: Final[str] = os.environ.get("VOICE_SERVER_PORT", "8001")
-
-    payload = {
-        "model": "tts-1",
-        "input": f"{title}: {message}",
-        "voice": "alloy",
-        "response_format": "mp3"
-    }
-
-    req = urllib.request.Request(
-        f"http://localhost:{port}/v1/audio/speech",
-        data=json.dumps(payload).encode("utf-8"),
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
-
-    try:
-        with urllib.request.urlopen(req, timeout=5.0) as resp:  # nosec - local call
-            status = getattr(resp, "status", resp.getcode())
-            if not (200 <= int(status) < 300):
-                print(f"Notification failed: {status}", file=sys.stderr)
-                return
-
-            # Read binary audio response
-            audio_data = resp.read()
-
-            # Save to temp file
-            with tempfile.NamedTemporaryFile(suffix='.mp3', delete=False) as f:
-                f.write(audio_data)
-                audio_file = f.name
-
-            # Play the audio
-            play_audio(audio_file)
-
-            # Send desktop notification
-            try:
-                subprocess.run(['notify-send', title, message],
-                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            except:
-                pass
-
-            # Clean up temp file
-            try:
-                os.unlink(audio_file)
-            except:
-                pass
-
-    except urllib.error.HTTPError as e:
-        # Server responded but with non-2xx code
-        print(f"Notification failed: {e.code}", file=sys.stderr)
-    except Exception:
-        # Silently fail if the voice server isn't running or unreachable
-        pass
-
-
-#########################[ end send_notification ]###########################
 
 #########################[ start set_terminal_tab_title ]####################
 def set_terminal_tab_title(title: str) -> None:
@@ -268,7 +154,7 @@ def main() -> int:
             return 0
 
         da_name = os.environ.get("DA_NAME", "AI Assistant")
-        message = f"What would you like to do?"
+        message = f"Hey Sketch! {da_name} here. What would you like to do?"
 
         stop_hook_ok = test_stop_hook()
         if not stop_hook_ok:
@@ -279,7 +165,11 @@ def main() -> int:
 
         # Note: PAI core context loading is handled by load-core-context.py hook
         # which should run BEFORE this hook in settings.json SessionStart hooks.
-        send_notification(f"{da_name} Ready", message, "low")
+        send_tts_request(
+            message,
+            agent="da",
+            title=f"{da_name} Ready",
+        )
 
         return 0
     except Exception as e:  # pragma: no cover - defensive

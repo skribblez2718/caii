@@ -1,0 +1,77 @@
+---
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+# {{ project_name }} General Guidelines
+
+These guidelines apply to all work in the {{ project_name }} project.
+
+## Critical Constraints
+
+| Constraint | Rule |
+|------------|------|
+{% for constraint in constraints %}
+| **{{ constraint.name }}** | {{ constraint.rule }} |
+{% endfor %}
+
+{% if environment_variables %}
+## Environment Variables
+
+| Variable | Purpose |
+|----------|---------|
+{% for var in environment_variables %}
+| `{{ var.name }}` | {{ var.purpose }} |
+{% endfor %}
+{% endif %}
+
+## Common Commands
+
+| Command | Purpose |
+|---------|---------|
+{% for cmd in commands %}
+| `{{ cmd.command }}` | {{ cmd.description }} |
+{% endfor %}
+
+{% if test_location %}
+## Test Locations
+
+Tests are located in `{{ test_location }}`.
+{% endif %}
+
+{% if language == "python" %}
+## Python Coding Standards
+
+**Target Version:** Python {{ python_version }}
+
+```python
+# CORRECT - absolute imports
+from {{ package_name }}.module import function
+
+# WRONG - never use relative imports
+from .module import function  # FORBIDDEN
+```
+{% endif %}
+
+{% if language == "typescript" or language == "javascript" %}
+## TypeScript/JavaScript Standards
+
+**Target Version:** {{ language_version }}
+
+```typescript
+// CORRECT - explicit imports
+import { function } from './module';
+
+// Prefer named exports over default exports
+export function myFunction() {}
+```
+{% endif %}
+
+## File Naming Conventions
+
+| Type | Pattern |
+|------|---------|
+{% for convention in naming_conventions %}
+| {{ convention.type }} | `{{ convention.pattern }}` |
+{% endfor %}

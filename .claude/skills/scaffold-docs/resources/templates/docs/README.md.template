@@ -1,0 +1,54 @@
+# {{ project_name }} Documentation
+
+{{ project_description }}
+
+## Quick Links
+
+- [Getting Started](./getting-started.md) - Installation and first steps
+{% if has_api %}
+- [API Reference](./api/README.md) - API documentation
+{% endif %}
+{% if has_architecture %}
+- [Architecture](./architecture.md) - System design overview
+{% endif %}
+
+## Overview
+
+{{ project_overview }}
+
+## Installation
+
+```bash
+{{ installation_command }}
+```
+
+## Usage
+
+```{{ language }}
+{{ usage_example }}
+```
+
+## Project Structure
+
+```
+{{ directory_tree }}
+```
+
+## Contributing
+
+{% if has_contributing %}
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for contribution guidelines.
+{% else %}
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+{% endif %}
+
+## License
+
+{% if license %}
+{{ license }}
+{% else %}
+See [LICENSE](../LICENSE) for details.
+{% endif %}

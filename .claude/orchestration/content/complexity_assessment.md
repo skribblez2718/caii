@@ -65,8 +65,21 @@ Classify as **TRIVIAL** if ALL of these are true:
 
 ### Your Response
 
-Respond with ONLY one of these words:
+After determining the complexity classification, execute the routing command:
 
-`trivial` | `simple` | `moderate` | `complex` | `very complex`
+**MANDATORY - EXECUTE IMMEDIATELY AFTER CLASSIFICATION:**
 
-No explanation. No punctuation. Just the classification.
+```bash
+python3 {entry_path} "{user_query}" --complexity <your_classification>
+```
+
+Replace `<your_classification>` with one of: `trivial`, `simple`, `moderate`, `complex`, or `very_complex`
+
+**Example:** If you determine the task is moderate complexity:
+```bash
+python3 {entry_path} "{user_query}" --complexity moderate
+```
+
+**Warnings:**
+- Execute this command NOW. Do NOT respond with text first.
+- FAILURE to execute breaks the system's reliability guarantee.

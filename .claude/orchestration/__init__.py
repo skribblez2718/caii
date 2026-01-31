@@ -11,6 +11,18 @@ from orchestration.utils import (
 )
 from orchestration.entry import main as orchestration_main
 
+# State module exports
+from orchestration.state import (
+    SESSIONS_DIR,
+    SCHEMA_VERSION,
+    generate_session_id,
+    BaseFSM,
+    BaseState,
+    AlgorithmPhase,
+    AlgorithmFSM,
+    AlgorithmState,
+)
+
 __all__ = [
     # Utilities
     "get_content_dir",
@@ -18,4 +30,13 @@ __all__ = [
     "substitute_placeholders",
     # Entry point
     "orchestration_main",
+    # State module
+    "SESSIONS_DIR",
+    "SCHEMA_VERSION",
+    "generate_session_id",
+    "BaseFSM",
+    "BaseState",
+    "AlgorithmPhase",
+    "AlgorithmFSM",
+    "AlgorithmState",
 ]

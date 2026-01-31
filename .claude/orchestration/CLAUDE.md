@@ -32,10 +32,27 @@ entry.py (5-category complexity analysis)
     │                     INNER LOOP (observe → think → plan → build → execute → learn)
     │
     └── complex/very_complex → DECOMPOSE protocol
-                                    ↓
-                               subtasks re-analyzed
-                                    ↓
-                               <= moderate → GATHER
+                                    │
+                    ┌───────────────┴───────────────┐
+                    ▼                               ▼
+             DECOMPOSE_FLOW                   After subtasks:
+             (clarification →                 AGGREGATION_FLOW
+              analysis →                      (synthesis)
+              synthesis →
+              validation)
+                    │
+                    ▼
+             Subtask States (all SIMPLE)
+                    │
+          ┌─────────┼─────────┐
+          ▼         ▼         ▼
+      Subtask 1  Subtask 2  Subtask 3
+          │         │         │
+          └─────────┼─────────┘
+                    │
+                    ▼
+               Each subtask:
+        GATHER → IDEAL → Inner Loop → VERIFY → LEARN
 ```
 
 **Key Principle:** Python enforces sequence. LLM makes decisions.
@@ -86,9 +103,24 @@ entry.py (5-category complexity analysis)
 
 #### Pre-Loop Protocols (`.claude/orchestration/decompose/`)
 
-| Protocol | CLAUDE.md | Content File | Purpose |
-|----------|-----------|--------------|---------|
-| **DECOMPOSE** | `decompose/CLAUDE.md` | `decompose/content/decompose_phase.md` | Task decomposition (STUB - not yet implemented) |
+| Protocol | CLAUDE.md | Key Files | Purpose |
+|----------|-----------|-----------|---------|
+| **DECOMPOSE** | `decompose/CLAUDE.md` | `flows.py`, `complete.py` | Task decomposition into SIMPLE subtasks |
+
+**DECOMPOSE Protocol Flows:**
+
+| Flow | Flow ID | Agents | Purpose |
+|------|---------|--------|---------|
+| `DECOMPOSE_FLOW` | `decompose-protocol` | clarification → analysis → synthesis → validation | Break task into subtasks |
+| `AGGREGATION_FLOW` | `decompose-aggregation` | synthesis | Combine subtask results |
+
+**Completion Handlers (`complete.py`):**
+
+| Function | Purpose |
+|----------|---------|
+| `complete_decomposition(parent, subtasks)` | Create subtask states, route first to GATHER |
+| `on_subtask_complete(state)` | Handle subtask completion, route next or aggregate |
+| `trigger_aggregation(parent)` | Start AGGREGATION_FLOW |
 
 #### Outer Loop (`.claude/orchestration/outer_loop/`)
 
@@ -407,6 +439,9 @@ source .venv/bin/activate
 | `agent_chain/state.py` | `tests/unit/orchestration/agent_chain/test_state.py` |
 | `agent_chain/memory.py` | `tests/unit/orchestration/agent_chain/test_memory.py` |
 | `agents/config.py` | `tests/unit/orchestration/agents/test_config.py` |
+| `decompose/flows.py` | `tests/unit/orchestration/decompose/test_flows.py` |
+| `decompose/complete.py` | `tests/unit/orchestration/decompose/test_complete.py` |
+| `decompose/entry.py` | `tests/unit/orchestration/decompose/test_entry.py` |
 
 ### Reference
 
@@ -415,4 +450,4 @@ source .venv/bin/activate
 
 ---
 
-*Last updated: 2026-01-28*
+*Last updated: 2026-01-31*

@@ -1,0 +1,130 @@
+# Getting Started with {{ project_name }}
+
+This guide will help you get up and running with {{ project_name }}.
+
+## Prerequisites
+
+{% for prereq in prerequisites %}
+- {{ prereq }}
+{% endfor %}
+
+## Installation
+
+### Step 1: Clone the Repository
+
+```bash
+git clone {{ repository_url }}
+cd {{ project_slug }}
+```
+
+### Step 2: Install Dependencies
+
+{% if language == "python" %}
+```bash
+# Create virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+{% elif language == "typescript" or language == "javascript" %}
+```bash
+npm install
+# or
+yarn install
+```
+{% elif language == "rust" %}
+```bash
+cargo build
+```
+{% elif language == "go" %}
+```bash
+go mod download
+```
+{% else %}
+```bash
+{{ installation_command }}
+```
+{% endif %}
+
+### Step 3: Configure Environment
+
+{% if has_env_example %}
+```bash
+cp .env.example .env
+# Edit .env with your configuration
+```
+{% else %}
+No additional configuration required.
+{% endif %}
+
+## Quick Start
+
+### Running the Application
+
+{% if language == "python" %}
+```bash
+python3 {{ entry_point }}
+```
+{% elif language == "typescript" %}
+```bash
+npm run start
+# or
+npx ts-node {{ entry_point }}
+```
+{% elif language == "javascript" %}
+```bash
+npm run start
+# or
+node {{ entry_point }}
+```
+{% else %}
+```bash
+{{ run_command }}
+```
+{% endif %}
+
+### Running Tests
+
+{% if language == "python" %}
+```bash
+pytest
+# or
+make test
+```
+{% elif language == "typescript" or language == "javascript" %}
+```bash
+npm test
+# or
+yarn test
+```
+{% elif language == "rust" %}
+```bash
+cargo test
+```
+{% elif language == "go" %}
+```bash
+go test ./...
+```
+{% else %}
+```bash
+{{ test_command }}
+```
+{% endif %}
+
+## Next Steps
+
+{% for step in next_steps %}
+- {{ step }}
+{% endfor %}
+
+## Getting Help
+
+{% if has_issues %}
+- Open an issue on [GitHub]({{ repository_url }}/issues)
+{% endif %}
+{% if has_discussions %}
+- Start a discussion on [GitHub Discussions]({{ repository_url }}/discussions)
+{% endif %}
+- Check the [documentation](./README.md)

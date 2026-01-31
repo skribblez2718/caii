@@ -389,9 +389,10 @@ class TestMain:
         with pytest.raises(SystemExit) as exc_info:
             main()
 
-        assert exc_info.value.code == 1
+        # argparse uses exit code 2 for argument errors
+        assert exc_info.value.code in (1, 2)
         captured = capsys.readouterr()
-        assert "Usage" in captured.err
+        assert "usage" in captured.err.lower() or "required" in captured.err.lower()
 
     @pytest.mark.unit
     def test_prints_complexity_prompt_with_query(self, monkeypatch, capsys):
@@ -409,3 +410,81 @@ class TestMain:
 
         captured = capsys.readouterr()
         assert "Analyze: Build an API" in captured.out
+
+    @pytest.mark.unit
+    def test_complexity_arg_triggers_routing(self, monkeypatch, mock_sessions_dir, capsys):
+        """Should route when --complexity arg provided."""
+        from orchestration import entry
+
+        monkeypatch.setattr(
+            sys, "argv", ["entry.py", "Build an API", "--complexity", "moderate"]
+        )
+
+        entry.main()
+
+        captured = capsys.readouterr()
+        # Should route to The Last Algorithm, not print complexity prompt
+        assert "Last Algorithm" in captured.out
+        assert "MODERATE" in captured.out
+        assert "MANDATORY" in captured.out
+        # Should have created state
+        session_files = list(mock_sessions_dir.glob("algorithm-*.json"))
+        assert len(session_files) == 1
+
+    @pytest.mark.unit
+    def test_complexity_arg_trivial_routes_direct(self, monkeypatch, mock_sessions_dir, capsys):
+        """Should route to DA direct execution when complexity is trivial."""
+        from orchestration import entry
+
+        monkeypatch.setattr(
+            sys, "argv", ["entry.py", "Fix typo", "--complexity", "trivial"]
+        )
+
+        entry.main()
+
+        captured = capsys.readouterr()
+        assert "DA Direct Execution" in captured.out
+        assert "TRIVIAL" in captured.out
+        # Should NOT create state for trivial
+        session_files = list(mock_sessions_dir.glob("algorithm-*.json"))
+        assert len(session_files) == 0
+
+    @pytest.mark.unit
+    def test_complexity_arg_complex_routes_decompose(self, monkeypatch, mock_sessions_dir, capsys):
+        """Should route to DECOMPOSE when complexity is complex."""
+        from orchestration import entry
+
+        monkeypatch.setattr(
+            sys, "argv", ["entry.py", "Refactor auth", "--complexity", "complex"]
+        )
+
+        entry.main()
+
+        captured = capsys.readouterr()
+        assert "DECOMPOSE" in captured.out
+        assert "COMPLEX" in captured.out
+        assert "MANDATORY" in captured.out
+        # Should have created state
+        session_files = list(mock_sessions_dir.glob("algorithm-*.json"))
+        assert len(session_files) == 1
+
+    @pytest.mark.unit
+    def test_no_complexity_arg_prints_prompt(self, monkeypatch, capsys):
+        """Should print complexity prompt when no --complexity arg."""
+        from orchestration import entry
+
+        monkeypatch.setattr(sys, "argv", ["entry.py", "Build an API"])
+        monkeypatch.setattr(
+            entry,
+            "load_content",
+            lambda *args: "Analyze: {user_query}",
+        )
+
+        entry.main()
+
+        captured = capsys.readouterr()
+        # Should print the complexity assessment prompt
+        assert "Analyze: Build an API" in captured.out
+        # Should NOT contain routing output
+        assert "Last Algorithm" not in captured.out
+        assert "DA Direct Execution" not in captured.out

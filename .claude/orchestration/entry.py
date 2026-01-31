@@ -6,13 +6,15 @@ Python enforces sequence; DA makes decisions.
 
 Flow:
 1. Print complexity analysis prompt for DA
-2. DA outputs ONLY "trivial" or "non-trivial"
-3. Python captures response and routes:
+2. DA determines complexity classification
+3. DA executes routing command with --complexity argument
+4. Python routes based on complexity:
    - trivial -> DA handles directly
-   - non-trivial -> Execute The Last Algorithm (outer loop)
+   - simple/moderate -> The Last Algorithm (GATHER)
+   - complex/very_complex -> DECOMPOSE protocol
 """
 
-import sys
+import argparse
 from pathlib import Path
 
 from orchestration.state import AlgorithmState
@@ -22,7 +24,10 @@ from orchestration.utils import load_content, substitute_placeholders
 def print_complexity_prompt(user_query: str) -> None:
     """Print prompt for DA to assess complexity."""
     content = load_content(__file__, "complexity_assessment.md")
-    prompt = substitute_placeholders(content, user_query=user_query)
+    entry_path = Path(__file__).resolve()
+    prompt = substitute_placeholders(
+        content, user_query=user_query, entry_path=str(entry_path)
+    )
     print(prompt)
 
 
@@ -132,14 +137,28 @@ python3 {decompose_entry} --state {state.session_id}
 
 
 def main() -> None:
-    if len(sys.argv) < 2:
-        print("Usage: python3 entry.py '<user_query>'", file=sys.stderr)
-        sys.exit(1)
+    """Entry point: either print complexity prompt or route based on classification."""
+    parser = argparse.ArgumentParser(
+        description="Global orchestration entry point for complexity-based routing"
+    )
+    parser.add_argument(
+        "user_query",
+        help="The user's task/query to process",
+    )
+    parser.add_argument(
+        "--complexity",
+        choices=["trivial", "simple", "moderate", "complex", "very_complex"],
+        help="Complexity classification from DA (triggers routing)",
+    )
 
-    user_query = sys.argv[1]
+    args = parser.parse_args()
 
-    # Print complexity prompt for DA
-    print_complexity_prompt(user_query)
+    if args.complexity:
+        # DA's decision triggers routing
+        route_based_on_complexity(args.complexity, args.user_query)
+    else:
+        # Initial call - print assessment prompt
+        print_complexity_prompt(args.user_query)
 
 
 if __name__ == "__main__":

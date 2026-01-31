@@ -11,12 +11,17 @@ which directly injects the reasoning protocol directive into Claude's context.
 import sys
 import os
 import json
-import urllib.request
-import urllib.error
-import tempfile
 import subprocess
 from pathlib import Path
 from typing import Optional, TypedDict
+
+import urllib.request
+import urllib.error
+
+# Add hooks directory to path for utils import
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from utils.tts import send_tts_request
 
 
 #########################[ start types ]######################################
@@ -199,120 +204,6 @@ def generate_summary(text: str) -> Optional[str]:
 
 #########################[ end generate_summary ]############################
 
-def play_audio(audio_file: str) -> bool:
-    """
-    Play audio file using available Linux audio players
-
-    Args:
-        audio_file: Path to the audio file
-
-    Returns:
-        True if successful, False otherwise
-    """
-    audio_players = ['mpg123', 'mpv', 'ffplay', 'paplay']
-
-    for player in audio_players:
-        try:
-            if player == 'paplay':
-                # Convert to wav for pulseaudio
-                wav_file = audio_file.replace('.mp3', '.wav')
-                subprocess.run(['ffmpeg', '-y', '-i', audio_file, wav_file],
-                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
-                result = subprocess.run([player, wav_file],
-                                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                try:
-                    os.unlink(wav_file)
-                except:
-                    pass
-                if result.returncode == 0:
-                    return True
-            else:
-                result = subprocess.run([player, audio_file],
-                                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                if result.returncode == 0:
-                    return True
-        except:
-            continue
-
-    return False
-
-
-#########################[ end play_audio ]##################################
-
-#########################[ start send_to_voice_server ]######################
-def send_to_voice_server(summary: str, port: str = "8001") -> bool:
-    """
-    Send summary to voice notification server (OpenAI TTS endpoint)
-
-    Args:
-        summary: The summary text to send
-        port: The port of the voice server (from VOICE_SERVER_PORT env var)
-
-    Returns:
-        True if successful, False otherwise
-    """
-    try:
-        url = f"http://127.0.0.1:{port}/v1/audio/speech"
-        da_name = os.environ.get("DA_NAME", "AI Assistant")
-        payload = {
-            "model": "tts-1",
-            "input": f"{da_name} Task Complete: {summary}",
-            "voice": "alloy",
-            "response_format": "mp3"
-        }
-
-        # Create request with urllib
-        req = urllib.request.Request(url, method='POST')
-        req.add_header('Content-Type', 'application/json')
-        data = json.dumps(payload).encode('utf-8')
-
-        response = urllib.request.urlopen(req, data=data, timeout=10)
-
-        if response.status == 200:
-            # Save audio to temp file
-            with tempfile.NamedTemporaryFile(suffix='.mp3', delete=False) as f:
-                f.write(response.read())
-                audio_file = f.name
-
-            # Play the audio
-            played = play_audio(audio_file)
-
-            # Send desktop notification
-            try:
-                subprocess.run(['notify-send', f'{da_name} Task Complete', summary],
-                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            except:
-                pass
-
-            # Clean up temp file
-            try:
-                os.unlink(audio_file)
-            except:
-                pass
-
-            if played:
-                print(f"Sent summary to voice server: {summary}", file=sys.stderr)
-                return True
-            else:
-                print("Audio generated but playback failed", file=sys.stderr)
-                return False
-        else:
-            print(f"Voice server responded with status {response.status}", file=sys.stderr)
-            return False
-
-    except urllib.error.HTTPError as e:
-        print(f"Voice server error (HTTP {e.code}): {e.reason}", file=sys.stderr)
-        return False
-    except urllib.error.URLError as e:
-        print(f"Could not reach voice server: {e.reason}", file=sys.stderr)
-        return False
-    except Exception as e:
-        print(f"Error sending to voice server: {e}", file=sys.stderr)
-        return False
-
-
-#########################[ end send_to_voice_server ]########################
-
 #########################[ start main ]######################################
 def main():
     """
@@ -357,8 +248,12 @@ def main():
             if assistant_response:
                 summary = generate_summary(assistant_response)
                 if summary:
-                    port = os.environ.get("VOICE_SERVER_PORT", "8001")
-                    send_to_voice_server(summary, port)
+                    da_name = os.environ.get("DA_NAME", "AI Assistant")
+                    send_tts_request(
+                        f"{da_name} Task Complete: {summary}",
+                        agent="da",
+                        title=f"{da_name} Task Complete",
+                    )
 
         return 0
 

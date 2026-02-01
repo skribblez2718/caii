@@ -10,6 +10,10 @@ from unittest.mock import patch
 
 import pytest
 
+from orchestration.state.algorithm_state import AlgorithmState
+from orchestration.state.algorithm_fsm import AlgorithmPhase
+from orchestration.entry_base import run_phase_entry, PhaseConfig
+
 
 class TestObserveEntryMain:
     """Tests for OBSERVE entry point using run_phase_entry."""
@@ -17,15 +21,13 @@ class TestObserveEntryMain:
     @pytest.mark.unit
     def test_exits_without_state_arg(self, monkeypatch, capsys):
         """Should exit with error when --state not provided."""
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
-
         monkeypatch.setattr(sys, "argv", ["entry.py"])
 
         with pytest.raises(SystemExit) as exc_info:
             run_phase_entry(
                 "dummy.py",
                 PhaseConfig(
-                    step_num=1,
+                    phase=AlgorithmPhase.INNER_LOOP,
                     phase_name="OBSERVE",
                     content_file="observe_phase.md",
                     description="OBSERVE Phase (Step 1)",
@@ -37,13 +39,11 @@ class TestObserveEntryMain:
     @pytest.mark.unit
     def test_exits_for_missing_session(self, mock_sessions_dir, monkeypatch, capsys):
         """Should exit with error when session doesn't exist."""
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
-
         with pytest.raises(SystemExit) as exc_info:
             run_phase_entry(
                 "dummy.py",
                 PhaseConfig(
-                    step_num=1,
+                    phase=AlgorithmPhase.INNER_LOOP,
                     phase_name="OBSERVE",
                     content_file="observe_phase.md",
                     description="OBSERVE Phase (Step 1)",
@@ -56,22 +56,22 @@ class TestObserveEntryMain:
     @pytest.mark.unit
     @pytest.mark.fsm
     def test_starts_observe_phase(self, mock_sessions_dir, monkeypatch, capsys):
-        """Should transition state to OBSERVE phase (step 1)."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
+        """Should transition state to OBSERVE phase (step 1).
 
-        # Create state at IDEAL_STATE phase
+        Note: Step 1 maps to INNER_LOOP in the current FSM, not OBSERVE directly.
+        The inner loop phases (OBSERVE, THINK, etc.) are conceptual steps within INNER_LOOP.
+        """
+        # Create state at INTERVIEW phase (predecessor of INNER_LOOP)
         state = AlgorithmState(user_query="Build API", session_id="observ123456")
-        state.start_phase(0)  # GATHER
-        state.start_phase(0.5)  # IDEAL_STATE
+        state.start_phase(AlgorithmPhase.GATHER)
+        state.start_phase(AlgorithmPhase.INTERVIEW)
         state.save()
 
         with patch("orchestration.utils.load_content", return_value="Test content"):
             run_phase_entry(
                 "dummy.py",
                 PhaseConfig(
-                    step_num=1,
+                    phase=AlgorithmPhase.INNER_LOOP,
                     phase_name="OBSERVE",
                     content_file="observe_phase.md",
                     description="OBSERVE Phase (Step 1)",
@@ -80,19 +80,17 @@ class TestObserveEntryMain:
             )
 
         loaded = AlgorithmState.load("observ123456")
-        assert loaded.current_phase == AlgorithmPhase.OBSERVE
+        # Step 1 maps to INNER_LOOP in the FSM
+        assert loaded.current_phase == AlgorithmPhase.INNER_LOOP
 
     @pytest.mark.unit
     @pytest.mark.critical
     def test_saves_state_before_print(self, mock_sessions_dir, monkeypatch, capsys):
         """Should save state BEFORE printing prompt."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
-
+        # Create state and transition to INTERVIEW (predecessor of INNER_LOOP)
         state = AlgorithmState(user_query="Test", session_id="saveobserv12")
-        state.fsm._state = AlgorithmPhase.IDEAL_STATE
-        state.fsm._history.append("IDEAL_STATE")
+        state._fsm._state = AlgorithmPhase.INTERVIEW
+        state._fsm._history.append("INTERVIEW")
         state.save()
 
         save_called = []
@@ -107,7 +105,7 @@ class TestObserveEntryMain:
                 run_phase_entry(
                     "dummy.py",
                     PhaseConfig(
-                        step_num=1,
+                        phase=AlgorithmPhase.INNER_LOOP,
                         phase_name="OBSERVE",
                         content_file="observe_phase.md",
                         description="OBSERVE Phase (Step 1)",

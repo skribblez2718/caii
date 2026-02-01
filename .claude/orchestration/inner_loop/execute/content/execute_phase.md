@@ -1,4 +1,4 @@
-# EXECUTE Phase (Step 5)
+# EXECUTE Phase
 
 **Task:** {user_query}
 
@@ -26,4 +26,4 @@ Run the plan and execute the task.
 
 Completed work ready for VERIFY phase.
 
-**Then:** Proceed to VERIFY (Step 8)
+**Then:** Proceed to VERIFY phase

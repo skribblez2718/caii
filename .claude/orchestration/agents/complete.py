@@ -6,13 +6,22 @@ CRITICAL: Verifies memory file exists and prints next agent directive for chaini
 """
 
 import argparse
+import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+# Bootstrap: Add .claude directory to path for orchestration imports
+_p = Path(__file__).resolve()
+while _p.name != "orchestration" and _p != _p.parent:
+    _p = _p.parent
+if _p.name == "orchestration" and str(_p.parent) not in sys.path:
+    sys.path.insert(0, str(_p.parent))
+del _p  # Clean up namespace
+
 from orchestration.agents.base import AgentExecutionState
-from orchestration.agents.config import get_agent_config, normalize_agent_name
+from orchestration.agents.config import get_agent_config
 from orchestration.agent_chain.memory import MemoryFile, verify_memory_file_exists
 
 
@@ -88,20 +97,36 @@ def agent_complete(agent_name: str) -> None:
     print()
     print(f"Duration: {duration.total_seconds():.1f}s")
 
-    # If in a flow, print directive for next agent
+    # If in a flow, call flow_continue.py to get actual next directive
     if flow_id:
         print()
         print("---")
         print()
-        print(f"Flow `{flow_id}` continues.")
-        print()
-        print(
-            f"**MANDATORY:** Execute the next agent in the flow "
-            f"(check flow definition for `{flow_id}`)."
+        # Call flow_continue.py to get actual next directive or FLOW_COMPLETE
+        flow_continue_script = Path(__file__).parent.parent / "flow_continue.py"
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(flow_continue_script),
+                "--task-id",
+                task_id,
+                "--completed-agent",
+                agent_name,
+            ],
+            capture_output=True,
+            text=True,
+            check=False,  # We handle errors explicitly below
         )
+        if result.returncode == 0:
+            # Print the continuation directive or FLOW_COMPLETE marker
+            print(result.stdout, end="")  # stdout already has newlines
+        else:
+            # Error from flow_continue.py
+            print(result.stderr, file=sys.stderr)
+            sys.exit(1)
 
 
-def verify_and_complete(
+def verify_and_complete(  # pylint: disable=unused-argument
     agent_name: str,
     task_id: str,
     state_path: Optional[Path] = None,

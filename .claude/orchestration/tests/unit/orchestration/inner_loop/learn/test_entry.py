@@ -10,6 +10,10 @@ from unittest.mock import patch
 
 import pytest
 
+from orchestration.state.algorithm_state import AlgorithmState
+from orchestration.state.algorithm_fsm import AlgorithmPhase
+from orchestration.entry_base import run_phase_entry, PhaseConfig
+
 
 class TestLearnEntryMain:
     """Tests for LEARN entry point using run_phase_entry."""
@@ -17,15 +21,13 @@ class TestLearnEntryMain:
     @pytest.mark.unit
     def test_exits_without_state_arg(self, monkeypatch, capsys):
         """Should exit with error when --state not provided."""
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
-
         monkeypatch.setattr(sys, "argv", ["entry.py"])
 
         with pytest.raises(SystemExit) as exc_info:
             run_phase_entry(
                 "dummy.py",
                 PhaseConfig(
-                    step_num=8.5,
+                    phase=AlgorithmPhase.LEARN,
                     phase_name="LEARN",
                     content_file="learn_phase.md",
                     description="LEARN Phase (Step 8.5)",
@@ -37,13 +39,11 @@ class TestLearnEntryMain:
     @pytest.mark.unit
     def test_exits_for_missing_session(self, mock_sessions_dir, monkeypatch, capsys):
         """Should exit with error when session doesn't exist."""
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
-
         with pytest.raises(SystemExit) as exc_info:
             run_phase_entry(
                 "dummy.py",
                 PhaseConfig(
-                    step_num=8.5,
+                    phase=AlgorithmPhase.LEARN,
                     phase_name="LEARN",
                     content_file="learn_phase.md",
                     description="LEARN Phase (Step 8.5)",
@@ -57,21 +57,17 @@ class TestLearnEntryMain:
     @pytest.mark.fsm
     def test_starts_learn_phase(self, mock_sessions_dir, monkeypatch, capsys):
         """Should transition state to LEARN phase (step 8.5)."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
-
-        # Create state at VERIFY phase
+        # Create state at VERIFY phase (predecessor of LEARN)
         state = AlgorithmState(user_query="Build API", session_id="learn1234567")
-        state.fsm._state = AlgorithmPhase.VERIFY
-        state.fsm._history.append("VERIFY")
+        state._fsm._state = AlgorithmPhase.VERIFY
+        state._fsm._history.append("VERIFY")
         state.save()
 
         with patch("orchestration.utils.load_content", return_value="Test content"):
             run_phase_entry(
                 "dummy.py",
                 PhaseConfig(
-                    step_num=8.5,
+                    phase=AlgorithmPhase.LEARN,
                     phase_name="LEARN",
                     content_file="learn_phase.md",
                     description="LEARN Phase (Step 8.5)",
@@ -86,13 +82,9 @@ class TestLearnEntryMain:
     @pytest.mark.critical
     def test_saves_state_before_print(self, mock_sessions_dir, monkeypatch, capsys):
         """Should save state BEFORE printing prompt."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
-
         state = AlgorithmState(user_query="Test", session_id="savelearn123")
-        state.fsm._state = AlgorithmPhase.VERIFY
-        state.fsm._history.append("VERIFY")
+        state._fsm._state = AlgorithmPhase.VERIFY
+        state._fsm._history.append("VERIFY")
         state.save()
 
         save_called = []
@@ -107,7 +99,7 @@ class TestLearnEntryMain:
                 run_phase_entry(
                     "dummy.py",
                     PhaseConfig(
-                        step_num=8.5,
+                        phase=AlgorithmPhase.LEARN,
                         phase_name="LEARN",
                         content_file="learn_phase.md",
                         description="LEARN Phase (Step 8.5)",

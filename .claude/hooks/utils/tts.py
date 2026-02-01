@@ -102,14 +102,16 @@ def play_audio(audio_file: str) -> bool:
             if result.returncode == 0:
                 return True
         except FileNotFoundError:
-            # Player not installed, try next
+            print(f"[tts] Audio player not found: {player_cmd[0]}", file=sys.stderr)
             continue
         except subprocess.TimeoutExpired:
-            print(f"Audio playback timed out with {player_cmd[0]}", file=sys.stderr)
+            print(f"[tts] Audio playback timed out with {player_cmd[0]}", file=sys.stderr)
             continue
-        except Exception:
+        except Exception as e:
+            print(f"[tts] Audio player {player_cmd[0]} failed: {e}", file=sys.stderr)
             continue
 
+    print("[tts] ERROR: No audio player available (tried: aplay, paplay, mpv, ffplay)", file=sys.stderr)
     return False
 
 
@@ -132,11 +134,13 @@ def send_tts_request(
         True if successful, False otherwise
 
     Environment Variables:
+        VOICE_SERVER_PROTOCOL: Protocol for voice server (default: http)
         VOICE_SERVER_HOST: Host for voice server (default: 127.0.0.1)
         VOICE_SERVER_PORT: Port for voice server (default: 8001)
         VOICE_SERVER_API_KEY: API key for authentication
         DA_NAME: Assistant name for notifications
     """
+    protocol = os.environ.get("VOICE_SERVER_PROTOCOL", "http")
     host = os.environ.get("VOICE_SERVER_HOST", "127.0.0.1")
     port = os.environ.get("VOICE_SERVER_PORT", "8001")
     api_key = os.environ.get("VOICE_SERVER_API_KEY", "")
@@ -146,7 +150,8 @@ def send_tts_request(
     voice = get_voice_for_agent(agent)
 
     try:
-        url = f"http://{host}:{port}/v1/audio/speech"
+        url = f"{protocol}://{host}:{port}/v1/audio/speech"
+        print(f"[tts] Sending request to {url} (voice={voice})", file=sys.stderr)
 
         payload = {
             "input": text,

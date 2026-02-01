@@ -297,7 +297,7 @@ def improve_prompt(prompt: str) -> Optional[str]:
     return None
 
 
-def handle_prompt_improvement(prompt: str, pai_dir: str) -> Tuple[bool, str]:
+def handle_prompt_improvement(prompt: str, caii_dir: str) -> Tuple[bool, str]:
     """
     Handle -i flag: improve prompt via external model.
 
@@ -306,7 +306,7 @@ def handle_prompt_improvement(prompt: str, pai_dir: str) -> Tuple[bool, str]:
 
     Args:
         prompt: The user's prompt (flags already stripped by parser)
-        pai_dir: CAII_DIRECTORY path for reasoning protocol
+        caii_dir: CAII_DIRECTORY path for reasoning protocol
 
     Returns:
         Tuple of (success, prompt_to_use) - prompt_to_use is improved or original
@@ -332,7 +332,7 @@ def handle_prompt_improvement(prompt: str, pai_dir: str) -> Tuple[bool, str]:
         return (False, prompt)
 
 
-def check_pending_dispatch(pai_dir: str) -> Tuple[bool, str]:
+def check_pending_dispatch(caii_dir: str) -> Tuple[bool, str]:
     """
     Check if there's a pending dispatch from a completed reasoning session.
 
@@ -340,14 +340,14 @@ def check_pending_dispatch(pai_dir: str) -> Tuple[bool, str]:
     directive printed by complete.py wasn't processed.
 
     Args:
-        pai_dir: CAII_DIRECTORY path
+        caii_dir: CAII_DIRECTORY path
 
     Returns:
         Tuple of (has_pending, dispatch_directive)
     """
     # Import ProtocolState to check for pending dispatch
     # Must add protocols directory to path for fully-qualified imports
-    protocols_path = Path(pai_dir) / ".claude/orchestration/protocols"
+    protocols_path = Path(caii_dir) / ".claude/orchestration/protocols"
     if str(protocols_path) not in sys.path:
         sys.path.insert(0, str(protocols_path))
 
@@ -417,13 +417,13 @@ def main() -> None:
             sys.exit(0)  # Empty prompt, nothing to do
 
         # Get CAII_DIRECTORY early (needed for prompt improvement)
-        pai_dir = os.environ.get("CAII_DIRECTORY")
-        if not pai_dir:
+        caii_dir = os.environ.get("CAII_DIRECTORY")
+        if not caii_dir:
             print("[hook] ERROR: CAII_DIRECTORY environment variable not set", file=sys.stderr)
             sys.exit(1)
 
-        if not Path(pai_dir).exists():
-            print(f"[hook] ERROR: CAII_DIRECTORY does not exist: {pai_dir}", file=sys.stderr)
+        if not Path(caii_dir).exists():
+            print(f"[hook] ERROR: CAII_DIRECTORY does not exist: {caii_dir}", file=sys.stderr)
             sys.exit(1)
 
         # Parse flags from prompt (order-independent)
@@ -442,7 +442,7 @@ def main() -> None:
         if parsed['improve']:
             print("[hook] Processing -i flag for prompt improvement", file=sys.stderr)
             try:
-                success, prompt = handle_prompt_improvement(prompt, pai_dir)
+                success, prompt = handle_prompt_improvement(prompt, caii_dir)
                 if success:
                     print("[hook] Prompt improvement succeeded", file=sys.stderr)
                 else:
@@ -459,7 +459,7 @@ def main() -> None:
             sys.exit(0)
 
         # # Call global orchestration entry point
-        # orchestration_entry = Path(pai_dir) / ".claude/orchestration/entry.py"
+        # orchestration_entry = Path(caii_dir) / ".claude/orchestration/entry.py"
         #
         # if orchestration_entry.exists():
         #     import subprocess

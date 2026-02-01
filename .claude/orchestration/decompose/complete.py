@@ -65,7 +65,9 @@ def complete_decomposition(
 
         # Resolve dependency IDs to session IDs
         dep_ids = subtask_def.get("dependencies", [])
-        resolved_deps = [id_mapping[dep_id] for dep_id in dep_ids if dep_id in id_mapping]
+        resolved_deps = [
+            id_mapping[dep_id] for dep_id in dep_ids if dep_id in id_mapping
+        ]
 
         parent_state.register_subtask(subtask_session_id, resolved_deps)
 
@@ -121,8 +123,7 @@ def on_subtask_complete(state: AlgorithmState) -> Optional[str]:
     if not ready_subtasks:
         # No ready subtasks but not all complete - waiting on dependencies
         return (
-            "WAITING: No subtasks ready. "
-            "Waiting for dependent subtasks to complete."
+            "WAITING: No subtasks ready. " "Waiting for dependent subtasks to complete."
         )
 
     # Route next ready subtask to GATHER

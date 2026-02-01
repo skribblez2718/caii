@@ -4,7 +4,7 @@
 
 - **Title:** Agent Registry
 - **Purpose:** Catalog of existing cognitive agents - 7 universal agents that handle all task workflows through domain-adaptive cognitive processing
-- **Description:** The PAI system uses 7 cognitive-domain agents that adapt to ANY task context rather than specialized agents for specific workflows. Each agent represents a fundamental cognitive function and adjusts its approach based on the domain (technical, personal, creative, professional, recreational).
+- **Description:** The CAII system uses 7 cognitive-domain agents that adapt to ANY task context rather than specialized agents for specific workflows. Each agent represents a fundamental cognitive function and adjusts its approach based on the domain (technical, personal, creative, professional, recreational).
 
 ## Agents
 

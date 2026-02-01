@@ -142,13 +142,15 @@ def build_agent_invocation_directive(
     if include_learnings_directive:
         directive_parts.append(build_learnings_directive(agent_name))
 
-    directive_parts.extend([
-        f"## Agent Invocation: {agent_name}",
-        "",
-        f"**Task ID:** `{task_id}`",
-        f"**Flow:** `{flow_id}`",
-        f"**Agent:** `{agent_name}` ({cognitive_function})",
-    ])
+    directive_parts.extend(
+        [
+            f"## Agent Invocation: {agent_name}",
+            "",
+            f"**Task ID:** `{task_id}`",
+            f"**Flow:** `{flow_id}`",
+            f"**Agent:** `{agent_name}` ({cognitive_function})",
+        ]
+    )
 
     if skill_name:
         directive_parts.append(f"**Skill:** `{skill_name}`")

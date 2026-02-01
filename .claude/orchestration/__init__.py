@@ -23,6 +23,21 @@ from orchestration.state import (
     AlgorithmState,
 )
 
+# Flow invoker exports
+from orchestration.flow_invoker import (
+    invoke_agent_flow,
+    get_flow_directive_info,
+    is_flow_complete,
+    get_flow_completion_status,
+)
+
+# Flow registry exports
+from orchestration.flow_registry import (
+    get_flow,
+    register_flow,
+    list_flows,
+)
+
 __all__ = [
     # Utilities
     "get_content_dir",
@@ -39,4 +54,13 @@ __all__ = [
     "AlgorithmPhase",
     "AlgorithmFSM",
     "AlgorithmState",
+    # Flow invoker
+    "invoke_agent_flow",
+    "get_flow_directive_info",
+    "is_flow_complete",
+    "get_flow_completion_status",
+    # Flow registry
+    "get_flow",
+    "register_flow",
+    "list_flows",
 ]

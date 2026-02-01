@@ -345,3 +345,144 @@ class TestFlowInvokerIntegration:
             assert flow.flow_id in result
             # All TDD flows have at least 2 agents
             assert "→" in result or len(flow.steps) == 1
+
+
+# ============================================================================
+# is_flow_complete Tests
+# ============================================================================
+
+
+@pytest.mark.unit
+class TestIsFlowComplete:
+    """Tests for is_flow_complete function."""
+
+    def test_is_flow_complete_returns_false_when_not_started(self):
+        """is_flow_complete should return False when flow hasn't started."""
+        from orchestration.flow_invoker import is_flow_complete
+
+        # No state exists for this task
+        result = is_flow_complete("nonexistent-task-id", "perform-tdd-red")
+
+        assert result is False
+
+    def test_is_flow_complete_returns_false_when_in_progress(self):
+        """is_flow_complete should return False when agents still pending."""
+        from orchestration.flow_invoker import is_flow_complete
+        from orchestration.agent_chain.state import ChainState, CHAIN_STATE_DIR
+
+        task_id = "test-in-progress-123"
+        state = ChainState(
+            task_id=task_id,
+            flow_id="perform-tdd-red",
+            skill_name="perform-tdd",
+            phase_id="red",
+            current_step_index=1,  # Only 1 agent done, RED has 4
+            completed_agents=["clarification"],
+        )
+        state.save()
+
+        try:
+            result = is_flow_complete(task_id, "perform-tdd-red")
+            assert result is False
+        finally:
+            state_file = CHAIN_STATE_DIR / f"chain-{task_id}.json"
+            if state_file.exists():
+                state_file.unlink()
+
+    def test_is_flow_complete_returns_true_when_all_agents_done(self):
+        """is_flow_complete should return True when all agents completed."""
+        from orchestration.flow_invoker import is_flow_complete
+        from orchestration.agent_chain.state import ChainState, CHAIN_STATE_DIR
+        from orchestration.skills.perform_tdd.flows import TDD_DOC_FLOW
+
+        task_id = "test-complete-789"
+        # DOC flow has 2 agents (analysis, generation)
+        state = ChainState(
+            task_id=task_id,
+            flow_id="perform-tdd-doc",
+            skill_name="perform-tdd",
+            phase_id="doc",
+            current_step_index=2,  # Both agents done
+            completed_agents=["analysis", "generation"],
+        )
+        state.save()
+
+        try:
+            result = is_flow_complete(task_id, "perform-tdd-doc")
+            assert result is True
+        finally:
+            state_file = CHAIN_STATE_DIR / f"chain-{task_id}.json"
+            if state_file.exists():
+                state_file.unlink()
+
+    def test_is_flow_complete_returns_false_for_wrong_flow_id(self):
+        """is_flow_complete should return False if state has different flow_id."""
+        from orchestration.flow_invoker import is_flow_complete
+        from orchestration.agent_chain.state import ChainState, CHAIN_STATE_DIR
+
+        task_id = "test-wrong-flow-456"
+        # State is for GREEN but we ask about RED
+        state = ChainState(
+            task_id=task_id,
+            flow_id="perform-tdd-green",
+            skill_name="perform-tdd",
+            phase_id="green",
+            current_step_index=3,
+            completed_agents=["analysis", "generation", "validation"],
+        )
+        state.save()
+
+        try:
+            result = is_flow_complete(task_id, "perform-tdd-red")
+            assert result is False
+        finally:
+            state_file = CHAIN_STATE_DIR / f"chain-{task_id}.json"
+            if state_file.exists():
+                state_file.unlink()
+
+
+# ============================================================================
+# get_flow_completion_status Tests
+# ============================================================================
+
+
+@pytest.mark.unit
+class TestGetFlowCompletionStatus:
+    """Tests for get_flow_completion_status function."""
+
+    def test_get_flow_completion_status_returns_error_for_missing_state(self):
+        """get_flow_completion_status should return error for missing state."""
+        from orchestration.flow_invoker import get_flow_completion_status
+
+        result = get_flow_completion_status("nonexistent", "perform-tdd-red")
+
+        assert result["is_complete"] is False
+        assert "error" in result
+
+    def test_get_flow_completion_status_returns_detailed_info(self):
+        """get_flow_completion_status should return detailed completion info."""
+        from orchestration.flow_invoker import get_flow_completion_status
+        from orchestration.agent_chain.state import ChainState, CHAIN_STATE_DIR
+
+        task_id = "test-status-detail"
+        state = ChainState(
+            task_id=task_id,
+            flow_id="perform-tdd-doc",
+            skill_name="perform-tdd",
+            phase_id="doc",
+            current_step_index=1,
+            completed_agents=["analysis"],
+        )
+        state.save()
+
+        try:
+            result = get_flow_completion_status(task_id, "perform-tdd-doc")
+
+            assert result["is_complete"] is False
+            assert result["completed_agents"] == ["analysis"]
+            assert result["total_agents"] == 2  # DOC has 2 agents
+            assert result["current_index"] == 1
+        finally:
+            state_file = CHAIN_STATE_DIR / f"chain-{task_id}.json"
+            if state_file.exists():
+                state_file.unlink()

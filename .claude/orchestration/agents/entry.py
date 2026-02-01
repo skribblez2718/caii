@@ -8,7 +8,6 @@ import argparse
 import sys
 import uuid
 from pathlib import Path
-from typing import Optional
 
 from orchestration.agents.base import AgentExecutionState
 from orchestration.agents.config import get_agent_config

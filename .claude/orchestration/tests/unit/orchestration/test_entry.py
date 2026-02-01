@@ -412,7 +412,9 @@ class TestMain:
         assert "Analyze: Build an API" in captured.out
 
     @pytest.mark.unit
-    def test_complexity_arg_triggers_routing(self, monkeypatch, mock_sessions_dir, capsys):
+    def test_complexity_arg_triggers_routing(
+        self, monkeypatch, mock_sessions_dir, capsys
+    ):
         """Should route when --complexity arg provided."""
         from orchestration import entry
 
@@ -432,7 +434,9 @@ class TestMain:
         assert len(session_files) == 1
 
     @pytest.mark.unit
-    def test_complexity_arg_trivial_routes_direct(self, monkeypatch, mock_sessions_dir, capsys):
+    def test_complexity_arg_trivial_routes_direct(
+        self, monkeypatch, mock_sessions_dir, capsys
+    ):
         """Should route to DA direct execution when complexity is trivial."""
         from orchestration import entry
 
@@ -450,7 +454,9 @@ class TestMain:
         assert len(session_files) == 0
 
     @pytest.mark.unit
-    def test_complexity_arg_complex_routes_decompose(self, monkeypatch, mock_sessions_dir, capsys):
+    def test_complexity_arg_complex_routes_decompose(
+        self, monkeypatch, mock_sessions_dir, capsys
+    ):
         """Should route to DECOMPOSE when complexity is complex."""
         from orchestration import entry
 

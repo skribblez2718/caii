@@ -19,6 +19,8 @@ if TYPE_CHECKING:
     from orchestration.state import AlgorithmState
     from orchestration.agent_chain.flow import AgentFlow
 
+from orchestration.state.algorithm_fsm import AlgorithmPhase
+
 
 @dataclass(frozen=True)
 class PhaseConfig:
@@ -26,8 +28,8 @@ class PhaseConfig:
     Immutable configuration for a phase entry point.
 
     Attributes:
-        step_num: FSM step number (0, 0.5, 1, 2, etc.)
-        phase_name: Human-readable name (e.g., "OBSERVE")
+        phase: AlgorithmPhase enum for FSM transitions
+        phase_name: Human-readable name (e.g., "OBSERVE") for display/logging
         content_file: Markdown file in content/ directory (used in legacy mode)
         description: Argparse description string
         extra_placeholders: Optional callable(state) -> dict for additional substitutions
@@ -36,7 +38,7 @@ class PhaseConfig:
         skill_content_dir: Path to skill's content directory for agent flow mode
     """
 
-    step_num: float
+    phase: AlgorithmPhase
     phase_name: str
     content_file: str
     description: str
@@ -73,7 +75,7 @@ def load_state_or_exit(session_id: str) -> "AlgorithmState":
 
 def start_phase_or_exit(
     state: "AlgorithmState",
-    step_num: float,
+    phase: AlgorithmPhase,
     phase_name: str,
 ) -> None:
     """
@@ -83,13 +85,13 @@ def start_phase_or_exit(
 
     Args:
         state: The AlgorithmState to transition
-        step_num: The step number to transition to
+        phase: The AlgorithmPhase enum to transition to
         phase_name: Human-readable phase name for error messages
 
     Raises:
         SystemExit: If transition fails (exits with code 1)
     """
-    if not state.start_phase(step_num):
+    if not state.start_phase(phase):
         print(f"ERROR: Cannot transition to {phase_name} phase", file=sys.stderr)
         print(f"Current phase: {state.current_phase.name}", file=sys.stderr)
         sys.exit(1)
@@ -143,7 +145,7 @@ def run_phase_entry(
     state = load_state_or_exit(args.state)
 
     # Start phase
-    start_phase_or_exit(state, config.step_num, config.phase_name)
+    start_phase_or_exit(state, config.phase, config.phase_name)
 
     # CRITICAL: Save state BEFORE printing directive
     state.save()

@@ -18,7 +18,7 @@ if _p.name == "orchestration" and str(_p.parent) not in sys.path:
 del _p  # Clean up namespace
 
 from orchestration.skills.perform_tdd.tdd_state import TDDPhase, TDDState
-from orchestration.skills.perform_tdd.flows import get_flow_for_phase, TDD_PHASE_FLOWS
+from orchestration.skills.perform_tdd.flows import get_flow_for_phase
 from orchestration.agent_chain.orchestrator import ChainOrchestrator
 from orchestration.utils import load_content, substitute_placeholders
 
@@ -75,7 +75,10 @@ def main() -> None:
     if args.perform_tdd_state:
         state = TDDState.load(args.perform_tdd_state)
         if not state:
-            print(f"ERROR: TDD session {args.perform_tdd_state} not found", file=sys.stderr)
+            print(
+                f"ERROR: TDD session {args.perform_tdd_state} not found",
+                file=sys.stderr,
+            )
             sys.exit(1)
     else:
         state = TDDState(

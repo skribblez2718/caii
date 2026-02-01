@@ -10,6 +10,10 @@ from unittest.mock import patch
 
 import pytest
 
+from orchestration.state.algorithm_state import AlgorithmState
+from orchestration.state.algorithm_fsm import AlgorithmPhase
+from orchestration.entry_base import run_phase_entry, PhaseConfig
+
 
 class TestPlanEntryMain:
     """Tests for PLAN entry point using run_phase_entry."""
@@ -17,15 +21,13 @@ class TestPlanEntryMain:
     @pytest.mark.unit
     def test_exits_without_state_arg(self, monkeypatch, capsys):
         """Should exit with error when --state not provided."""
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
-
         monkeypatch.setattr(sys, "argv", ["entry.py"])
 
         with pytest.raises(SystemExit) as exc_info:
             run_phase_entry(
                 "dummy.py",
                 PhaseConfig(
-                    step_num=3,
+                    phase=AlgorithmPhase.PLAN,
                     phase_name="PLAN",
                     content_file="plan_phase.md",
                     description="PLAN Phase (Step 3)",
@@ -37,13 +39,11 @@ class TestPlanEntryMain:
     @pytest.mark.unit
     def test_exits_for_missing_session(self, mock_sessions_dir, monkeypatch, capsys):
         """Should exit with error when session doesn't exist."""
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
-
         with pytest.raises(SystemExit) as exc_info:
             run_phase_entry(
                 "dummy.py",
                 PhaseConfig(
-                    step_num=3,
+                    phase=AlgorithmPhase.PLAN,
                     phase_name="PLAN",
                     content_file="plan_phase.md",
                     description="PLAN Phase (Step 3)",
@@ -57,21 +57,17 @@ class TestPlanEntryMain:
     @pytest.mark.fsm
     def test_starts_plan_phase(self, mock_sessions_dir, monkeypatch, capsys):
         """Should transition state to PLAN phase (step 3)."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
-
-        # Create state at THINK phase
+        # Create state at THINK phase (predecessor of PLAN)
         state = AlgorithmState(user_query="Build API", session_id="plan12345678")
-        state.fsm._state = AlgorithmPhase.THINK
-        state.fsm._history.append("THINK")
+        state._fsm._state = AlgorithmPhase.THINK
+        state._fsm._history.append("THINK")
         state.save()
 
         with patch("orchestration.utils.load_content", return_value="Test content"):
             run_phase_entry(
                 "dummy.py",
                 PhaseConfig(
-                    step_num=3,
+                    phase=AlgorithmPhase.PLAN,
                     phase_name="PLAN",
                     content_file="plan_phase.md",
                     description="PLAN Phase (Step 3)",
@@ -86,13 +82,9 @@ class TestPlanEntryMain:
     @pytest.mark.critical
     def test_saves_state_before_print(self, mock_sessions_dir, monkeypatch, capsys):
         """Should save state BEFORE printing prompt."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
-
         state = AlgorithmState(user_query="Test", session_id="saveplan12345")
-        state.fsm._state = AlgorithmPhase.THINK
-        state.fsm._history.append("THINK")
+        state._fsm._state = AlgorithmPhase.THINK
+        state._fsm._history.append("THINK")
         state.save()
 
         save_called = []
@@ -107,7 +99,7 @@ class TestPlanEntryMain:
                 run_phase_entry(
                     "dummy.py",
                     PhaseConfig(
-                        step_num=3,
+                        phase=AlgorithmPhase.PLAN,
                         phase_name="PLAN",
                         content_file="plan_phase.md",
                         description="PLAN Phase (Step 3)",

@@ -10,6 +10,10 @@ from unittest.mock import patch
 
 import pytest
 
+from orchestration.state.algorithm_state import AlgorithmState
+from orchestration.state.algorithm_fsm import AlgorithmPhase
+from orchestration.entry_base import run_phase_entry, PhaseConfig
+
 
 class TestBuildEntryMain:
     """Tests for BUILD entry point using run_phase_entry."""
@@ -17,15 +21,13 @@ class TestBuildEntryMain:
     @pytest.mark.unit
     def test_exits_without_state_arg(self, monkeypatch, capsys):
         """Should exit with error when --state not provided."""
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
-
         monkeypatch.setattr(sys, "argv", ["entry.py"])
 
         with pytest.raises(SystemExit) as exc_info:
             run_phase_entry(
                 "dummy.py",
                 PhaseConfig(
-                    step_num=4,
+                    phase=AlgorithmPhase.BUILD,
                     phase_name="BUILD",
                     content_file="build_phase.md",
                     description="BUILD Phase (Step 4)",
@@ -37,13 +39,11 @@ class TestBuildEntryMain:
     @pytest.mark.unit
     def test_exits_for_missing_session(self, mock_sessions_dir, monkeypatch, capsys):
         """Should exit with error when session doesn't exist."""
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
-
         with pytest.raises(SystemExit) as exc_info:
             run_phase_entry(
                 "dummy.py",
                 PhaseConfig(
-                    step_num=4,
+                    phase=AlgorithmPhase.BUILD,
                     phase_name="BUILD",
                     content_file="build_phase.md",
                     description="BUILD Phase (Step 4)",
@@ -57,21 +57,17 @@ class TestBuildEntryMain:
     @pytest.mark.fsm
     def test_starts_build_phase(self, mock_sessions_dir, monkeypatch, capsys):
         """Should transition state to BUILD phase (step 4)."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
-
-        # Create state at PLAN phase
+        # Create state at PLAN phase (predecessor of BUILD)
         state = AlgorithmState(user_query="Build API", session_id="build1234567")
-        state.fsm._state = AlgorithmPhase.PLAN
-        state.fsm._history.append("PLAN")
+        state._fsm._state = AlgorithmPhase.PLAN
+        state._fsm._history.append("PLAN")
         state.save()
 
         with patch("orchestration.utils.load_content", return_value="Test content"):
             run_phase_entry(
                 "dummy.py",
                 PhaseConfig(
-                    step_num=4,
+                    phase=AlgorithmPhase.BUILD,
                     phase_name="BUILD",
                     content_file="build_phase.md",
                     description="BUILD Phase (Step 4)",
@@ -86,13 +82,9 @@ class TestBuildEntryMain:
     @pytest.mark.critical
     def test_saves_state_before_print(self, mock_sessions_dir, monkeypatch, capsys):
         """Should save state BEFORE printing prompt."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
-
         state = AlgorithmState(user_query="Test", session_id="savebuild123")
-        state.fsm._state = AlgorithmPhase.PLAN
-        state.fsm._history.append("PLAN")
+        state._fsm._state = AlgorithmPhase.PLAN
+        state._fsm._history.append("PLAN")
         state.save()
 
         save_called = []
@@ -107,7 +99,7 @@ class TestBuildEntryMain:
                 run_phase_entry(
                     "dummy.py",
                     PhaseConfig(
-                        step_num=4,
+                        phase=AlgorithmPhase.BUILD,
                         phase_name="BUILD",
                         content_file="build_phase.md",
                         description="BUILD Phase (Step 4)",

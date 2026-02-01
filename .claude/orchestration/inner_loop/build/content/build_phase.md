@@ -1,4 +1,4 @@
-# BUILD Phase (Step 4)
+# BUILD Phase
 
 **Task:** {user_query}
 
@@ -28,4 +28,4 @@ Orchestrate agents to create artifacts.
 
 Artifacts ready for EXECUTE phase.
 
-**Then:** Proceed to EXECUTE (Step 5)
+**Then:** Proceed to EXECUTE phase

@@ -1,8 +1,8 @@
-PAI SYSTEM PHILOSOPHY AND COMPLIANCE GUIDE
-=========================================
+CAII SYSTEM PHILOSOPHY AND COMPLIANCE GUIDE
+===========================================
 
 PURPOSE
-This document defines our ABSOLUTE system design philosophy and MANDATORY compliance requirements for ALL modifications to the Personal AI Infrastructure (PAI). Reference this document BEFORE and DURING any system work to ensure architectural alignment.
+This document defines our ABSOLUTE system design philosophy and MANDATORY compliance requirements for ALL modifications to the Cognitive AI Infrastructure (CAII). Reference this document BEFORE and DURING any system work to ensure architectural alignment.
 
 CORE PHILOSOPHY
 ===============
@@ -115,13 +115,18 @@ All tasks route through one of two execution paths:
 
 FAIL-SECURE DESIGN:
 When uncertainty exists about routing, default to clarification
-Ambiguity always routes to cognitive processing via orchestrate-clarification
-Agent involvement is the DEFAULT providing reasoning, context, quality
+Ambiguity always routes to cognitive processing via clarification agent
+Agent involvement is the DEFAULT for non-trivial tasks - reasoning, context, quality
+
+COMPLEXITY-BASED ROUTING:
+- TRIVIAL tasks: DA direct execution (no state, no agents) - quick, obvious answers
+- SIMPLE/MODERATE tasks: Full algorithm with agent orchestration
+- COMPLEX/VERY_COMPLEX tasks: Decompose protocol before algorithm
 
 RATIONALE:
 Agents provide reasoning transparency, contextual awareness, and quality oversight
-Tools provide deterministic execution without understanding or validation
-Mix them only when triviality is certain and verified, not assumed
+Direct execution provides speed for trivial tasks where agents add no value
+Route to agents when triviality is uncertain - err on the side of thoroughness
 
 TARGET METRICS FOR WORKFLOW OPTIMIZATION:
 - Memory files: 300-400 lines maximum (down from 1,000-2,800)

@@ -115,7 +115,12 @@ Finalizes agent execution:
 2. Verifies memory file exists
 3. Updates state with completion metadata
 4. Prints completion marker
-5. Prints next agent directive (if in flow)
+5. **Calls `flow_continue.py` to get next directive** (if in a flow)
+
+When in a flow, `agent_complete()` invokes `flow_continue.py` via subprocess,
+which prints either:
+- The actual Task tool directive for the next agent, OR
+- `**FLOW_COMPLETE: {flow_id}**` when all agents have run
 
 ```python
 from orchestration.agents.complete import agent_complete
@@ -184,4 +189,4 @@ pytest tests/unit/orchestration/agents/ -v
 
 ---
 
-*Last updated: 2026-01-28*
+*Last updated: 2026-01-31*

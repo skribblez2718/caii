@@ -126,7 +126,10 @@ class TestLanguageDefaults:
         defaults = get_language_defaults("python")
 
         assert len(defaults.naming_conventions) > 0
-        assert "Modules" in defaults.naming_conventions or "Files" in defaults.naming_conventions
+        assert (
+            "Modules" in defaults.naming_conventions
+            or "Files" in defaults.naming_conventions
+        )
 
     def test_get_supported_languages(self):
         """Should return list of supported languages."""

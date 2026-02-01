@@ -159,6 +159,16 @@ python3 advance.py --perform-tdd-state {tdd_id} --no-flow
 
 **Note:** `advance.py` now uses `invoke_agent_flow()` from `flow_invoker.py` to trigger agent chains, ensuring consistent flow invocation across entry points.
 
+**Phase Advancement Gate:** Before advancing to the next phase, `advance.py` validates
+that the current phase's agent flow has completed all agents using `is_flow_complete()`.
+This prevents premature phase advancement when agents haven't all run.
+
+```python
+if not is_flow_complete(state.session_id, flow.flow_id):
+    print("ERROR: Cannot advance - flow not complete")
+    sys.exit(1)
+```
+
 ### complete.py
 
 Completes session or loops back:
@@ -226,4 +236,4 @@ pytest tests/unit/orchestration/skills/perform_tdd/ -v
 
 ---
 
-*Last updated: 2026-01-28*
+*Last updated: 2026-01-31*

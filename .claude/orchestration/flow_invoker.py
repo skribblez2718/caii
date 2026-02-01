@@ -9,7 +9,7 @@ All phase entry points and advance scripts should use this.
 """
 
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from orchestration.agent_chain.flow import AgentFlow
 from orchestration.agent_chain.orchestrator import ChainOrchestrator
@@ -71,3 +71,67 @@ def get_flow_directive_info(flow: AgentFlow) -> str:
     """
     agents = " → ".join(s.agent_name for s in flow.steps)
     return f"**Flow:** {flow.name} (`{flow.flow_id}`)\n**Agents:** {agents}"
+
+
+def is_flow_complete(task_id: str, flow_id: str) -> bool:
+    """
+    Check if a flow has completed all agents.
+
+    Used by advance scripts to validate before phase advancement.
+
+    Args:
+        task_id: Task/session ID
+        flow_id: Flow ID to check
+
+    Returns:
+        True if all agents in the flow have completed
+    """
+    from orchestration.agent_chain.state import ChainState
+    from orchestration.flow_registry import get_flow
+
+    state = ChainState.load(task_id)
+    if not state:
+        return False
+
+    # State might be from a different flow (e.g., previous phase)
+    if state.flow_id != flow_id:
+        return False
+
+    flow = get_flow(flow_id)
+    if not flow:
+        return False
+
+    return state.current_step_index >= len(flow.steps)
+
+
+def get_flow_completion_status(task_id: str, flow_id: str) -> Dict[str, Any]:
+    """
+    Get detailed flow completion status.
+
+    Args:
+        task_id: Task/session ID
+        flow_id: Flow ID to check
+
+    Returns:
+        Dict with completion info: is_complete, completed_agents, total_agents
+    """
+    from orchestration.agent_chain.state import ChainState
+    from orchestration.flow_registry import get_flow
+
+    state = ChainState.load(task_id)
+    flow = get_flow(flow_id)
+
+    if not state or not flow:
+        return {
+            "is_complete": False,
+            "completed_agents": [],
+            "total_agents": 0,
+            "error": "State or flow not found",
+        }
+
+    return {
+        "is_complete": state.current_step_index >= len(flow.steps),
+        "completed_agents": state.completed_agents,
+        "total_agents": len(flow.steps),
+        "current_index": state.current_step_index,
+    }

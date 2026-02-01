@@ -153,7 +153,9 @@ entry.py (5-category complexity analysis)
 | File | Purpose |
 |------|---------|
 | `entry_base.py` | Factory functions for phase entry points (PhaseConfig, run_phase_entry) |
-| `flow_invoker.py` | Shared utility for triggering agent flows (invoke_agent_flow) |
+| `flow_invoker.py` | Shared utility for triggering agent flows (invoke_agent_flow, is_flow_complete) |
+| `flow_registry.py` | Central registry of all agent flows by ID |
+| `flow_continue.py` | Continuation script for agent flow chaining |
 
 **Flow Invocation Pattern:**
 
@@ -274,7 +276,7 @@ Phase entry points use the factory pattern via `entry_base.py` to eliminate dupl
 
 ```python
 """
-PHASE Phase Entry Point (Step N)
+PHASE Phase Entry Point
 
 Description of what the phase does.
 """
@@ -291,6 +293,7 @@ if _p.name == "orchestration" and str(_p.parent) not in sys.path:
 del _p  # Clean up namespace
 
 from orchestration.entry_base import PhaseConfig, run_phase_entry
+from orchestration.state.algorithm_fsm import AlgorithmPhase
 
 # Step number for this phase (preserved for backward compatibility)
 STEP_NUM = 1
@@ -299,10 +302,10 @@ if __name__ == "__main__":
     run_phase_entry(
         __file__,
         PhaseConfig(
-            step_num=1,
+            phase=AlgorithmPhase.INNER_LOOP,
             phase_name="OBSERVE",
             content_file="observe_phase.md",
-            description="OBSERVE Phase (Step 1)",
+            description="OBSERVE Phase",
         ),
     )
 ```
@@ -311,8 +314,8 @@ if __name__ == "__main__":
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `step_num` | float | FSM step number (0, 0.5, 1, 2, etc.) |
-| `phase_name` | str | Human-readable name (e.g., "OBSERVE") |
+| `phase` | AlgorithmPhase | FSM phase enum for transitions |
+| `phase_name` | str | Human-readable name for display/logging (e.g., "OBSERVE") |
 | `content_file` | str | Markdown file in content/ directory (legacy mode) |
 | `description` | str | Argparse description string |
 | `extra_placeholders` | Optional[Callable] | Function(state) -> Dict for additional substitutions |
@@ -329,7 +332,7 @@ if __name__ == "__main__":
 | Function | Purpose |
 |----------|---------|
 | `load_state_or_exit(session_id)` | Load state or exit with error |
-| `start_phase_or_exit(state, step_num, phase_name)` | Transition phase or exit with error |
+| `start_phase_or_exit(state, phase, phase_name)` | Transition phase or exit with error |
 | `create_phase_parser(description)` | Create standard argparser with --state |
 | `run_phase_entry(caller_file, config, argv)` | Complete phase lifecycle orchestration |
 
@@ -343,6 +346,33 @@ Entry points run as standalone scripts (not modules), so they need to add `.clau
 | **Solution** | Walk up to find `orchestration/` directory, add its parent (`.claude/`) to path |
 | **Robust** | Works regardless of entry point depth (unlike hardcoded `.parent.parent.parent`) |
 | **Clean** | Deletes `_p` variable after use to avoid polluting module namespace |
+
+### Pylint Configuration
+
+Pylint is configured in `pyproject.toml` with these key settings:
+
+**Disabled Checks (intentional patterns):**
+
+| Check | Reason |
+|-------|--------|
+| `wrong-import-position` | Bootstrap pattern requires imports after sys.path modification |
+| `import-outside-toplevel` | Lazy imports avoid circular dependencies |
+| `global-statement` | Flow registry pattern requires global state |
+| `duplicate-code` | Declarative flow definitions share structure intentionally |
+
+**Increased Limits (complex architecture needs):**
+
+| Setting | Value | Reason |
+|---------|-------|--------|
+| `max-attributes` | 12 | State/config classes have many fields |
+| `max-args` | 12 | Builder functions have many optional params |
+| `max-positional-arguments` | 12 | Same as max-args |
+| `max-locals` | 18 | Complex entry points need more locals |
+| `max-statements` | 75 | Complex main functions |
+| `max-branches` | 18 | Complex entry points with many conditions |
+| `max-public-methods` | 30 | State classes have many accessors |
+
+**Target:** `make lint` = 10.00/10
 
 ### Required Patterns
 

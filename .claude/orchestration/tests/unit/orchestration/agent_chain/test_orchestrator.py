@@ -63,7 +63,13 @@ class TestChainOrchestratorLearnings:
     @patch("orchestration.agent_chain.orchestrator.build_agent_invocation_directive")
     @patch("orchestration.agent_chain.orchestrator.build_task_tool_directive")
     def test_first_agent_gets_learnings_directive(
-        self, mock_task_directive, mock_agent_directive, mock_config, simple_flow, tmp_path, monkeypatch
+        self,
+        mock_task_directive,
+        mock_agent_directive,
+        mock_config,
+        simple_flow,
+        tmp_path,
+        monkeypatch,
     ):
         """First invocation of an agent should include learnings directive."""
         monkeypatch.setattr(
@@ -91,8 +97,14 @@ class TestChainOrchestratorLearnings:
     @patch("orchestration.agent_chain.orchestrator.build_task_tool_directive")
     @patch("orchestration.agent_chain.orchestrator.verify_memory_file_exists")
     def test_second_invocation_same_agent_no_learnings(
-        self, mock_verify, mock_task_directive, mock_agent_directive, mock_config,
-        flow_with_repeated_agent, tmp_path, monkeypatch
+        self,
+        mock_verify,
+        mock_task_directive,
+        mock_agent_directive,
+        mock_config,
+        flow_with_repeated_agent,
+        tmp_path,
+        monkeypatch,
     ):
         """Second invocation of same agent should NOT include learnings directive."""
         monkeypatch.setattr(
@@ -134,8 +146,14 @@ class TestChainOrchestratorLearnings:
     @patch("orchestration.agent_chain.orchestrator.build_task_tool_directive")
     @patch("orchestration.agent_chain.orchestrator.verify_memory_file_exists")
     def test_different_agents_each_get_learnings(
-        self, mock_verify, mock_task_directive, mock_agent_directive, mock_config,
-        simple_flow, tmp_path, monkeypatch
+        self,
+        mock_verify,
+        mock_task_directive,
+        mock_agent_directive,
+        mock_config,
+        simple_flow,
+        tmp_path,
+        monkeypatch,
     ):
         """Each different agent should get learnings directive on first invocation."""
         monkeypatch.setattr(
@@ -238,9 +256,7 @@ class TestChainOrchestratorBasic:
         assert "MANDATORY" in directive
 
     @patch("orchestration.agent_chain.orchestrator.get_agent_config")
-    def test_get_current_step(
-        self, mock_config, simple_flow, tmp_path, monkeypatch
-    ):
+    def test_get_current_step(self, mock_config, simple_flow, tmp_path, monkeypatch):
         """get_current_step should return the current step."""
         monkeypatch.setattr(
             "orchestration.agent_chain.state.CHAIN_STATE_DIR",

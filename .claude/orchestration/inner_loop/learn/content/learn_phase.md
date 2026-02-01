@@ -1,4 +1,4 @@
-# LEARN Phase (Step 8b)
+# LEARN Phase
 
 **Task:** {user_query}
 

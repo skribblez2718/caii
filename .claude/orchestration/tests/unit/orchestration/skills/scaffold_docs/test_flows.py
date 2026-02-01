@@ -104,16 +104,22 @@ class TestScaffoldDocsFlows:
         from orchestration.skills.scaffold_docs.flows import SCAFFOLD_FLOW
 
         # Analysis should depend on clarification
-        analysis_step = next(s for s in SCAFFOLD_FLOW.steps if s.agent_name == "analysis")
+        analysis_step = next(
+            s for s in SCAFFOLD_FLOW.steps if s.agent_name == "analysis"
+        )
         assert "clarification" in analysis_step.predecessors
 
         # Synthesis should depend on multiple predecessors
-        synthesis_step = next(s for s in SCAFFOLD_FLOW.steps if s.agent_name == "synthesis")
+        synthesis_step = next(
+            s for s in SCAFFOLD_FLOW.steps if s.agent_name == "synthesis"
+        )
         assert "clarification" in synthesis_step.predecessors
         assert "analysis" in synthesis_step.predecessors
 
         # Validation should see all prior work
-        validation_step = next(s for s in SCAFFOLD_FLOW.steps if s.agent_name == "validation")
+        validation_step = next(
+            s for s in SCAFFOLD_FLOW.steps if s.agent_name == "validation"
+        )
         assert len(validation_step.predecessors) >= 2
 
 

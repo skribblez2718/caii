@@ -10,6 +10,10 @@ from unittest.mock import patch
 
 import pytest
 
+from orchestration.state.algorithm_state import AlgorithmState
+from orchestration.state.algorithm_fsm import AlgorithmPhase
+from orchestration.entry_base import run_phase_entry, PhaseConfig
+
 
 class TestThinkEntryMain:
     """Tests for THINK entry point using run_phase_entry."""
@@ -17,15 +21,13 @@ class TestThinkEntryMain:
     @pytest.mark.unit
     def test_exits_without_state_arg(self, monkeypatch, capsys):
         """Should exit with error when --state not provided."""
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
-
         monkeypatch.setattr(sys, "argv", ["entry.py"])
 
         with pytest.raises(SystemExit) as exc_info:
             run_phase_entry(
                 "dummy.py",
                 PhaseConfig(
-                    step_num=2,
+                    phase=AlgorithmPhase.THINK,
                     phase_name="THINK",
                     content_file="think_phase.md",
                     description="THINK Phase (Step 2)",
@@ -37,13 +39,11 @@ class TestThinkEntryMain:
     @pytest.mark.unit
     def test_exits_for_missing_session(self, mock_sessions_dir, monkeypatch, capsys):
         """Should exit with error when session doesn't exist."""
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
-
         with pytest.raises(SystemExit) as exc_info:
             run_phase_entry(
                 "dummy.py",
                 PhaseConfig(
-                    step_num=2,
+                    phase=AlgorithmPhase.THINK,
                     phase_name="THINK",
                     content_file="think_phase.md",
                     description="THINK Phase (Step 2)",
@@ -57,21 +57,17 @@ class TestThinkEntryMain:
     @pytest.mark.fsm
     def test_starts_think_phase(self, mock_sessions_dir, monkeypatch, capsys):
         """Should transition state to THINK phase (step 2)."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
-
-        # Create state at OBSERVE phase
+        # Create state at OBSERVE phase (predecessor of THINK)
         state = AlgorithmState(user_query="Build API", session_id="think1234567")
-        state.fsm._state = AlgorithmPhase.OBSERVE
-        state.fsm._history.append("OBSERVE")
+        state._fsm._state = AlgorithmPhase.OBSERVE
+        state._fsm._history.append("OBSERVE")
         state.save()
 
         with patch("orchestration.utils.load_content", return_value="Test content"):
             run_phase_entry(
                 "dummy.py",
                 PhaseConfig(
-                    step_num=2,
+                    phase=AlgorithmPhase.THINK,
                     phase_name="THINK",
                     content_file="think_phase.md",
                     description="THINK Phase (Step 2)",
@@ -86,13 +82,9 @@ class TestThinkEntryMain:
     @pytest.mark.critical
     def test_saves_state_before_print(self, mock_sessions_dir, monkeypatch, capsys):
         """Should save state BEFORE printing prompt."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
-
         state = AlgorithmState(user_query="Test", session_id="savethink123")
-        state.fsm._state = AlgorithmPhase.OBSERVE
-        state.fsm._history.append("OBSERVE")
+        state._fsm._state = AlgorithmPhase.OBSERVE
+        state._fsm._history.append("OBSERVE")
         state.save()
 
         save_called = []
@@ -107,7 +99,7 @@ class TestThinkEntryMain:
                 run_phase_entry(
                     "dummy.py",
                     PhaseConfig(
-                        step_num=2,
+                        phase=AlgorithmPhase.THINK,
                         phase_name="THINK",
                         content_file="think_phase.md",
                         description="THINK Phase (Step 2)",

@@ -1,4 +1,4 @@
-# THINK Phase (Step 2)
+# THINK Phase
 
 **Task:** {user_query}
 
@@ -19,4 +19,4 @@ Apply chain of thought reasoning to break down the problem.
 
 A reasoned analysis that feeds into PLAN phase.
 
-**Then:** Proceed to PLAN (Step 3)
+**Then:** Proceed to PLAN phase

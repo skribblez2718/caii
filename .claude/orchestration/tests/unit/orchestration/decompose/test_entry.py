@@ -129,9 +129,7 @@ class TestDecomposeEntry:
         assert "clarification" in captured.out
 
     @pytest.mark.unit
-    def test_decompose_entry_no_flow_mode(
-        self, mock_sessions_dir, monkeypatch, capsys
-    ):
+    def test_decompose_entry_no_flow_mode(self, mock_sessions_dir, monkeypatch, capsys):
         """Entry point with --no-flow should print legacy status."""
         from orchestration.decompose import entry as decompose_entry
         from orchestration.state.algorithm_state import AlgorithmState

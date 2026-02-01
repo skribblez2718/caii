@@ -13,6 +13,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from orchestration.state.algorithm_fsm import AlgorithmPhase
+
 # ============================================================================
 # PhaseConfig Tests
 # ============================================================================
@@ -27,13 +29,13 @@ class TestPhaseConfig:
         from orchestration.entry_base import PhaseConfig
 
         config = PhaseConfig(
-            step_num=1,
+            phase=AlgorithmPhase.OBSERVE,
             phase_name="OBSERVE",
             content_file="observe_phase.md",
             description="OBSERVE Phase (Step 1)",
         )
 
-        assert config.step_num == 1
+        assert config.phase == AlgorithmPhase.OBSERVE
         assert config.phase_name == "OBSERVE"
         assert config.content_file == "observe_phase.md"
         assert config.description == "OBSERVE Phase (Step 1)"
@@ -43,34 +45,40 @@ class TestPhaseConfig:
         from orchestration.entry_base import PhaseConfig
 
         config = PhaseConfig(
-            step_num=1,
+            phase=AlgorithmPhase.OBSERVE,
             phase_name="OBSERVE",
             content_file="observe_phase.md",
             description="Test",
         )
 
         with pytest.raises(AttributeError):
-            config.step_num = 2  # type: ignore
+            config.phase = AlgorithmPhase.THINK  # type: ignore
 
-    def test_phase_config_float_step_num(self):
-        """PhaseConfig should support float step numbers (e.g., 0.5)."""
+    def test_phase_config_all_algorithm_phases(self):
+        """PhaseConfig should support all AlgorithmPhase values."""
         from orchestration.entry_base import PhaseConfig
 
-        config = PhaseConfig(
-            step_num=0.5,
-            phase_name="IDEAL_STATE",
-            content_file="ideal_state.md",
-            description="IDEAL STATE Phase",
-        )
-
-        assert config.step_num == 0.5
+        # Test a few different phases
+        for phase in [
+            AlgorithmPhase.GATHER,
+            AlgorithmPhase.INTERVIEW,
+            AlgorithmPhase.VERIFY,
+            AlgorithmPhase.LEARN,
+        ]:
+            config = PhaseConfig(
+                phase=phase,
+                phase_name=phase.name,
+                content_file="test.md",
+                description=f"{phase.name} Phase",
+            )
+            assert config.phase == phase
 
     def test_phase_config_extra_placeholders_optional(self):
         """PhaseConfig should allow optional extra_placeholders."""
         from orchestration.entry_base import PhaseConfig
 
         config = PhaseConfig(
-            step_num=1,
+            phase=AlgorithmPhase.OBSERVE,
             phase_name="TEST",
             content_file="test.md",
             description="Test",
@@ -86,7 +94,7 @@ class TestPhaseConfig:
             return {"task_id": state.session_id}
 
         config = PhaseConfig(
-            step_num=8,
+            phase=AlgorithmPhase.VERIFY,
             phase_name="VERIFY",
             content_file="verify.md",
             description="VERIFY Phase",
@@ -158,11 +166,9 @@ class TestStartPhaseOrExit:
 
         state = AlgorithmState(user_query="test")
         # INITIALIZED -> GATHER is valid
-        start_phase_or_exit(state, step_num=0, phase_name="GATHER")
+        start_phase_or_exit(state, phase=AlgorithmPhase.GATHER, phase_name="GATHER")
 
         # Should not raise, and state should be updated
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-
         assert state.current_phase == AlgorithmPhase.GATHER
 
     def test_start_phase_invalid_transition_exits(self, mock_sessions_dir):
@@ -173,7 +179,9 @@ class TestStartPhaseOrExit:
         state = AlgorithmState(user_query="test")
         # INITIALIZED -> OBSERVE is invalid (must go through GATHER first)
         with pytest.raises(SystemExit) as exc_info:
-            start_phase_or_exit(state, step_num=1, phase_name="OBSERVE")
+            start_phase_or_exit(
+                state, phase=AlgorithmPhase.OBSERVE, phase_name="OBSERVE"
+            )
 
         assert exc_info.value.code == 1
 
@@ -185,7 +193,9 @@ class TestStartPhaseOrExit:
         state = AlgorithmState(user_query="test")
 
         with pytest.raises(SystemExit):
-            start_phase_or_exit(state, step_num=1, phase_name="OBSERVE")
+            start_phase_or_exit(
+                state, phase=AlgorithmPhase.OBSERVE, phase_name="OBSERVE"
+            )
 
         captured = capsys.readouterr()
         assert "OBSERVE" in captured.err
@@ -276,7 +286,7 @@ class TestRunPhaseEntry:
         caller_file = tmp_path / "entry.py"
 
         config = PhaseConfig(
-            step_num=0,
+            phase=AlgorithmPhase.GATHER,
             phase_name="GATHER",
             content_file="test_phase.md",
             description="Test Phase",
@@ -306,7 +316,7 @@ class TestRunPhaseEntry:
         caller_file = tmp_path / "entry.py"
 
         config = PhaseConfig(
-            step_num=0,
+            phase=AlgorithmPhase.GATHER,
             phase_name="GATHER",
             content_file="test.md",
             description="Test",
@@ -348,7 +358,7 @@ class TestRunPhaseEntry:
         caller_file = tmp_path / "entry.py"
 
         config = PhaseConfig(
-            step_num=0,
+            phase=AlgorithmPhase.GATHER,
             phase_name="GATHER",
             content_file="test.md",
             description="Test",
@@ -382,7 +392,7 @@ class TestRunPhaseEntry:
             return {"custom_field": "custom_value"}
 
         config = PhaseConfig(
-            step_num=0,
+            phase=AlgorithmPhase.GATHER,
             phase_name="GATHER",
             content_file="test.md",
             description="Test",
@@ -407,7 +417,7 @@ class TestRunPhaseEntry:
         caller_file = tmp_path / "entry.py"
 
         config = PhaseConfig(
-            step_num=0,
+            phase=AlgorithmPhase.GATHER,
             phase_name="GATHER",
             content_file="test.md",
             description="Test",
@@ -436,7 +446,7 @@ class TestRunPhaseEntry:
 
         # Try to transition to OBSERVE without going through GATHER first
         config = PhaseConfig(
-            step_num=1,  # OBSERVE
+            phase=AlgorithmPhase.OBSERVE,
             phase_name="OBSERVE",
             content_file="test.md",
             description="Test",
@@ -481,7 +491,7 @@ class TestPhaseConfigAgentFlow:
         )
 
         config = PhaseConfig(
-            step_num=1,
+            phase=AlgorithmPhase.OBSERVE,
             phase_name="TEST",
             content_file="test.md",
             description="Test Phase",
@@ -499,7 +509,7 @@ class TestPhaseConfigAgentFlow:
         from orchestration.entry_base import PhaseConfig
 
         config = PhaseConfig(
-            step_num=1,
+            phase=AlgorithmPhase.OBSERVE,
             phase_name="TEST",
             content_file="test.md",
             description="Test",
@@ -548,7 +558,7 @@ class TestRunPhaseEntryAgentFlow:
         caller_file = tmp_path / "entry.py"
 
         config = PhaseConfig(
-            step_num=0,
+            phase=AlgorithmPhase.GATHER,
             phase_name="GATHER",
             content_file="unused.md",  # Won't be used in flow mode
             description="Test",
@@ -604,7 +614,7 @@ class TestRunPhaseEntryAgentFlow:
         caller_file = tmp_path / "entry.py"
 
         config = PhaseConfig(
-            step_num=0,
+            phase=AlgorithmPhase.GATHER,
             phase_name="GATHER",
             content_file="unused.md",
             description="Test",
@@ -640,7 +650,7 @@ class TestRunPhaseEntryAgentFlow:
         caller_file = tmp_path / "entry.py"
 
         config = PhaseConfig(
-            step_num=0,
+            phase=AlgorithmPhase.GATHER,
             phase_name="GATHER",
             content_file="test.md",
             description="Test",
@@ -688,7 +698,7 @@ class TestRunPhaseEntryAgentFlow:
         caller_file = tmp_path / "entry.py"
 
         config = PhaseConfig(
-            step_num=0,
+            phase=AlgorithmPhase.GATHER,
             phase_name="GATHER",
             content_file="unused.md",
             description="Test",

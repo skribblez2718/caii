@@ -6,6 +6,8 @@ This project is built upon the foundational work and inspiration from **Daniel M
 
 [danielmiessler/Personal_AI_Infrastructure](https://github.com/danielmiessler/Personal_AI_Infrastructure/)
 
+> **⚠️ WARNING: This project is under significant redesign and enhancement. APIs, protocols, and directory structures may change without notice.**
+
 ---
 
 ![Cognitive Augmented Intelligence Infrastructure](img/caii.png)

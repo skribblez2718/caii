@@ -321,6 +321,53 @@ Learnings injection is handled automatically by `ChainOrchestrator._build_direct
 
 ---
 
+## Flow Continuation
+
+When an agent completes, the flow continues via `flow_continue.py`:
+
+```
+Agent completes
+      │
+      ▼
+agents/complete.py
+      │
+      ▼ (subprocess call)
+flow_continue.py --task-id <id> --completed-agent <name>
+      │
+      ├── Load ChainState
+      ├── Look up flow in flow_registry
+      ├── Call orchestrator.get_next_directive()
+      │
+      ├── If more agents → Print Task tool directive
+      └── If done → Print FLOW_COMPLETE marker
+```
+
+### Flow Registry
+
+All flows are registered in `flow_registry.py` for ID-based lookup:
+
+```python
+from orchestration.flow_registry import get_flow, list_flows
+
+flow = get_flow("perform-tdd-red")  # Returns AgentFlow
+all_ids = list_flows()  # Returns ["perform-tdd-red", ...]
+```
+
+### FLOW_COMPLETE Marker
+
+When all agents in a flow have completed, `flow_continue.py` prints:
+
+```
+**FLOW_COMPLETE: {flow_id}**
+
+All agents in flow have completed.
+Ready for {skill_name} phase advancement.
+```
+
+This unambiguous marker signals to DA that the current phase is ready for advancement.
+
+---
+
 ## Critical Invariants
 
 ```
@@ -359,4 +406,4 @@ Learnings injection is handled automatically by `ChainOrchestrator._build_direct
 
 ---
 
-*Last updated: 2026-01-28*
+*Last updated: 2026-01-31*

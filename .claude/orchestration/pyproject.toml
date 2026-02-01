@@ -60,7 +60,31 @@ disable = [
     "missing-class-docstring",
     "missing-function-docstring",
     "too-few-public-methods",
+    # Bootstrap pattern requires imports after sys.path modification
+    "wrong-import-position",
+    # Lazy imports to avoid circular dependencies
+    "import-outside-toplevel",
+    # Flow registry pattern requires global state
+    "global-statement",
+    # Duplicate code in flows is intentional (declarative pattern)
+    "duplicate-code",
 ]
+
+[tool.pylint.design]
+# State/config classes need more attributes
+max-attributes = 12
+# Builder functions need more arguments (invoker.build_agent_invocation_directive)
+max-args = 12
+# Flow handlers need more positional args
+max-positional-arguments = 12
+# Complex entry points need more locals
+max-locals = 18
+# Complex main functions need more statements
+max-statements = 75
+# Complex entry points need more branches
+max-branches = 18
+# State classes have many methods
+max-public-methods = 30
 
 [tool.mypy]
 python_version = "3.11"

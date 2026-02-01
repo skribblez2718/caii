@@ -90,11 +90,14 @@ class TestCompleteDecomposition:
         complete_decomposition(parent, subtasks)
 
         reloaded = AlgorithmState.load("deps12345678")
-        # First subtask has no dependencies
-        assert reloaded.subtasks[0]["dependencies"] == []
-        # Second subtask depends on first
-        # Note: dependencies are stored as subtask IDs (session IDs)
-        assert len(reloaded.subtasks[1]["dependencies"]) == 1
+        # Should have 2 subtasks registered
+        assert len(reloaded.subtasks) == 2
+        # Find the subtask that has dependencies (it depends on the other one)
+        subtask_with_deps = [
+            info for info in reloaded.subtasks.values() if len(info["dependencies"]) > 0
+        ]
+        assert len(subtask_with_deps) == 1
+        assert len(subtask_with_deps[0]["dependencies"]) == 1
 
     def test_complete_decomposition_returns_gather_directive(
         self, mock_sessions_dir, monkeypatch
@@ -180,10 +183,10 @@ class TestOnSubtaskComplete:
             session_id="parent654321",
             complexity="complex",
         )
-        parent.subtasks = [
-            {"id": "subtask00001", "dependencies": [], "status": "pending"},
-            {"id": "subtask00002", "dependencies": ["subtask00001"], "status": "pending"},
-        ]
+        parent.subtasks = {
+            "subtask00001": {"dependencies": [], "complete": False},
+            "subtask00002": {"dependencies": ["subtask00001"], "complete": False},
+        }
         parent.save()
 
         # Create subtask state
@@ -201,7 +204,7 @@ class TestOnSubtaskComplete:
 
         # Reload parent and check
         reloaded_parent = AlgorithmState.load("parent654321")
-        assert reloaded_parent.subtasks[0]["status"] == "completed"
+        assert reloaded_parent.subtasks["subtask00001"]["complete"] is True
 
     def test_on_subtask_complete_returns_next_subtask_directive(
         self, mock_sessions_dir, monkeypatch
@@ -216,10 +219,10 @@ class TestOnSubtaskComplete:
             session_id="parent111222",
             complexity="complex",
         )
-        parent.subtasks = [
-            {"id": "sub001aaaaaa", "dependencies": [], "status": "pending"},
-            {"id": "sub002bbbbbb", "dependencies": ["sub001aaaaaa"], "status": "pending"},
-        ]
+        parent.subtasks = {
+            "sub001aaaaaa": {"dependencies": [], "complete": False},
+            "sub002bbbbbb": {"dependencies": ["sub001aaaaaa"], "complete": False},
+        }
         parent.save()
 
         # Create and complete first subtask
@@ -251,9 +254,9 @@ class TestOnSubtaskComplete:
             session_id="parent333444",
             complexity="complex",
         )
-        parent.subtasks = [
-            {"id": "onlysub12345", "dependencies": [], "status": "pending"},
-        ]
+        parent.subtasks = {
+            "onlysub12345": {"dependencies": [], "complete": False},
+        }
         parent.save()
 
         # Create subtask
@@ -308,10 +311,10 @@ class TestTriggerAggregation:
             session_id="aggr12345678",
             complexity="complex",
         )
-        parent.subtasks = [
-            {"id": "sub1_1234567", "dependencies": [], "status": "completed"},
-            {"id": "sub2_1234567", "dependencies": [], "status": "completed"},
-        ]
+        parent.subtasks = {
+            "sub1_1234567": {"dependencies": [], "complete": True},
+            "sub2_1234567": {"dependencies": [], "complete": True},
+        }
         parent.save()
 
         result = trigger_aggregation(parent)
@@ -332,9 +335,9 @@ class TestTriggerAggregation:
             session_id="parentsess12",
             complexity="complex",
         )
-        parent.subtasks = [
-            {"id": "sub_done_123", "dependencies": [], "status": "completed"},
-        ]
+        parent.subtasks = {
+            "sub_done_123": {"dependencies": [], "complete": True},
+        }
         parent.save()
 
         result = trigger_aggregation(parent)
@@ -358,11 +361,11 @@ class TestSubtaskDependencyOrdering:
             session_id="parallel1234",
             complexity="complex",
         )
-        parent.subtasks = [
-            {"id": "ind1_1234567", "dependencies": [], "status": "pending"},
-            {"id": "ind2_1234567", "dependencies": [], "status": "pending"},
-            {"id": "ind3_1234567", "dependencies": [], "status": "pending"},
-        ]
+        parent.subtasks = {
+            "ind1_1234567": {"dependencies": [], "complete": False},
+            "ind2_1234567": {"dependencies": [], "complete": False},
+            "ind3_1234567": {"dependencies": [], "complete": False},
+        }
         parent.save()
 
         ready = parent.get_ready_subtasks()
@@ -381,10 +384,10 @@ class TestSubtaskDependencyOrdering:
             session_id="seq123456789",
             complexity="complex",
         )
-        parent.subtasks = [
-            {"id": "first_123456", "dependencies": [], "status": "pending"},
-            {"id": "second_12345", "dependencies": ["first_123456"], "status": "pending"},
-        ]
+        parent.subtasks = {
+            "first_123456": {"dependencies": [], "complete": False},
+            "second_12345": {"dependencies": ["first_123456"], "complete": False},
+        }
         parent.save()
 
         ready_before = parent.get_ready_subtasks()

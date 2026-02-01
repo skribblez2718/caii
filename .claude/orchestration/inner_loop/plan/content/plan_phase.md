@@ -1,4 +1,4 @@
-# PLAN Phase (Step 3)
+# PLAN Phase
 
 **Task:** {user_query}
 
@@ -19,4 +19,4 @@ Explore solution space with tree of thought planning.
 
 A concrete plan with ordered steps that feeds into BUILD phase.
 
-**Then:** Proceed to BUILD (Step 4)
+**Then:** Proceed to BUILD phase

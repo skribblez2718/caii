@@ -1,4 +1,4 @@
-# OBSERVE Phase (Step 1)
+# OBSERVE Phase
 
 **Task:** {user_query}
 
@@ -19,4 +19,4 @@ Semantic understanding of the task before reasoning begins.
 
 Produce a semantic model of the task that feeds into THINK phase.
 
-**Then:** Proceed to THINK (Step 2)
+**Then:** Proceed to THINK phase

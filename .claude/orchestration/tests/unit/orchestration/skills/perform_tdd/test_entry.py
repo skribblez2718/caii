@@ -141,7 +141,11 @@ class TestTDDAdvanceModule:
         state.advance_to_phase(TDDPhase.RED)
         state.save()
 
-        with patch.object(sys, "argv", ["advance.py", "--perform-tdd-state", state.session_id]):
+        with patch.object(
+            sys,
+            "argv",
+            ["advance.py", "--perform-tdd-state", state.session_id, "--no-flow"],
+        ):
             advance_module.main()
 
         # Reload and verify
@@ -170,6 +174,7 @@ class TestTDDAdvanceModule:
                 state.session_id,
                 "--output",
                 '{"test_file": "test_foo.py"}',
+                "--no-flow",
             ],
         ):
             advance_module.main()
@@ -232,7 +237,9 @@ class TestTDDCompleteModule:
         state.save()
 
         with patch.object(
-            sys, "argv", ["complete.py", "--perform-tdd-state", state.session_id, "--loop-back"]
+            sys,
+            "argv",
+            ["complete.py", "--perform-tdd-state", state.session_id, "--loop-back"],
         ):
             complete_module.main()
 

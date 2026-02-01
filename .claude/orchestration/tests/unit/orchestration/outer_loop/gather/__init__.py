@@ -1,1 +1,1 @@
-"""Unit tests for gather phase."""
+"""GATHER phase unit tests."""

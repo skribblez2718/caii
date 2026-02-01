@@ -5,11 +5,11 @@ load-core-context.py
 Purpose
 -------
 Automatically inject the DA.md file contents as a system-reminder at session
-start, providing PAI core context directly to Claude.
+start, providing CAII core context directly to Claude.
 
 Behavior
 --------
-* Skips execution for subagent sessions (they do not need PAI context).
+* Skips execution for subagent sessions (they do not need CAII context).
 * Reads DA.md from ``${CAII_DIRECTORY}/.claude/DA.md``.
 * Emits the contents wrapped in ``<system-reminder>`` tags to ``stdout``.
 * Logs progress to ``stderr``.
@@ -17,7 +17,7 @@ Behavior
 
 Environment Variables
 ---------------------
-* ``CAII_DIRECTORY`` — Base directory for PAI configuration files.
+* ``CAII_DIRECTORY`` — Base directory for CAII configuration files.
 * ``CLAUDE_PROJECT_DIR`` — If it contains ``/.claude/agents/``, this is treated
   as a subagent session.
 * ``CLAUDE_AGENT_TYPE`` — If set (to any value), this is treated as a subagent
@@ -53,7 +53,7 @@ def is_subagent_session() -> bool:
 #########################[ start main ]######################################
 def main() -> int:
     """
-    Entry point for loading PAI core context.
+    Entry point for loading CAII core context.
 
     Workflow
     --------
@@ -67,7 +67,7 @@ def main() -> int:
     try:
         # 1) Skip for subagent sessions
         if is_subagent_session():
-            print("🤖 Subagent session - skipping PAI context loading", file=sys.stderr)
+            print("🤖 Subagent session - skipping CAII context loading", file=sys.stderr)
             return 0
 
         # 2) Get CAII_DIRECTORY and construct DA.md path

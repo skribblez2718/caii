@@ -22,7 +22,11 @@ del _p  # Clean up namespace
 
 from orchestration.skills.perform_tdd.tdd_state import TDDPhase, TDDState
 from orchestration.skills.perform_tdd.flows import get_flow_for_phase
-from orchestration.flow_invoker import invoke_agent_flow, get_flow_directive_info
+from orchestration.flow_invoker import (
+    invoke_agent_flow,
+    get_flow_directive_info,
+    is_flow_complete,
+)
 
 # Next phase mapping
 NEXT_PHASE = {
@@ -79,6 +83,23 @@ def main() -> None:
 
     current_phase = state.current_phase
 
+    # Validate current phase flow is complete before advancing (unless --no-flow)
+    if not args.no_flow:
+        phase_name = PHASE_FLOW_MAP.get(current_phase)
+        if phase_name:
+            try:
+                flow = get_flow_for_phase(phase_name)
+                if not is_flow_complete(state.session_id, flow.flow_id):
+                    print(
+                        f"ERROR: Cannot advance - flow {flow.flow_id} not complete.\n"
+                        f"Run all agents in the current phase first.",
+                        file=sys.stderr,
+                    )
+                    sys.exit(1)
+            except ValueError:
+                # No flow for this phase (shouldn't happen, but be defensive)
+                pass
+
     # Get next phase
     next_phase = NEXT_PHASE.get(current_phase)
     if not next_phase:
@@ -117,14 +138,14 @@ def main() -> None:
         from orchestration.utils import load_content, substitute_placeholders
 
         # Legacy content file mapping
-        PHASE_CONTENT_MAP = {
+        phase_content_map = {
             TDDPhase.RED: "phase_red.md",
             TDDPhase.GREEN: "phase_green.md",
             TDDPhase.REFACTOR: "phase_refactor.md",
             TDDPhase.DOC: "phase_doc.md",
         }
 
-        content_file = PHASE_CONTENT_MAP.get(next_phase)
+        content_file = phase_content_map.get(next_phase)
         if content_file:
             content = load_content(__file__, content_file)
             prompt = substitute_placeholders(

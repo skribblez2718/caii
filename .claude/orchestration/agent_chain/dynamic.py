@@ -117,11 +117,11 @@ def create_dynamic_flow_with_context(
 
         try:
             pattern = ContextPattern(pattern_str.lower())
-        except ValueError:
+        except ValueError as exc:
             raise ValueError(
                 f"Invalid context pattern: {pattern_str}. "
                 f"Must be one of: {[p.value for p in ContextPattern]}"
-            )
+            ) from exc
 
         step = FlowStep(
             agent_name=agent_name,

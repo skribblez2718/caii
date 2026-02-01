@@ -25,8 +25,18 @@ These guidelines apply to all work in the CAII (Cognitive AI Infrastructure) pro
 | `/clean:all` | Clean all state files |
 | `/perform-tdd` | Execute TDD workflow |
 | `make test` | Run tests (in orchestration venv) |
-| `make lint` | Run linting |
-| `make format` | Format code |
+| `make lint` | Run linting (target: 10.00/10) |
+| `make format` | Format code with black |
+
+## Pylint Configuration
+
+Pylint is configured in `.claude/orchestration/pyproject.toml`. Key settings:
+
+- **Disabled:** `wrong-import-position`, `import-outside-toplevel`, `global-statement`, `duplicate-code`
+- **Increased limits:** `max-attributes=12`, `max-args=12`, `max-statements=75`, etc.
+- **Target score:** 10.00/10
+
+See `.claude/orchestration/CLAUDE.md` for full configuration details.
 
 ## Test Locations
 

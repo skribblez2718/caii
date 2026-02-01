@@ -1,4 +1,4 @@
-# IDEAL STATE Capture (Step 0.5)
+# INTERVIEW Phase - IDEAL STATE Capture
 
 **Task:** {user_query}
 

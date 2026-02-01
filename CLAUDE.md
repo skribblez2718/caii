@@ -9,7 +9,8 @@ Multi-agent orchestration system for Claude Code implementing The Last Algorithm
 | `/perform-tdd` | Execute TDD workflow (RED-GREEN-REFACTOR-DOC) |
 | `/clean:all` | Clean all state, research, plan, and memory files |
 | `make test` | Run tests (in `.claude/orchestration/` venv) |
-| `make lint` | Run linting |
+| `make lint` | Run linting (target: 10.00/10) |
+| `make format` | Format code with black |
 
 ## Documentation
 

@@ -1,11 +1,32 @@
 """
 Integration tests for loop-back scenarios.
 
-Tests the VERIFY phase's ability to loop back to earlier phases
+Tests the VERIFY phase's ability to loop back to INNER_LOOP
 for refinement, including iteration tracking and max iteration limits.
 """
 
 import pytest
+
+from orchestration.state.algorithm_state import AlgorithmState, VerificationResult
+from orchestration.state.algorithm_fsm import AlgorithmPhase, AlgorithmFSM
+
+# ============================================================================
+# Helper Functions
+# ============================================================================
+
+
+def progress_to_verify(state: AlgorithmState) -> None:
+    """Progress state through all phases to VERIFY."""
+    phases = [
+        AlgorithmPhase.GATHER,
+        AlgorithmPhase.INTERVIEW,
+        AlgorithmPhase.INNER_LOOP,
+    ]
+    for phase in phases:
+        state.start_phase(phase)
+        state.record_phase_output(phase, {phase.name.lower(): "done"})
+    state.start_phase(AlgorithmPhase.VERIFY)
+
 
 # ============================================================================
 # Test Basic Loop-Back
@@ -17,93 +38,66 @@ class TestBasicLoopBack:
 
     @pytest.mark.integration
     @pytest.mark.fsm
-    def test_loop_back_to_observe(self, mock_sessions_dir):
-        """Should loop back from VERIFY to OBSERVE."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-
+    def test_loop_back_to_inner_loop(self, mock_sessions_dir):
+        """Should loop back from VERIFY to INNER_LOOP."""
         state = AlgorithmState(user_query="Build API")
 
         # Progress to VERIFY
-        for step in [0, 0.5, 1, 2, 3, 4, 5]:
-            state.start_phase(step)
-            state.complete_phase(step, {f"step_{step}": "done"})
+        progress_to_verify(state)
+        state.record_phase_output(
+            AlgorithmPhase.VERIFY, {"verification": "failed", "needs": "refinement"}
+        )
 
-        state.start_phase(8)  # VERIFY
-        state.complete_phase(8, {"verification": "failed", "needs": "more observation"})
-
-        # Loop back to OBSERVE
-        result = state.fsm.loop_back(AlgorithmPhase.OBSERVE)
+        # Loop back to INNER_LOOP
+        assert state.can_loop_back()
+        result = state.loop_back_to_inner_loop()
 
         assert result is True
-        assert state.current_phase == AlgorithmPhase.OBSERVE
-        assert state.fsm.iteration_count == 1
+        assert state.current_phase == AlgorithmPhase.INNER_LOOP
+        assert state.outer_loop_iteration == 1
 
     @pytest.mark.integration
     @pytest.mark.fsm
-    def test_loop_back_to_think(self, mock_sessions_dir):
-        """Should loop back from VERIFY to THINK."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-
+    def test_loop_back_increments_outer_iteration(self, mock_sessions_dir):
+        """Loop back should increment outer_loop_iteration."""
         state = AlgorithmState(user_query="Build API")
 
-        # Progress to VERIFY
-        for step in [0, 0.5, 1, 2, 3, 4, 5]:
-            state.start_phase(step)
-            state.complete_phase(step, {})
+        progress_to_verify(state)
+        assert state.outer_loop_iteration == 0
 
-        state.start_phase(8)  # VERIFY
-
-        # Loop back to THINK
-        result = state.fsm.loop_back(AlgorithmPhase.THINK)
-
-        assert result is True
-        assert state.current_phase == AlgorithmPhase.THINK
+        # First loop back
+        state.loop_back_to_inner_loop()
+        assert state.outer_loop_iteration == 1
 
     @pytest.mark.integration
     @pytest.mark.fsm
-    def test_loop_back_to_plan(self, mock_sessions_dir):
-        """Should loop back from VERIFY to PLAN."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-
+    def test_can_loop_back_only_from_verify(self, mock_sessions_dir):
+        """can_loop_back should return False when not in VERIFY."""
         state = AlgorithmState(user_query="Build API")
 
-        # Progress to VERIFY
-        for step in [0, 0.5, 1, 2, 3, 4, 5]:
-            state.start_phase(step)
-            state.complete_phase(step, {})
+        # In INITIALIZED
+        assert not state.can_loop_back()
 
-        state.start_phase(8)  # VERIFY
+        # In GATHER
+        state.start_phase(AlgorithmPhase.GATHER)
+        assert not state.can_loop_back()
 
-        # Loop back to PLAN
-        result = state.fsm.loop_back(AlgorithmPhase.PLAN)
-
-        assert result is True
-        assert state.current_phase == AlgorithmPhase.PLAN
+        # In INNER_LOOP
+        state.record_phase_output(AlgorithmPhase.GATHER, {})
+        state.start_phase(AlgorithmPhase.INTERVIEW)
+        state.record_phase_output(AlgorithmPhase.INTERVIEW, {})
+        state.start_phase(AlgorithmPhase.INNER_LOOP)
+        assert not state.can_loop_back()
 
     @pytest.mark.integration
     @pytest.mark.fsm
-    def test_loop_back_to_build(self, mock_sessions_dir):
-        """Should loop back from VERIFY to BUILD."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-
+    def test_loop_back_fails_when_not_from_verify(self, mock_sessions_dir):
+        """loop_back_to_inner_loop should fail when not in VERIFY."""
         state = AlgorithmState(user_query="Build API")
 
-        # Progress to VERIFY
-        for step in [0, 0.5, 1, 2, 3, 4, 5]:
-            state.start_phase(step)
-            state.complete_phase(step, {})
-
-        state.start_phase(8)  # VERIFY
-
-        # Loop back to BUILD
-        result = state.fsm.loop_back(AlgorithmPhase.BUILD)
-
-        assert result is True
-        assert state.current_phase == AlgorithmPhase.BUILD
+        # In INITIALIZED
+        result = state.loop_back_to_inner_loop()
+        assert result is False
 
 
 # ============================================================================
@@ -117,80 +111,56 @@ class TestIterationTracking:
     @pytest.mark.integration
     def test_iteration_increments_on_loop_back(self, mock_sessions_dir):
         """Iteration count should increment on each loop-back."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-
         state = AlgorithmState(user_query="Build API")
 
-        # Progress to VERIFY
-        for step in [0, 0.5, 1, 2, 3, 4, 5]:
-            state.start_phase(step)
-            state.complete_phase(step, {})
-
-        state.start_phase(8)  # VERIFY
-        assert state.fsm.iteration_count == 0
+        progress_to_verify(state)
+        assert state.outer_loop_iteration == 0
 
         # First loop-back
-        state.fsm.loop_back(AlgorithmPhase.OBSERVE)
-        assert state.fsm.iteration_count == 1
+        state.loop_back_to_inner_loop()
+        assert state.outer_loop_iteration == 1
 
     @pytest.mark.integration
     def test_multiple_loop_backs_track_iterations(self, mock_sessions_dir):
         """Multiple loop-backs should track iteration count correctly."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-
         state = AlgorithmState(user_query="Build API")
 
         # First pass through to VERIFY
-        for step in [0, 0.5, 1, 2, 3, 4, 5]:
-            state.start_phase(step)
-            state.complete_phase(step, {})
-        state.start_phase(8)
+        progress_to_verify(state)
 
         # First loop-back
-        state.fsm.loop_back(AlgorithmPhase.OBSERVE)
-        assert state.fsm.iteration_count == 1
+        state.loop_back_to_inner_loop()
+        assert state.outer_loop_iteration == 1
 
-        # Second pass through inner loop
-        for step in [1, 2, 3, 4, 5]:
-            state.complete_phase(step, {f"iteration_1_step_{step}": "done"})
-            state.start_phase(step + 1 if step < 5 else 8)
+        # Second pass through to VERIFY
+        state.record_phase_output(AlgorithmPhase.INNER_LOOP, {"iteration": 1})
+        state.start_phase(AlgorithmPhase.VERIFY)
 
         # Second loop-back
-        state.fsm.loop_back(AlgorithmPhase.PLAN)
-        assert state.fsm.iteration_count == 2
+        state.loop_back_to_inner_loop()
+        assert state.outer_loop_iteration == 2
 
     @pytest.mark.integration
     @pytest.mark.fsm
     def test_max_iterations_enforced(self, mock_sessions_dir):
         """Loop-back should fail at max iterations."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmFSM, AlgorithmPhase
-
         state = AlgorithmState(user_query="Build API")
 
         # Progress to VERIFY
-        for step in [0, 0.5, 1, 2, 3, 4, 5]:
-            state.start_phase(step)
-            state.complete_phase(step, {})
+        progress_to_verify(state)
 
-        state.start_phase(8)  # VERIFY
-
-        # Max is 3, so we can loop back 3 times
-        max_iterations = AlgorithmFSM.MAX_ITERATIONS
+        # Max is 3 verify iterations
+        max_iterations = AlgorithmFSM.MAX_VERIFY_ITERATIONS
 
         for i in range(max_iterations):
-            result = state.fsm.loop_back(AlgorithmPhase.OBSERVE)
+            result = state.loop_back_to_inner_loop()
             assert result is True
             # Progress back to VERIFY
-            for step in [1, 2, 3, 4, 5]:
-                state.start_phase(step)
-                state.complete_phase(step, {})
-            state.start_phase(8)
+            state.record_phase_output(AlgorithmPhase.INNER_LOOP, {"iteration": i + 1})
+            state.start_phase(AlgorithmPhase.VERIFY)
 
-        # Next loop-back should fail
-        result = state.fsm.loop_back(AlgorithmPhase.OBSERVE)
+        # Next loop-back should fail (at max)
+        result = state.loop_back_to_inner_loop()
         assert result is False
         assert state.current_phase == AlgorithmPhase.VERIFY
 
@@ -207,66 +177,46 @@ class TestLoopBackPersistence:
     @pytest.mark.critical
     def test_iteration_count_persists(self, mock_sessions_dir):
         """Iteration count should persist across save/load."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-
         session_id = "loopback12345"
         state = AlgorithmState(user_query="Build API", session_id=session_id)
 
         # Progress to VERIFY
-        for step in [0, 0.5, 1, 2, 3, 4, 5]:
-            state.start_phase(step)
-            state.complete_phase(step, {})
-
-        state.start_phase(8)  # VERIFY
+        progress_to_verify(state)
 
         # Loop back
-        state.fsm.loop_back(AlgorithmPhase.OBSERVE)
+        state.loop_back_to_inner_loop()
         state.save()
 
         # Load and verify
         loaded = AlgorithmState.load(session_id)
-        assert loaded.fsm.iteration_count == 1
-        assert loaded.current_phase == AlgorithmPhase.OBSERVE
+        assert loaded.outer_loop_iteration == 1
+        assert loaded.current_phase == AlgorithmPhase.INNER_LOOP
 
     @pytest.mark.integration
     def test_phase_outputs_preserved_after_loop_back(self, mock_sessions_dir):
         """Phase outputs from before loop-back should be preserved."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-
         session_id = "preserve12345"
         state = AlgorithmState(user_query="Build API", session_id=session_id)
 
         # First pass with specific outputs
-        outputs = {
-            0: {"johari": "first_pass"},
-            0.5: {"ideal": "first_pass"},
-            1: {"observe": "first_pass"},
-            2: {"think": "first_pass"},
-            3: {"plan": "first_pass"},
-            4: {"build": "first_pass"},
-            5: {"execute": "first_pass"},
-        }
+        state.start_phase(AlgorithmPhase.GATHER)
+        state.record_phase_output(AlgorithmPhase.GATHER, {"johari": "first_pass"})
+        state.start_phase(AlgorithmPhase.INTERVIEW)
+        state.record_phase_output(AlgorithmPhase.INTERVIEW, {"ideal": "first_pass"})
+        state.start_phase(AlgorithmPhase.INNER_LOOP)
+        state.record_phase_output(AlgorithmPhase.INNER_LOOP, {"work": "first_pass"})
+        state.start_phase(AlgorithmPhase.VERIFY)
 
-        for step, output in outputs.items():
-            state.start_phase(step)
-            state.complete_phase(step, output)
-
-        state.start_phase(8)  # VERIFY
-
-        # Loop back to PLAN
-        state.fsm.loop_back(AlgorithmPhase.PLAN)
+        # Loop back to INNER_LOOP
+        state.loop_back_to_inner_loop()
         state.save()
 
         # Load and verify earlier outputs preserved
         loaded = AlgorithmState.load(session_id)
 
-        # Steps 0, 0.5, 1, 2 should still have their outputs
-        assert loaded.phase_outputs.get("0") == {"johari": "first_pass"}
-        assert loaded.phase_outputs.get("0.5") == {"ideal": "first_pass"}
-        assert loaded.phase_outputs.get("1") == {"observe": "first_pass"}
-        assert loaded.phase_outputs.get("2") == {"think": "first_pass"}
+        # Outer loop phase outputs should be preserved
+        assert loaded.phase_outputs.get("GATHER") == {"johari": "first_pass"}
+        assert loaded.phase_outputs.get("INTERVIEW") == {"ideal": "first_pass"}
 
 
 # ============================================================================
@@ -280,76 +230,102 @@ class TestLoopBackWorkflowCompletion:
     @pytest.mark.integration
     def test_complete_after_loop_back(self, mock_sessions_dir):
         """Should complete workflow after loop-back and re-verification."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-
         state = AlgorithmState(user_query="Build API")
 
         # First pass
-        for step in [0, 0.5, 1, 2, 3, 4, 5]:
-            state.start_phase(step)
-            state.complete_phase(step, {f"step_{step}": "pass_1"})
+        progress_to_verify(state)
+        state.add_verification_result(
+            VerificationResult(
+                iteration=0,
+                timestamp="2026-01-27T10:00:00Z",
+                status="GAPS_IDENTIFIED",
+                objective_score=0.5,
+                heuristic_score=0.5,
+                semantic_score=0.5,
+                overall_score=0.5,
+                gaps=["tests failed"],
+                recommendations=["fix tests"],
+            )
+        )
 
-        state.start_phase(8)  # VERIFY
-        state.add_verification_result({"check": "tests"}, passed=False)
+        # Loop back to INNER_LOOP
+        state.loop_back_to_inner_loop()
 
-        # Loop back to BUILD
-        state.fsm.loop_back(AlgorithmPhase.BUILD)
-
-        # Second pass from BUILD
-        for step in [4, 5]:
-            state.complete_phase(step, {f"step_{step}": "pass_2"})
-            if step < 5:
-                state.start_phase(5)
-
-        state.start_phase(8)  # VERIFY again
-        state.add_verification_result({"check": "tests"}, passed=True)
+        # Second pass from INNER_LOOP
+        state.record_phase_output(AlgorithmPhase.INNER_LOOP, {"pass": 2})
+        state.start_phase(AlgorithmPhase.VERIFY)
+        state.add_verification_result(
+            VerificationResult(
+                iteration=1,
+                timestamp="2026-01-27T10:01:00Z",
+                status="VERIFIED",
+                objective_score=1.0,
+                heuristic_score=1.0,
+                semantic_score=1.0,
+                overall_score=1.0,
+                gaps=[],
+                recommendations=[],
+            )
+        )
 
         # Now proceed to LEARN
-        state.complete_phase(8, {"verification": "passed"})
-        state.start_phase(8.5)  # LEARN
-        state.complete_phase(8.5, {"learnings": "captured"})
+        state.record_phase_output(AlgorithmPhase.VERIFY, {"verification": "passed"})
+        state.start_phase(AlgorithmPhase.LEARN)
+        state.record_phase_output(AlgorithmPhase.LEARN, {"learnings": "captured"})
 
         # Mark completed
-        assert state.mark_completed()
+        state.complete()
         assert state.current_phase == AlgorithmPhase.COMPLETED
         assert state.status == "completed"
 
         # Verify iteration tracked
-        assert state.fsm.iteration_count == 1
-        assert len(state.verification_results) == 2
+        assert state.outer_loop_iteration == 1
+        assert len(state.verification_history) == 2
 
     @pytest.mark.integration
     def test_verification_history_tracks_iterations(self, mock_sessions_dir):
         """Verification history should show results from each iteration."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-
         state = AlgorithmState(user_query="Build API")
 
         # First pass
-        for step in [0, 0.5, 1, 2, 3, 4, 5]:
-            state.start_phase(step)
-            state.complete_phase(step, {})
-
-        state.start_phase(8)
-        state.add_verification_result({"check": "iteration_0"}, passed=False)
+        progress_to_verify(state)
+        state.add_verification_result(
+            VerificationResult(
+                iteration=0,
+                timestamp="2026-01-27T10:00:00Z",
+                status="GAPS_IDENTIFIED",
+                objective_score=0.5,
+                heuristic_score=0.5,
+                semantic_score=0.5,
+                overall_score=0.5,
+                gaps=["iteration 0 failed"],
+                recommendations=[],
+            )
+        )
 
         # Loop back
-        state.fsm.loop_back(AlgorithmPhase.OBSERVE)
+        state.loop_back_to_inner_loop()
 
         # Second pass
-        for step in [1, 2, 3, 4, 5]:
-            state.complete_phase(step, {})
-            if step < 5:
-                state.start_phase(step + 1)
-
-        state.start_phase(8)
-        state.add_verification_result({"check": "iteration_1"}, passed=True)
+        state.record_phase_output(AlgorithmPhase.INNER_LOOP, {"pass": 2})
+        state.start_phase(AlgorithmPhase.VERIFY)
+        state.add_verification_result(
+            VerificationResult(
+                iteration=1,
+                timestamp="2026-01-27T10:01:00Z",
+                status="VERIFIED",
+                objective_score=1.0,
+                heuristic_score=1.0,
+                semantic_score=1.0,
+                overall_score=1.0,
+                gaps=[],
+                recommendations=[],
+            )
+        )
 
         # Verify history
-        assert len(state.verification_results) == 2
-        assert state.verification_results[0]["iteration"] == 0
-        assert state.verification_results[0]["passed"] is False
-        assert state.verification_results[1]["iteration"] == 1
-        assert state.verification_results[1]["passed"] is True
+        assert len(state.verification_history) == 2
+        assert state.verification_history[0].iteration == 0
+        assert state.verification_history[0].status == "GAPS_IDENTIFIED"
+        assert state.verification_history[1].iteration == 1
+        assert state.verification_history[1].status == "VERIFIED"

@@ -2,29 +2,50 @@
 
 ## Purpose
 
-Collect and clarify all requirements before execution begins.
+Dynamic state gathering based on task domain classification.
+Implements the Johari Window Protocol for domain-aware state collection.
 
-## Agentic Flow
+## Flow
 
-The GATHER phase uses an agentic flow to:
-1. Analyze the task requirements
-2. Identify ambiguities and unknowns
-3. Clarify with user if needed
-4. Prepare context for IDEAL STATE capture
+```
+GATHER → INTERVIEW → [Inner Loop] → VERIFY
+  │
+  ├── 1. Load algorithm state
+  ├── 2. Classify task domain
+  ├── 3. Trigger research → analysis agent flow
+  └── 4. Agents gather domain-specific state information
+```
 
-## Johari Protocol
+## Files
 
-The Johari Window protocol is available at:
-`.claude/orchestration/johari/`
+| File | Purpose |
+|------|---------|
+| `entry.py` | Phase entry point |
+| `flows.py` | Agent flow definitions (GATHER_FLOW) |
+| `domain_classifier.py` | Task domain classification |
+| `content/gather/research.md` | Research agent instructions |
+| `content/gather/analysis.md` | Analysis agent instructions |
 
-Agents within the GATHER flow may invoke Johari to:
-- Surface unknown unknowns
-- Execute SHARE/PROBE/MAP/DELIVER framework
-- Trigger user clarification via AskUserQuestion
+## Agent Flow
 
-**Note:** Johari is NOT directly wired to this step.
-It is called by agents as needed within the agentic flow.
+The GATHER phase uses a research → analysis agent chain:
+
+1. **Research Agent**: Gathers domain-specific current state
+2. **Analysis Agent**: Structures findings for downstream phases
+
+## Domain Classification
+
+Supports 11 task domains:
+- CODING, CORRESPONDENCE, RESEARCH, DOCUMENT
+- SOCIAL, CREATIVE, PERSONAL, PROFESSIONAL
+- TECHNICAL_OPS, DATA, GENERAL
 
 ## Entry Point
 
-`python3 entry.py "<user_query>"`
+```bash
+python3 entry.py --state <session_id>
+```
+
+Options:
+- `--state`: Required. Algorithm session ID
+- `--no-flow`: Skip agent flow (legacy mode)

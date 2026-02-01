@@ -132,31 +132,50 @@ Multi-agent orchestration system for Claude Code implementing cognitive workflow
 | **COMPLEX** | DECOMPOSE → Subtasks → GATHER each | Yes |
 | **VERY COMPLEX** | DECOMPOSE (required) → Subtasks → GATHER each | Yes |
 
+### Complexity Classification Criteria
+
+The complexity classifier (`entry.py`) evaluates tasks against the following METR-aligned criteria:
+
+| Category | Criteria | Examples |
+|----------|----------|----------|
+| **TRIVIAL** | Single-step, obvious answer, no research needed | "What time is it?", "Convert 5 miles to km", Simple greetings |
+| **SIMPLE** | 2-5 steps, clear path, minimal research | "Write a function to reverse a string", "Explain X concept" |
+| **MODERATE** | Multi-step, requires planning, some ambiguity | "Build a REST API endpoint with validation", "Refactor this code" |
+| **COMPLEX** | Multi-component, significant ambiguity, integration | "Add authentication to the application", "Implement feature X" |
+| **VERY_COMPLEX** | System-level, architectural decisions, high risk | "Redesign the database schema", "Migrate to microservices" |
+
+**Classification factors:**
+- Number of affected files/components
+- Degree of ambiguity in requirements
+- Integration complexity
+- Risk of unintended side effects
+- Need for user clarification
+
 ## Loop Descriptions
 
-### Outer Loop (Steps 0-0.5)
+### Outer Loop (GATHER → INTERVIEW)
 
 The outer loop handles requirement gathering and success criteria definition:
 
-- **GATHER (Step 0)**: Applies Johari Window Protocol to clarify requirements
-- **IDEAL STATE (Step 0.5)**: Defines success criteria and anti-criteria
+- **GATHER phase**: Applies Johari Window Protocol to clarify requirements
+- **INTERVIEW phase**: Defines success criteria and anti-criteria (captures IDEAL STATE)
 
-### Inner Loop (Steps 1-5)
+### Inner Loop (OBSERVE → EXECUTE)
 
 The inner loop executes the cognitive workflow:
 
-| Step | Name | Description |
-|------|------|-------------|
-| 1 | OBSERVE | Semantic understanding of the task |
-| 2 | THINK | Chain-of-thought reasoning |
-| 3 | PLAN | Tree-of-thought planning |
-| 4 | BUILD | Agent orchestration |
-| 5 | EXECUTE | Run the plan |
+| Phase | Description |
+|-------|-------------|
+| **OBSERVE** | Semantic understanding of the task |
+| **THINK** | Chain-of-thought reasoning |
+| **PLAN** | Tree-of-thought planning |
+| **BUILD** | Agent orchestration |
+| **EXECUTE** | Run the plan |
 
-### Verification (Step 8+)
+### Verification (VERIFY → LEARN)
 
-- **VERIFY (Step 8)**: Check results against IDEAL STATE
-- **LEARN (Step 8.5)**: Extract learnings for future tasks
+- **VERIFY phase**: Check results against IDEAL STATE (captured in INTERVIEW)
+- **LEARN phase**: Extract learnings for future tasks
 
 ## Decompose Protocol
 

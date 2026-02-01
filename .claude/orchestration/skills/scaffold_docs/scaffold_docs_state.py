@@ -86,7 +86,9 @@ class ScaffoldDocsFSM(BaseFSM):
         return self._mode
 
     @property
-    def TRANSITIONS(self) -> Dict[ScaffoldDocsPhase, List[ScaffoldDocsPhase]]:  # type: ignore[override]
+    def TRANSITIONS(  # noqa: N802 pylint: disable=invalid-name
+        self,
+    ) -> Dict[ScaffoldDocsPhase, List[ScaffoldDocsPhase]]:
         """Get transitions for current mode."""
         if self._mode == "update":
             return self.UPDATE_TRANSITIONS
@@ -245,7 +247,9 @@ class ScaffoldDocsState(BaseState):
         """
         return self._fsm.transition(phase)
 
-    def record_phase_output(self, phase: ScaffoldDocsPhase, output: Dict[str, Any]) -> None:
+    def record_phase_output(
+        self, phase: ScaffoldDocsPhase, output: Dict[str, Any]
+    ) -> None:
         """
         Record output for a phase.
 

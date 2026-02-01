@@ -6,7 +6,7 @@ Handles reading and writing agent memory files for context passing.
 
 import re
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 # Memory files location
 MEMORY_DIR = Path(__file__).parent.parent.parent / "memory"

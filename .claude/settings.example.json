@@ -5,7 +5,10 @@
     "DA_NAME": "",
     "CAII_DIRECTORY": "/path/to/your/project",
     "PROJECT_ROOT": "/path/to/your/projects",
+    "VOICE_SERVER_PROTOCOL": "voice-server-protocol",
+    "VOICE_SERVER_HOST": "voice-server-host",
     "VOICE_SERVER_PORT": "voice-server-port",
+    "VOICE_SERVER_API_KEY": "voice-server-api-key",
     "OPENAI_BASE_URL": "openai-ai-api-compatible-endpoint",
     "OPENAI_API_KEY": "your-openai-api-key",
     "OPENAI_SUMMARIZATION_MODEL": "your-summarizer-model-id",
@@ -53,7 +56,7 @@
           },
           {
             "type": "command",
-            "command": "python3 ${CAII_DIRECTORY}/.claude/hooks/session-start/initialize-pai-session.py"
+            "command": "python3 ${CAII_DIRECTORY}/.claude/hooks/session-start/initialize-caii-session.py"
           }
         ]
       }

@@ -1,209 +1,196 @@
 """
-Unit tests for outer_loop/gather/entry.py
+GATHER Entry Point Unit Tests
 
-Tests the GATHER phase (Step 0) entry point.
-Updated to work with refactored run_phase_entry() pattern.
+Tests for GATHER phase entry point.
 """
 
+import subprocess
 import sys
-from unittest.mock import patch
+from pathlib import Path
 
 import pytest
 
 
+@pytest.mark.unit
 class TestGatherEntryMain:
-    """Tests for GATHER entry point using run_phase_entry."""
+    """Tests for GATHER entry point main function."""
 
-    @pytest.mark.unit
-    def test_exits_without_state_arg(self, monkeypatch, capsys):
-        """Should exit with error when --state not provided."""
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
+    def test_exits_without_state_arg(self):
+        """Should exit with error if no --state argument."""
+        entry_path = (
+            Path(__file__).parent.parent.parent.parent.parent.parent
+            / "outer_loop"
+            / "gather"
+            / "entry.py"
+        )
 
-        monkeypatch.setattr(sys, "argv", ["entry.py"])
+        result = subprocess.run(
+            [sys.executable, str(entry_path)],
+            capture_output=True,
+            text=True,
+        )
 
-        with pytest.raises(SystemExit) as exc_info:
-            run_phase_entry(
-                "dummy.py",
-                PhaseConfig(
-                    step_num=0,
-                    phase_name="GATHER",
-                    content_file="gather_phase.md",
-                    description="GATHER Phase (Step 0)",
-                ),
-            )
+        assert result.returncode != 0
+        assert "required" in result.stderr.lower() or "error" in result.stderr.lower()
 
-        assert exc_info.value.code != 0
+    def test_exits_for_missing_session(self, temp_state_dir, monkeypatch):
+        """Should exit with error for nonexistent session."""
+        from orchestration.state import config as state_config
 
-    @pytest.mark.unit
-    def test_exits_for_missing_session(self, mock_sessions_dir, monkeypatch, capsys):
-        """Should exit with error when session doesn't exist."""
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
+        monkeypatch.setattr(state_config, "SESSIONS_DIR", temp_state_dir)
 
-        with pytest.raises(SystemExit) as exc_info:
-            run_phase_entry(
-                "dummy.py",
-                PhaseConfig(
-                    step_num=0,
-                    phase_name="GATHER",
-                    content_file="gather_phase.md",
-                    description="GATHER Phase (Step 0)",
-                ),
-                argv=["--state", "nonexistent12"],
-            )
+        entry_path = (
+            Path(__file__).parent.parent.parent.parent.parent.parent
+            / "outer_loop"
+            / "gather"
+            / "entry.py"
+        )
 
-        assert exc_info.value.code == 1
-        captured = capsys.readouterr()
-        assert "ERROR" in captured.err
-        assert "nonexistent12" in captured.err
+        result = subprocess.run(
+            [sys.executable, str(entry_path), "--state", "nonexistent12"],
+            capture_output=True,
+            text=True,
+            env={
+                **dict(__import__("os").environ),
+                "PYTHONPATH": str(entry_path.parent.parent.parent.parent),
+            },
+        )
 
-    @pytest.mark.unit
-    @pytest.mark.fsm
-    def test_starts_gather_phase(self, mock_sessions_dir, monkeypatch, capsys):
-        """Should transition state to GATHER phase (step 0)."""
+        assert result.returncode != 0
+        assert "not found" in result.stderr.lower()
+
+    def test_classifies_domain_for_new_state(self, temp_state_dir, monkeypatch):
+        """Should classify domain if not already set."""
+        from orchestration.state import config as state_config
+
+        monkeypatch.setattr(state_config, "SESSIONS_DIR", temp_state_dir)
+
         from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
 
-        # Create initial state
-        state = AlgorithmState(user_query="Build an API", session_id="gather123456")
+        state = AlgorithmState.for_task("implement a REST API for users")
         state.save()
 
-        with patch("orchestration.utils.load_content", return_value="Test content"):
-            run_phase_entry(
-                "dummy.py",
-                PhaseConfig(
-                    step_num=0,
-                    phase_name="GATHER",
-                    content_file="gather_phase.md",
-                    description="GATHER Phase (Step 0)",
-                ),
-                argv=["--state", "gather123456"],
-            )
+        entry_path = (
+            Path(__file__).parent.parent.parent.parent.parent.parent
+            / "outer_loop"
+            / "gather"
+            / "entry.py"
+        )
 
-        loaded = AlgorithmState.load("gather123456")
-        assert loaded.current_phase == AlgorithmPhase.GATHER
+        result = subprocess.run(
+            [sys.executable, str(entry_path), "--state", state.session_id, "--no-flow"],
+            capture_output=True,
+            text=True,
+            env={
+                **dict(__import__("os").environ),
+                "PYTHONPATH": str(entry_path.parent.parent.parent.parent),
+            },
+        )
 
-    @pytest.mark.unit
-    @pytest.mark.critical
-    def test_saves_state_before_print(self, mock_sessions_dir, monkeypatch, capsys):
-        """Should save state BEFORE printing prompt."""
+        assert result.returncode == 0
+        # Should have classified as CODING
+        assert "CODING" in result.stdout or "coding" in result.stdout.lower()
+
+    def test_prints_phase_header(self, temp_state_dir, monkeypatch):
+        """Should print GATHER phase header."""
+        from orchestration.state import config as state_config
+
+        monkeypatch.setattr(state_config, "SESSIONS_DIR", temp_state_dir)
+
         from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
 
-        state = AlgorithmState(user_query="Test query", session_id="savetest1234")
+        state = AlgorithmState.for_task("test query")
         state.save()
 
-        save_called = []
-        original_save = AlgorithmState.save
+        entry_path = (
+            Path(__file__).parent.parent.parent.parent.parent.parent
+            / "outer_loop"
+            / "gather"
+            / "entry.py"
+        )
 
-        def tracking_save(self):
-            save_called.append(True)
-            return original_save(self)
+        result = subprocess.run(
+            [sys.executable, str(entry_path), "--state", state.session_id, "--no-flow"],
+            capture_output=True,
+            text=True,
+            env={
+                **dict(__import__("os").environ),
+                "PYTHONPATH": str(entry_path.parent.parent.parent.parent),
+            },
+        )
 
-        with patch("orchestration.utils.load_content", return_value="Content here"):
-            with patch.object(AlgorithmState, "save", tracking_save):
-                run_phase_entry(
-                    "dummy.py",
-                    PhaseConfig(
-                        step_num=0,
-                        phase_name="GATHER",
-                        content_file="gather_phase.md",
-                        description="GATHER Phase (Step 0)",
-                    ),
-                    argv=["--state", "savetest1234"],
-                )
+        assert "GATHER Phase" in result.stdout
 
-        assert len(save_called) > 0
+    def test_saves_state_before_output(self, temp_state_dir, monkeypatch):
+        """Should save state before printing directive."""
+        from orchestration.state import config as state_config
 
-    @pytest.mark.unit
-    def test_substitutes_placeholders(self, mock_sessions_dir, monkeypatch, capsys):
-        """Should substitute user_query and session_id in content."""
+        monkeypatch.setattr(state_config, "SESSIONS_DIR", temp_state_dir)
+
         from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
 
-        state = AlgorithmState(user_query="Build REST API", session_id="subst1234567")
+        state = AlgorithmState.for_task("test query")
         state.save()
 
-        with patch(
-            "orchestration.utils.load_content",
-            return_value="Query: {user_query} Session: {session_id}",
-        ):
-            run_phase_entry(
-                "dummy.py",
-                PhaseConfig(
-                    step_num=0,
-                    phase_name="GATHER",
-                    content_file="gather_phase.md",
-                    description="GATHER Phase (Step 0)",
-                ),
-                argv=["--state", "subst1234567"],
-            )
+        entry_path = (
+            Path(__file__).parent.parent.parent.parent.parent.parent
+            / "outer_loop"
+            / "gather"
+            / "entry.py"
+        )
 
-        captured = capsys.readouterr()
-        assert "Build REST API" in captured.out
-        assert "subst1234567" in captured.out
+        subprocess.run(
+            [sys.executable, str(entry_path), "--state", state.session_id, "--no-flow"],
+            capture_output=True,
+            text=True,
+            env={
+                **dict(__import__("os").environ),
+                "PYTHONPATH": str(entry_path.parent.parent.parent.parent),
+            },
+        )
 
-    @pytest.mark.unit
-    def test_prints_prompt(self, mock_sessions_dir, monkeypatch, capsys):
-        """Should print the phase prompt."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
+        # Reload and check state was saved
+        reloaded = AlgorithmState.load(state.session_id)
 
-        state = AlgorithmState(user_query="Test", session_id="print1234567")
-        state.save()
+        assert reloaded is not None
+        # Domain should now be set
+        assert reloaded.task_domain is not None
 
-        with patch(
-            "orchestration.utils.load_content", return_value="GATHER PHASE OUTPUT"
-        ):
-            run_phase_entry(
-                "dummy.py",
-                PhaseConfig(
-                    step_num=0,
-                    phase_name="GATHER",
-                    content_file="gather_phase.md",
-                    description="GATHER Phase (Step 0)",
-                ),
-                argv=["--state", "print1234567"],
-            )
-
-        captured = capsys.readouterr()
-        assert "GATHER PHASE OUTPUT" in captured.out
-
-    @pytest.mark.unit
-    @pytest.mark.fsm
-    def test_invalid_phase_transition_exits(
-        self, mock_sessions_dir, monkeypatch, capsys
-    ):
-        """Should exit with error if FSM transition is invalid."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
-
-        # Create state already at GATHER phase
-        state = AlgorithmState(user_query="Test", session_id="invalid12345")
-        state.fsm._state = AlgorithmPhase.GATHER
-        state.fsm._history.append("GATHER")
-        state.save()
-
-        with pytest.raises(SystemExit) as exc_info:
-            run_phase_entry(
-                "dummy.py",
-                PhaseConfig(
-                    step_num=0,
-                    phase_name="GATHER",
-                    content_file="gather_phase.md",
-                    description="GATHER Phase (Step 0)",
-                ),
-                argv=["--state", "invalid12345"],
-            )
-
-        assert exc_info.value.code == 1
-        captured = capsys.readouterr()
-        assert "Cannot transition" in captured.err
-
-    @pytest.mark.unit
     def test_step_num_is_zero(self):
         """STEP_NUM should be 0 for GATHER phase."""
-        from orchestration.outer_loop.gather import entry
+        from orchestration.outer_loop.gather.entry import STEP_NUM
 
-        assert entry.STEP_NUM == 0
+        assert STEP_NUM == 0
+
+
+@pytest.mark.unit
+class TestGetDomainDescriptionSafe:
+    """Tests for get_domain_description_safe helper."""
+
+    def test_valid_domain(self):
+        """Should return description for valid domain."""
+        from orchestration.outer_loop.gather.entry import get_domain_description_safe
+
+        desc = get_domain_description_safe("coding")
+
+        assert isinstance(desc, str)
+        assert len(desc) > 0
+
+    def test_invalid_domain(self):
+        """Should return 'Unknown domain' for invalid domain."""
+        from orchestration.outer_loop.gather.entry import get_domain_description_safe
+
+        desc = get_domain_description_safe("invalid_domain_xyz")
+
+        assert desc == "Unknown domain"
+
+    def test_case_insensitive(self):
+        """Should handle different cases."""
+        from orchestration.outer_loop.gather.entry import get_domain_description_safe
+
+        desc1 = get_domain_description_safe("CODING")
+        desc2 = get_domain_description_safe("coding")
+        desc3 = get_domain_description_safe("Coding")
+
+        # All should work (lowercase value in enum)
+        assert desc1 == desc2 == desc3

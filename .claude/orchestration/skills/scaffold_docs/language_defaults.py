@@ -211,4 +211,4 @@ def get_supported_languages() -> List[str]:
     Returns:
         List of language identifiers
     """
-    return [lang for lang in LANGUAGE_DEFAULTS.keys() if lang != "unknown"]
+    return [lang for lang in LANGUAGE_DEFAULTS if lang != "unknown"]

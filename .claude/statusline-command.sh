@@ -233,7 +233,7 @@ if [ -z "$mcp_names_formatted" ]; then
     mcp_names_formatted="${SEPARATOR_COLOR}None${RESET}"
 fi
 
-# Get Command names - format as /<verb>:<noun>
+# Get Command names - format as <verb>:<noun>
 # Structure: .claude/commands/<verb>/<noun>.md
 command_names_formatted=""
 if [ -d "$claude_dir/commands" ]; then
@@ -241,8 +241,8 @@ if [ -d "$claude_dir/commands" ]; then
         # Extract verb (parent directory) and noun (filename without .md)
         verb=$(basename "$(dirname "$cmd_path")")
         noun=$(basename "$cmd_path" .md)
-        # Format as /<verb>:<noun>
-        formatted="${MCP_NAMES_COLOR}/${verb}:${noun}${RESET}"
+        # Format as <verb>:<noun>
+        formatted="${MCP_NAMES_COLOR}${verb}:${noun}${RESET}"
 
         if [ -z "$command_names_formatted" ]; then
             command_names_formatted="$formatted"

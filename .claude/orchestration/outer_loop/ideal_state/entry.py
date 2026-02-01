@@ -16,6 +16,7 @@ if _p.name == "orchestration" and str(_p.parent) not in sys.path:
 del _p  # Clean up namespace
 
 from orchestration.entry_base import PhaseConfig, run_phase_entry
+from orchestration.state.algorithm_fsm import AlgorithmPhase
 
 # Step number for this phase (preserved for backward compatibility)
 STEP_NUM = 0.5
@@ -24,8 +25,8 @@ if __name__ == "__main__":
     run_phase_entry(
         __file__,
         PhaseConfig(
-            step_num=0.5,
-            phase_name="IDEAL_STATE",
+            phase=AlgorithmPhase.INTERVIEW,
+            phase_name="INTERVIEW",
             content_file="ideal_state_capture.md",
             description="IDEAL STATE Phase (Step 0.5)",
         ),

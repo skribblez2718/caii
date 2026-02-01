@@ -10,6 +10,10 @@ from unittest.mock import patch
 
 import pytest
 
+from orchestration.state.algorithm_state import AlgorithmState
+from orchestration.state.algorithm_fsm import AlgorithmPhase
+from orchestration.entry_base import run_phase_entry, PhaseConfig
+
 
 class TestExecuteEntryMain:
     """Tests for EXECUTE entry point using run_phase_entry."""
@@ -17,15 +21,13 @@ class TestExecuteEntryMain:
     @pytest.mark.unit
     def test_exits_without_state_arg(self, monkeypatch, capsys):
         """Should exit with error when --state not provided."""
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
-
         monkeypatch.setattr(sys, "argv", ["entry.py"])
 
         with pytest.raises(SystemExit) as exc_info:
             run_phase_entry(
                 "dummy.py",
                 PhaseConfig(
-                    step_num=5,
+                    phase=AlgorithmPhase.EXECUTE,
                     phase_name="EXECUTE",
                     content_file="execute_phase.md",
                     description="EXECUTE Phase (Step 5)",
@@ -37,13 +39,11 @@ class TestExecuteEntryMain:
     @pytest.mark.unit
     def test_exits_for_missing_session(self, mock_sessions_dir, monkeypatch, capsys):
         """Should exit with error when session doesn't exist."""
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
-
         with pytest.raises(SystemExit) as exc_info:
             run_phase_entry(
                 "dummy.py",
                 PhaseConfig(
-                    step_num=5,
+                    phase=AlgorithmPhase.EXECUTE,
                     phase_name="EXECUTE",
                     content_file="execute_phase.md",
                     description="EXECUTE Phase (Step 5)",
@@ -57,21 +57,17 @@ class TestExecuteEntryMain:
     @pytest.mark.fsm
     def test_starts_execute_phase(self, mock_sessions_dir, monkeypatch, capsys):
         """Should transition state to EXECUTE phase (step 5)."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
-
-        # Create state at BUILD phase
+        # Create state at BUILD phase (predecessor of EXECUTE)
         state = AlgorithmState(user_query="Build API", session_id="exec12345678")
-        state.fsm._state = AlgorithmPhase.BUILD
-        state.fsm._history.append("BUILD")
+        state._fsm._state = AlgorithmPhase.BUILD
+        state._fsm._history.append("BUILD")
         state.save()
 
         with patch("orchestration.utils.load_content", return_value="Test content"):
             run_phase_entry(
                 "dummy.py",
                 PhaseConfig(
-                    step_num=5,
+                    phase=AlgorithmPhase.EXECUTE,
                     phase_name="EXECUTE",
                     content_file="execute_phase.md",
                     description="EXECUTE Phase (Step 5)",
@@ -86,13 +82,9 @@ class TestExecuteEntryMain:
     @pytest.mark.critical
     def test_saves_state_before_print(self, mock_sessions_dir, monkeypatch, capsys):
         """Should save state BEFORE printing prompt."""
-        from orchestration.state.algorithm_state import AlgorithmState
-        from orchestration.state.algorithm_fsm import AlgorithmPhase
-        from orchestration.entry_base import run_phase_entry, PhaseConfig
-
         state = AlgorithmState(user_query="Test", session_id="saveexec1234")
-        state.fsm._state = AlgorithmPhase.BUILD
-        state.fsm._history.append("BUILD")
+        state._fsm._state = AlgorithmPhase.BUILD
+        state._fsm._history.append("BUILD")
         state.save()
 
         save_called = []
@@ -107,7 +99,7 @@ class TestExecuteEntryMain:
                 run_phase_entry(
                     "dummy.py",
                     PhaseConfig(
-                        step_num=5,
+                        phase=AlgorithmPhase.EXECUTE,
                         phase_name="EXECUTE",
                         content_file="execute_phase.md",
                         description="EXECUTE Phase (Step 5)",

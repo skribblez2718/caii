@@ -93,12 +93,12 @@ def main():
             return 0
 
         # Get CAII_DIRECTORY for entry script path
-        pai_dir = os.environ.get("CAII_DIRECTORY")
-        if not pai_dir:
+        caii_dir = os.environ.get("CAII_DIRECTORY")
+        if not caii_dir:
             print("CAII_DIRECTORY not set, cannot trigger reasoning", file=sys.stderr)
             return 0
 
-        entry_script = Path(pai_dir) / ".claude/orchestration/protocols/reasoning/entry.py"
+        entry_script = Path(caii_dir) / ".claude/orchestration/protocols/reasoning/entry.py"
         if not entry_script.exists():
             print(f"entry.py not found at {entry_script}", file=sys.stderr)
             return 0
@@ -126,8 +126,8 @@ def main():
             ["python3", str(entry_script), query],
             capture_output=True,
             text=True,
-            cwd=pai_dir,
-            env={**os.environ, "CAII_DIRECTORY": pai_dir}
+            cwd=caii_dir,
+            env={**os.environ, "CAII_DIRECTORY": caii_dir}
         )
 
         # Output goes DIRECTLY to Claude's context
